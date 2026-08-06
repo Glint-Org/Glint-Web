@@ -1,0 +1,14 @@
+{
+  "id": "feature-callout",
+  "name": "Feature Callout",
+  "description": "Three bullet points with centered device",
+  "store": "play",
+  "canvas": { "width": 1080, "height": 1920 },
+  "layers": [
+    { "type": "background", "theme": "ocean-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 40, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Why users love it", "marginTop": 100 },
+    { "type": "bullets", "position": "left", "items": ["Fast & reliable", "Beautiful design", "Works offline"], "fontSize": 28, "color": "#ffffff", "marginTop": 200, "marginLeft": 80 },
+    { "type": "screenshot", "slot": 0, "position": "bottom-center", "scale": 0.58, "rounded": 16 },
+    { "type": "device-frame", "frame": "pixel7", "position": "bottom-center", "scale": 0.6 }
+  ]
+}
