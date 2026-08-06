@@ -1,21 +1,36 @@
 # Telor Web
 
-Telor Web — lightweight editor to frame, style, preview, and export Play Store–ready screenshots.
+Browser-based editor that turns Android screenshots into Play Store–ready marketing visuals. Frame, theme, arrange, and export — no login, no backend.
 
-What this repo does
-- Accepts screenshots (upload or live from Telor Bridge) and produces framed, themed PNG assets ready for export.
+## Features
 
-Core tech
-- React + Vite
-- TailwindCSS
-- Fabric.js (canvas editing)
+- **Upload** — drag & drop or import from Telor Bridge via WebSocket
+- **Device frames** — bezel overlays for Pixel, Samsung, and generic devices
+- **Background themes** — gradient, blur glass, solid dark/light
+- **Text overlays** — app name and tagline rendered on the canvas
+- **Layout tools** — reorder screenshots, grid/carousel preview
+- **Export** — single PNG or batch ZIP (1080×1920 default)
 
-Quick start
-1. Install: `npm install`
-2. Dev: `npm run dev`
+## Quick Start
 
-Integration
-- Connects to a local Telor Bridge WebSocket (ws://localhost:7700) or imports session JSON/ZIP exports.
+```bash
+npm install
+npm run dev
+```
 
-License
-- No backend or auth included; intended for local use. See repository LICENSE for details.
+Open `http://localhost:5173`. For Bridge integration, start Telor Bridge first — the editor shows "Bridge Connected" automatically.
+
+## Tech Stack
+
+- React 19 + Vite
+- TailwindCSS 4
+- Fabric.js 7 (canvas editing)
+- JSZip (batch exports)
+
+## Integration
+
+Telor Web connects to a local [Telor Bridge](https://github.com/Telor-Org/Telor-Bridge) instance at `ws://localhost:7700`. Screenshots appear in the editor as they're captured. You can also upload images directly.
+
+## License
+
+MIT
