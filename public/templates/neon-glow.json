@@ -1,0 +1,14 @@
+{
+  "id": "neon-glow",
+  "name": "Neon Glow",
+  "description": "Dark background with ocean gradient accent",
+  "store": "play",
+  "canvas": { "width": 1080, "height": 1920 },
+  "layers": [
+    { "type": "background", "theme": "ocean-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 50, "fontWeight": "bold", "color": "#38ef7d", "placeholder": "Next level app", "marginTop": 120 },
+    { "type": "subheadline", "position": "top", "fontSize": 24, "color": "#aaaaaa", "placeholder": "Experience the difference", "marginTop": 200 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.68, "rounded": 16 },
+    { "type": "device-frame", "frame": "pixel7", "position": "center", "scale": 0.71 }
+  ]
+}
