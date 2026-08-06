@@ -3,6 +3,8 @@ const FRAMES = [
   { id: 'generic', label: 'Generic Android' },
   { id: 'pixel7', label: 'Pixel 7' },
   { id: 'galaxy-s23', label: 'Galaxy S23' },
+  { id: 'iphone15', label: 'iPhone 15' },
+  { id: 'ipad-pro', label: 'iPad Pro' },
 ];
 
 export default function FrameSelector({ selected, onChange }) {
