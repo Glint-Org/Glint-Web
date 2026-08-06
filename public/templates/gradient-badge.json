@@ -1,0 +1,14 @@
+{
+  "id": "gradient-badge",
+  "name": "Gradient Badge",
+  "description": "Mint gradient with promotional badge",
+  "store": "play",
+  "canvas": { "width": 1080, "height": 1920 },
+  "layers": [
+    { "type": "background", "theme": "mint-gradient" },
+    { "type": "badge", "text": "FREE", "position": "top-right", "background": "#ffffff", "color": "#11998e" },
+    { "type": "headline", "position": "top", "fontSize": 46, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Download now", "marginTop": 130 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.7, "rounded": 24 },
+    { "type": "device-frame", "frame": "galaxy-s23", "position": "center", "scale": 0.73 }
+  ]
+}
