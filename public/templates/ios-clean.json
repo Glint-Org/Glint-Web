@@ -1,0 +1,13 @@
+{
+  "id": "ios-clean",
+  "name": "iOS Clean",
+  "description": "Minimal iOS-style layout with iPhone frame",
+  "store": "ios",
+  "canvas": { "width": 1290, "height": 2796 },
+  "layers": [
+    { "type": "background", "theme": "ios-light" },
+    { "type": "headline", "position": "top", "fontSize": 56, "fontWeight": "600", "color": "#1d1d1f", "placeholder": "Designed for iPhone", "marginTop": 200, "fontFamily": "-apple-system, SF Pro Display, sans-serif" },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.65, "rounded": 32 },
+    { "type": "device-frame", "frame": "iphone15", "position": "center", "scale": 0.68 }
+  ]
+}
