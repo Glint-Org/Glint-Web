@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createCanvas, addImageToCanvas, setBackground, addTextOverlay, applyFrame, clearCanvas } from '../utils/canvasEngine';
 
-export default function FrameEditor({ screenshots, background, textOverlay, frame: frameId, onCanvasReady }) {
+export default function FrameEditor({ screenshots, background, textOverlay, frame: frameId, onCanvasReady, templateMode = false }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const frameObjRef = useRef(null);
@@ -19,7 +19,7 @@ export default function FrameEditor({ screenshots, background, textOverlay, fram
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || templateMode) return;
     clearCanvas(canvas);
     if (background) setBackground(canvas, background.type, background.value);
     if (!screenshots.length) return;
@@ -28,7 +28,7 @@ export default function FrameEditor({ screenshots, background, textOverlay, fram
         top: 100 + i * (canvas.height / Math.max(screenshots.length, 1)),
       }),
     ));
-  }, [screenshots, background]);
+  }, [screenshots, background, templateMode]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
