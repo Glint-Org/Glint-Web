@@ -19,7 +19,7 @@ export function useTelorBridge() {
       const msg = JSON.parse(event.data);
       if (msg.type === 'screenshot') {
         setScreenshots((prev) => [...prev, msg.path]);
-      } else if (msg.type === 'batch_result') {
+      } else if (msg.type === 'batch_result' || msg.type === 'crawl_result') {
         setScreenshots((prev) => [...prev, ...msg.paths]);
       } else if (msg.type === 'devices') {
         setDevices([...msg.usb, ...msg.wifi]);
@@ -37,8 +37,10 @@ export function useTelorBridge() {
 
   const captureSingle = useCallback(() => send({ action: 'capture_single' }), [send]);
   const captureBatch = useCallback((count = 5) => send({ action: 'capture_batch', count }), [send]);
+  const crawlApp = useCallback((pkg, maxScreens = 20) => send({ action: 'crawl', package: pkg, max_screens: maxScreens }), [send]);
+  const getSession = useCallback(() => send({ action: 'get_session' }), [send]);
   const listDevices = useCallback(() => send({ action: 'list_devices' }), [send]);
   const connectWifi = useCallback((ip, port = 5555) => send({ action: 'connect_wifi', ip, port }), [send]);
 
-  return { connected, screenshots, devices, captureSingle, captureBatch, listDevices, connectWifi };
+  return { connected, screenshots, devices, captureSingle, captureBatch, crawlApp, getSession, listDevices, connectWifi };
 }
