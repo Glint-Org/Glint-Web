@@ -1,0 +1,13 @@
+{
+  "id": "dark-minimal",
+  "name": "Dark Minimal",
+  "description": "Clean dark background with subtle device frame",
+  "store": "play",
+  "canvas": { "width": 1080, "height": 1920 },
+  "layers": [
+    { "type": "background", "theme": "dark-minimal" },
+    { "type": "headline", "position": "top", "fontSize": 36, "fontWeight": "600", "color": "#ffffff", "placeholder": "Simple. Powerful.", "marginTop": 140 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.7, "rounded": 0 },
+    { "type": "device-frame", "frame": "generic", "position": "center", "scale": 0.73 }
+  ]
+}
