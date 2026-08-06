@@ -1,15 +1,16 @@
 # Telor Web
 
-Browser-based editor that turns Android screenshots into Play Store–ready marketing visuals. Frame, theme, arrange, and export — no login, no backend.
+Browser-based editor that turns app screenshots into store-ready marketing visuals with viral templates. Frame, theme, batch export — no login, no backend.
 
 ## Features
 
+- **Session import** — drag `session.json` + PNGs from `telor_capture` or Telor Bridge
+- **Viral templates** — 12 curated Play Store / App Store layout presets
+- **Batch export** — apply one template to all screenshots, export as ZIP
 - **Upload** — drag & drop or import from Telor Bridge via WebSocket
-- **Device frames** — bezel overlays for Pixel, Samsung, and generic devices
-- **Background themes** — gradient, blur glass, solid dark/light
-- **Text overlays** — app name and tagline rendered on the canvas
-- **Layout tools** — reorder screenshots, grid/carousel preview
-- **Export** — single PNG or batch ZIP (1080×1920 default)
+- **Device frames** — Pixel, Samsung, iPhone, iPad bezels
+- **Export presets** — Play Store (1080×1920), App Store (1290×2796), iPad (2048×2732)
+- **QR export** — generate QR for Telor View preview on device
 
 ## Quick Start
 
@@ -18,18 +19,33 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. For Bridge integration, start Telor Bridge first — the editor shows "Bridge Connected" automatically.
+Open `http://localhost:5173`.
+
+### Workflow
+
+1. Run `dart run telor_capture` in your Flutter app (or capture via Bridge)
+2. Import the output folder into Telor Web
+3. Pick a viral template
+4. Export all screenshots as ZIP
+5. Scan QR with Telor View to preview
 
 ## Tech Stack
 
 - React 19 + Vite
 - TailwindCSS 4
-- Fabric.js 7 (canvas editing)
+- Fabric.js 7 (canvas + template rendering)
 - JSZip (batch exports)
+- qrcode (session QR for Telor View)
+
+## Templates
+
+Templates live in `public/templates/` as JSON definitions. Each template defines layers (background, headline, device frame, screenshot, badge, bullets).
 
 ## Integration
 
-Telor Web connects to a local [Telor Bridge](https://github.com/Telor-Org/Telor-Bridge) instance at `ws://localhost:7700`. Screenshots appear in the editor as they're captured. You can also upload images directly.
+- **Telor Capture:** Import `build/telor_screenshots/` folder
+- **Telor Bridge:** WebSocket at `ws://localhost:7700` for live capture
+- **Telor View:** QR code or paste session JSON for preview
 
 ## License
 
