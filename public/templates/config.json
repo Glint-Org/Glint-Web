@@ -1,0 +1,42 @@
+{
+  "themes": {
+    "dark-solid": { "type": "solid", "value": "#1a1a2e" },
+    "light-solid": { "type": "solid", "value": "#ffffff" },
+    "sunset-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#ff7e5f" },
+        { "offset": 1, "color": "#feb47b" }
+      ]
+    },
+    "ocean-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#0f2027" },
+        { "offset": 0.5, "color": "#203a43" },
+        { "offset": 1, "color": "#2c5364" }
+      ]
+    },
+    "purple-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#667eea" },
+        { "offset": 1, "color": "#764ba2" }
+      ]
+    },
+    "mint-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#11998e" },
+        { "offset": 1, "color": "#38ef7d" }
+      ]
+    },
+    "dark-minimal": { "type": "solid", "value": "#0d0d0d" },
+    "ios-light": { "type": "solid", "value": "#f5f5f7" }
+  },
+  "exportPresets": {
+    "play": { "width": 1080, "height": 1920, "label": "Play Store" },
+    "ios": { "width": 1290, "height": 2796, "label": "App Store Phone" },
+    "ios-tablet": { "width": 2048, "height": 2732, "label": "App Store Tablet" }
+  }
+}
