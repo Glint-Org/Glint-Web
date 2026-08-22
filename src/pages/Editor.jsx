@@ -9,7 +9,6 @@ import SessionImporter from '../components/SessionImporter';
 import ScreenshotReorder from '../components/ScreenshotReorder';
 import BatchProcessor from '../components/BatchProcessor';
 import QRExporter from '../components/QRExporter';
-import AdSlot from '../components/AdSlot';
 import { useGLINTBridge } from '../hooks/useGLINTBridge';
 import { applyTemplate } from '../utils/templateEngine';
 import { loadThemePresets } from '../utils/templateLoader';
@@ -28,6 +27,7 @@ export default function Editor() {
   const [canvas, setCanvas] = useState(null);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [themes, setThemes] = useState({});
+  const [bridgeToken, setBridgeToken] = useState('');
   const bridge = useGLINTBridge();
 
   useEffect(() => {
@@ -62,14 +62,35 @@ export default function Editor() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">T</div>
           <h1 className="text-lg font-bold text-gray-900">Glint Editor</h1>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          bridge.connected ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
-        }`}>
-          {bridge.connected ? '● Bridge Connected' : '○ Bridge Offline'}
-        </span>
+        <div className="flex items-center gap-3">
+          {bridge.error && !bridge.connected && (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Bridge pairing token"
+                value={bridgeToken}
+                onChange={(e) => setBridgeToken(e.target.value)}
+                className="px-3 py-1 border rounded text-xs w-36"
+              />
+              <button
+                onClick={() => bridge.connect(bridgeToken)}
+                className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+              >
+                Pair
+              </button>
+            </div>
+          )}
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            bridge.connected ? 'bg-emerald-100 text-emerald-700' :
+            bridge.pairing ? 'bg-amber-100 text-amber-700' :
+            'bg-gray-100 text-gray-500'
+          }`}>
+            {bridge.connected ? '● Bridge Connected' :
+             bridge.pairing ? '◌ Pairing...' :
+             '○ Bridge Offline'}
+          </span>
+        </div>
       </header>
-
-      <AdSlot slot="editor-banner" />
 
       <div className="flex flex-1">
         <aside className="w-72 bg-white/90 backdrop-blur-sm border-r border-violet-100/60 p-4 space-y-6 overflow-y-auto">

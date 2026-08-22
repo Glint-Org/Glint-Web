@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
-import AdSlot from '../components/AdSlot';
 
 export default function Home() {
   const [screenshots, setScreenshots] = useState([]);
@@ -36,8 +35,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
-      <AdSlot slot="home-banner" />
 
       <main className="max-w-5xl mx-auto px-4 py-10 space-y-10">
         <section className="text-center max-w-2xl mx-auto">
@@ -84,8 +81,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      <AdSlot slot="home-footer" />
     </div>
   );
 }

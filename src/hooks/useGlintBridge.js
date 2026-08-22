@@ -1,22 +1,54 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
 const WS_URL = 'ws://localhost:7700';
+const STORAGE_KEY = 'glint_bridge_token';
 
 export function useGLINTBridge() {
   const [connected, setConnected] = useState(false);
+  const [pairing, setPairing] = useState(false);
+  const [error, setError] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [devices, setDevices] = useState([]);
   const wsRef = useRef(null);
-  const pendingRef = useRef({});
+  const tokenRef = useRef(localStorage.getItem(STORAGE_KEY) || '');
 
-  useEffect(() => {
+  const connect = useCallback((token) => {
+    if (token) {
+      tokenRef.current = token;
+      localStorage.setItem(STORAGE_KEY, token);
+    }
+
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+
+    setPairing(true);
+    setError(null);
+
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
-    ws.onopen = () => setConnected(true);
-    ws.onclose = () => setConnected(false);
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ action: 'pair', token: tokenRef.current }));
+    };
+
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
+
+      if (msg.type === 'paired' && msg.success) {
+        setConnected(true);
+        setPairing(false);
+        setError(null);
+        return;
+      }
+
+      if (msg.type === 'error' && !connected) {
+        setPairing(false);
+        setError(msg.message || 'Pairing failed');
+        ws.close();
+        return;
+      }
+
       if (msg.type === 'screenshot') {
         setScreenshots((prev) => [...prev, msg.path]);
       } else if (msg.type === 'batch_result' || msg.type === 'crawl_result') {
@@ -26,7 +58,21 @@ export function useGLINTBridge() {
       }
     };
 
-    return () => ws.close();
+    ws.onclose = () => {
+      setConnected(false);
+      setPairing(false);
+    };
+
+    ws.onerror = () => {
+      setConnected(false);
+      setPairing(false);
+      setError('Cannot reach Glint Bridge. Is it running?');
+    };
+  }, []);
+
+  useEffect(() => {
+    connect();
+    return () => wsRef.current?.close();
   }, []);
 
   const send = useCallback((data) => {
@@ -42,5 +88,18 @@ export function useGLINTBridge() {
   const listDevices = useCallback(() => send({ action: 'list_devices' }), [send]);
   const connectWifi = useCallback((ip, port = 5555) => send({ action: 'connect_wifi', ip, port }), [send]);
 
-  return { connected, screenshots, devices, captureSingle, captureBatch, crawlApp, getSession, listDevices, connectWifi };
+  return {
+    connected,
+    pairing,
+    error,
+    screenshots,
+    devices,
+    connect,
+    captureSingle,
+    captureBatch,
+    crawlApp,
+    getSession,
+    listDevices,
+    connectWifi,
+  };
 }
