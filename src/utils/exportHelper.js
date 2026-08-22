@@ -17,7 +17,7 @@ export async function downloadBatchZip(dataUrls, filenames) {
   });
   const blob = await zip.generateAsync({ type: 'blob' });
   const link = document.createElement('a');
-  link.download = 'telor-export.zip';
+  link.download = 'glint-export.zip';
   link.href = URL.createObjectURL(blob);
   document.body.appendChild(link);
   link.click();

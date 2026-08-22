@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 
 /**
- * Import session.json + PNG files from a folder (telor_capture or Bridge output).
+ * Import session.json + PNG files from a folder (glint_capture or Bridge output).
  */
 export default function SessionImporter({ onImport }) {
   const inputRef = useRef(null);

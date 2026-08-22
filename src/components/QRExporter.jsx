@@ -36,7 +36,7 @@ export default function QRExporter({ session, exportedUrls }) {
   return (
     <div className="space-y-3">
       <h3 className="font-semibold text-gray-700">Preview QR</h3>
-      <p className="text-xs text-gray-500">Scan with Telor View to preview on device</p>
+      <p className="text-xs text-gray-500">Scan with Glint View to preview on device</p>
       {qrDataUrl && (
         <div className="flex justify-center">
           <img src={qrDataUrl} alt="Session QR Code" className="rounded border" />

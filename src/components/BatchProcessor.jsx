@@ -66,7 +66,7 @@ export default function BatchProcessor({
       <button
         onClick={handleRenderBatch}
         disabled={!template || !screenshots.length || processing}
-        className="w-full px-4 py-2.5 telor-btn-primary rounded-xl text-sm"
+        className="w-full px-4 py-2.5 glint-btn-primary rounded-xl text-sm"
       >
         {processing ? 'Processing...' : 'Preview All Screens'}
       </button>

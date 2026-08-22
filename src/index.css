@@ -2,12 +2,12 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-telor-50: #f5f3ff;
-  --color-telor-100: #ede9fe;
-  --color-telor-500: #6c5ce7;
-  --color-telor-600: #5b4cdb;
-  --color-telor-700: #4c3ec9;
-  --color-telor-900: #1e1b4b;
+  --color-glint-50: #f5f3ff;
+  --color-glint-100: #ede9fe;
+  --color-glint-500: #6c5ce7;
+  --color-glint-600: #5b4cdb;
+  --color-glint-700: #4c3ec9;
+  --color-glint-900: #1e1b4b;
 }
 
 body {
@@ -16,32 +16,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.telor-gradient-bg {
+.glint-gradient-bg {
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 92, 231, 0.15), transparent),
     linear-gradient(to bottom, #fafbff, #f4f6fb);
 }
 
-.telor-card {
+.glint-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(108, 92, 231, 0.1);
   box-shadow: 0 4px 24px rgba(30, 27, 75, 0.06);
 }
 
-.telor-btn-primary {
+.glint-btn-primary {
   background: linear-gradient(135deg, #6c5ce7 0%, #5b4cdb 100%);
   color: white;
   font-weight: 600;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.telor-btn-primary:hover:not(:disabled) {
+.glint-btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
 }
 
-.telor-btn-primary:disabled {
+.glint-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

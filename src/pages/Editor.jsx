@@ -10,7 +10,7 @@ import ScreenshotReorder from '../components/ScreenshotReorder';
 import BatchProcessor from '../components/BatchProcessor';
 import QRExporter from '../components/QRExporter';
 import AdSlot from '../components/AdSlot';
-import { useTelorBridge } from '../hooks/useTelorBridge';
+import { useGLINTBridge } from '../hooks/useGLINTBridge';
 import { applyTemplate } from '../utils/templateEngine';
 import { loadThemePresets } from '../utils/templateLoader';
 
@@ -28,7 +28,7 @@ export default function Editor() {
   const [canvas, setCanvas] = useState(null);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [themes, setThemes] = useState({});
-  const bridge = useTelorBridge();
+  const bridge = useGLINTBridge();
 
   useEffect(() => {
     loadThemePresets().then(setThemes);
@@ -56,11 +56,11 @@ export default function Editor() {
   };
 
   return (
-    <div className="min-h-screen telor-gradient-bg flex flex-col">
+    <div className="min-h-screen glint-gradient-bg flex flex-col">
       <header className="bg-white/80 backdrop-blur-md border-b border-violet-100/60 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">T</div>
-          <h1 className="text-lg font-bold text-gray-900">Telor Editor</h1>
+          <h1 className="text-lg font-bold text-gray-900">Glint Editor</h1>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
           bridge.connected ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
@@ -152,7 +152,7 @@ export default function Editor() {
         <main className="flex-1 p-6 overflow-auto">
           {screenshots.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-400">
-              <p>Upload screenshots, import a session folder, or connect to Telor Bridge</p>
+              <p>Upload screenshots, import a session folder, or connect to Glint Bridge</p>
             </div>
           ) : (
             <div className="space-y-4">

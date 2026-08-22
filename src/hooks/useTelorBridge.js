@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 const WS_URL = 'ws://localhost:7700';
 
-export function useTelorBridge() {
+export function useGLINTBridge() {
   const [connected, setConnected] = useState(false);
   const [screenshots, setScreenshots] = useState([]);
   const [devices, setDevices] = useState([]);

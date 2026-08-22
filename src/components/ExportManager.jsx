@@ -8,7 +8,7 @@ export default function ExportManager({ canvas, screenshots }) {
   const handleExportSingle = () => {
     if (!canvas) return;
     const dataUrl = exportAsPNG(canvas);
-    downloadSinglePNG(dataUrl, 'telor-frame.png');
+    downloadSinglePNG(dataUrl, 'glint-frame.png');
   };
 
   const handleExportAll = async () => {
