@@ -2,9 +2,14 @@ const THEME_CACHE = {};
 
 export async function loadThemePresets() {
   if (Object.keys(THEME_CACHE).length > 0) return THEME_CACHE;
-  const res = await fetch('/templates/config.json');
-  const config = await res.json();
-  Object.assign(THEME_CACHE, config.themes);
+  try {
+    const res = await fetch('/templates/config.json');
+    if (!res.ok) return THEME_CACHE;
+    const config = await res.json();
+    if (config.themes) Object.assign(THEME_CACHE, config.themes);
+  } catch {
+    // Return empty cache on network error
+  }
   return THEME_CACHE;
 }
 

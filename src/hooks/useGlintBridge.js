@@ -10,6 +10,7 @@ export function useGLINTBridge() {
   const [screenshots, setScreenshots] = useState([]);
   const [devices, setDevices] = useState([]);
   const wsRef = useRef(null);
+  const connectedRef = useRef(false);
   const tokenRef = useRef(localStorage.getItem(STORAGE_KEY) || '');
 
   const connect = useCallback((token) => {
@@ -33,16 +34,22 @@ export function useGLINTBridge() {
     };
 
     ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
+      let msg;
+      try {
+        msg = JSON.parse(event.data);
+      } catch {
+        return; // Ignore non-JSON messages
+      }
 
       if (msg.type === 'paired' && msg.success) {
+        connectedRef.current = true;
         setConnected(true);
         setPairing(false);
         setError(null);
         return;
       }
 
-      if (msg.type === 'error' && !connected) {
+      if (msg.type === 'error' && !connectedRef.current) {
         setPairing(false);
         setError(msg.message || 'Pairing failed');
         ws.close();
@@ -59,11 +66,13 @@ export function useGLINTBridge() {
     };
 
     ws.onclose = () => {
+      connectedRef.current = false;
       setConnected(false);
       setPairing(false);
     };
 
     ws.onerror = () => {
+      connectedRef.current = false;
       setConnected(false);
       setPairing(false);
       setError('Cannot reach Glint Bridge. Is it running?');

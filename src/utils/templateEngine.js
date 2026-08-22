@@ -29,6 +29,7 @@ function resolvePosition(position, canvasW, canvasH, objW, objH, layer = {}) {
 
 async function loadFrameSvg(frameId) {
   const res = await fetch(`/frames/${frameId}.svg`);
+  if (!res.ok) throw new Error(`Frame not found: ${frameId}`);
   return res.text();
 }
 
@@ -37,7 +38,7 @@ async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH
   const img = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
   const maxW = canvasW * scale;
   const maxH = canvasH * scale;
-  const imgScale = Math.min(maxW / img.width, maxH / img.height, 1);
+  const imgScale = Math.min(maxW / (img.width || 1), maxH / (img.height || 1), 1);
 
   img.set({
     scaleX: imgScale,
@@ -68,24 +69,28 @@ async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH
 
 async function addFrameLayer(canvas, frameId, layer, canvasW, canvasH) {
   if (!frameId) return null;
-  const svg = await loadFrameSvg(frameId);
-  const { objects, options } = await loadSVGFromString(svg);
-  const frame = util.groupSVGElements(objects, options);
-  const scale = layer.scale ?? 0.75;
+  try {
+    const svg = await loadFrameSvg(frameId);
+    const { objects, options } = await loadSVGFromString(svg);
+    const frame = util.groupSVGElements(objects, options);
+    const scale = layer.scale ?? 0.75;
 
-  frame.set({
-    scaleX: scale,
-    scaleY: scale,
-    evented: false,
-    selectable: false,
-  });
+    frame.set({
+      scaleX: scale,
+      scaleY: scale,
+      evented: false,
+      selectable: false,
+    });
 
-  const objW = canvasW * scale;
-  const objH = canvasH * scale;
-  const pos = resolvePosition(layer.position ?? 'center', canvasW, canvasH, objW, objH, layer);
-  frame.set({ left: pos.left, top: pos.top });
-  canvas.add(frame);
-  return frame;
+    const objW = canvasW * scale;
+    const objH = canvasH * scale;
+    const pos = resolvePosition(layer.position ?? 'center', canvasW, canvasH, objW, objH, layer);
+    frame.set({ left: pos.left, top: pos.top });
+    canvas.add(frame);
+    return frame;
+  } catch {
+    return null;
+  }
 }
 
 function addTextLayer(canvas, layer, metadata, canvasW, canvasH) {
@@ -103,12 +108,10 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH) {
     selectable: false,
   });
 
-  const objW = layer.maxWidth ?? fb.width;
-  const pos = resolvePosition(layer.position ?? 'top', canvasW, canvasH, objW, fb.height, layer);
+  const pos = resolvePosition(layer.position ?? 'top', canvasW, canvasH, fb.width, fb.height, layer);
   fb.set({
     left: layer.position === 'left' ? pos.left : canvasW / 2,
     top: pos.top,
-    width: layer.maxWidth,
   });
 
   canvas.add(fb);
@@ -164,6 +167,7 @@ function addBulletsLayer(canvas, layer, canvasW) {
  * Render a single screenshot through a template onto an offscreen canvas.
  */
 export async function renderTemplateFrame(template, screenshotUrl, metadata = {}, themes = {}) {
+  const layers = template?.layers ?? [];
   const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
 
@@ -171,44 +175,47 @@ export async function renderTemplateFrame(template, screenshotUrl, metadata = {}
   const canvas = createCanvas(container);
   canvas.setDimensions({ width: canvasW, height: canvasH });
 
-  for (const layer of template.layers) {
-    switch (layer.type) {
-      case 'background': {
-        const theme = getTheme(layer.theme, themes);
-        setBackground(canvas, theme.type, theme.value);
-        break;
-      }
-      case 'headline':
-      case 'subheadline':
-        addTextLayer(canvas, layer, metadata, canvasW, canvasH);
-        break;
-      case 'screenshot':
-        if (screenshotUrl) {
-          await addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH);
+  try {
+    for (const layer of layers) {
+      switch (layer.type) {
+        case 'background': {
+          const theme = getTheme(layer.theme, themes);
+          setBackground(canvas, theme.type, theme.value);
+          break;
         }
-        break;
-      case 'device-frame':
-        await addFrameLayer(canvas, layer.frame, layer, canvasW, canvasH);
-        break;
-      case 'badge':
-        addBadgeLayer(canvas, layer, canvasW);
-        break;
-      case 'bullets':
-        addBulletsLayer(canvas, layer, canvasW);
-        break;
-      default:
-        break;
+        case 'headline':
+        case 'subheadline':
+          addTextLayer(canvas, layer, metadata, canvasW, canvasH);
+          break;
+        case 'screenshot':
+          if (screenshotUrl) {
+            await addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH);
+          }
+          break;
+        case 'device-frame':
+          await addFrameLayer(canvas, layer.frame, layer, canvasW, canvasH);
+          break;
+        case 'badge':
+          addBadgeLayer(canvas, layer, canvasW);
+          break;
+        case 'bullets':
+          addBulletsLayer(canvas, layer, canvasW);
+          break;
+        default:
+          break;
+      }
     }
-  }
 
-  canvas.renderAll();
-  const dataUrl = canvas.toDataURL({ format: 'png', multiplier: 1 });
-  canvas.dispose();
-  return dataUrl;
+    canvas.renderAll();
+    return canvas.toDataURL({ format: 'png', multiplier: 1 });
+  } finally {
+    canvas.dispose();
+  }
 }
 
 /**
  * Render all screenshots through the same template (one frame per screenshot).
+ * Continues on individual frame errors instead of aborting the entire batch.
  */
 export async function renderBatch(screenshots, template, metadata = {}, themes = {}, exportSize = null) {
   const effectiveTemplate = exportSize
@@ -217,13 +224,17 @@ export async function renderBatch(screenshots, template, metadata = {}, themes =
 
   const results = [];
   for (let i = 0; i < screenshots.length; i++) {
-    const frameMeta = {
-      ...metadata,
-      slot: i,
-      headline: metadata.headlines?.[i] ?? metadata.headline,
-    };
-    const dataUrl = await renderTemplateFrame(effectiveTemplate, screenshots[i], frameMeta, themes);
-    results.push(dataUrl);
+    try {
+      const frameMeta = {
+        ...metadata,
+        slot: i,
+        headline: metadata.headlines?.[i] ?? metadata.headline,
+      };
+      const dataUrl = await renderTemplateFrame(effectiveTemplate, screenshots[i], frameMeta, themes);
+      results.push(dataUrl);
+    } catch {
+      // Skip failed frames, continue with rest
+    }
   }
   return results;
 }
@@ -232,16 +243,14 @@ export async function renderBatch(screenshots, template, metadata = {}, themes =
  * Apply template to an existing live canvas (editor preview mode).
  */
 export async function applyTemplate(canvas, template, screenshotUrl, metadata = {}, themes = {}) {
-  canvas.clear();
-  canvas.setDimensions({
-    width: template.canvas?.width ?? DEFAULT_WIDTH,
-    height: template.canvas?.height ?? DEFAULT_HEIGHT,
-  });
-
+  const layers = template?.layers ?? [];
   const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
 
-  for (const layer of template.layers) {
+  canvas.clear();
+  canvas.setDimensions({ width: canvasW, height: canvasH });
+
+  for (const layer of layers) {
     switch (layer.type) {
       case 'background': {
         const theme = getTheme(layer.theme, themes);

@@ -67,7 +67,13 @@ export default function SessionImporter({ onImport }) {
     if (!json) return;
     try {
       const session = JSON.parse(json);
-      onImport({ screenshots: session.screens ?? [], session });
+      const screens = session.screens ?? [];
+      const hasBlobUrls = screens.some((s) => typeof s === 'string' && s.startsWith('blob:'));
+      if (screens.length > 0 && !hasBlobUrls) {
+        alert('Pasted session contains file paths, not image data.\n\nUse "Import Folder" to load session.json + PNG files together.');
+        return;
+      }
+      onImport({ screenshots: screens, session });
     } catch {
       alert('Invalid JSON');
     }
