@@ -24,7 +24,7 @@ export default function UploadZone({ onUpload }) {
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
       onClick={handleClick}
-      className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 transition-colors bg-gray-50"
+      className="border-2 border-dashed border-glint-border-strong rounded-xl p-12 text-center cursor-pointer hover:border-glint-accent transition-colors bg-glint-surface-2"
     >
       <input
         ref={inputRef}
@@ -35,8 +35,8 @@ export default function UploadZone({ onUpload }) {
         className="hidden"
       />
       <Image size={32} className="mx-auto mb-2 text-glint-text-tertiary" />
-      <p className="text-gray-600 font-medium">Drop screenshots here</p>
-      <p className="text-gray-400 text-sm mt-1">or click to browse</p>
+      <p className="text-glint-text-secondary font-medium">Drop screenshots here</p>
+      <p className="text-glint-text-tertiary text-sm mt-1">or click to browse</p>
     </div>
   );
 }

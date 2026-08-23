@@ -35,16 +35,16 @@ export default function QRExporter({ session, exportedUrls }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-700">Preview QR</h3>
-      <p className="text-xs text-gray-500">Scan with Glint View to preview on device</p>
+      <h3 className="font-semibold text-glint-text-secondary">Preview QR</h3>
+      <p className="text-xs text-glint-text-tertiary">Scan with Glint View to preview on device</p>
       {qrDataUrl && (
         <div className="flex justify-center">
-          <img src={qrDataUrl} alt="Session QR Code" className="rounded border" />
+          <img src={qrDataUrl} alt="Session QR Code" className="rounded border border-glint-border" />
         </div>
       )}
       <button
         onClick={handleCopyJson}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+        className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary"
       >
         Copy session.json
       </button>

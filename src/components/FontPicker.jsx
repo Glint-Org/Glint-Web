@@ -81,18 +81,18 @@ export default function FontPicker({ selected, onChange }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-700 text-sm">Font</h3>
+        <h3 className="font-semibold text-glint-text-secondary text-sm">Font</h3>
         <button onClick={() => fileInputRef.current?.click()} className="text-xs text-glint-accent hover:text-glint-accent-hover font-medium">+ Upload</button>
         <input ref={fileInputRef} type="file" accept=".ttf,.otf,.woff,.woff2" multiple onChange={handleCustomUpload} className="hidden" />
       </div>
 
       <input type="text" placeholder="Search fonts..." value={search} onChange={(e) => setSearch(e.target.value)}
-        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
+        className="w-full px-3 py-1.5 border border-glint-border rounded-lg text-sm bg-glint-surface text-glint-text" />
 
       <div className="flex gap-1 flex-wrap">
         {['all', 'sans-serif', 'serif', 'display', 'monospace', 'handwriting', 'custom'].map((cat) => (
           <button key={cat} onClick={() => setActiveCategory(cat)}
-            className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${activeCategory === cat ? 'bg-glint-accent-muted text-glint-accent' : 'text-gray-500 hover:bg-gray-100'}`}>
+            className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${activeCategory === cat ? 'bg-glint-accent-muted text-glint-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`}>
             {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
           </button>
         ))}
@@ -101,7 +101,7 @@ export default function FontPicker({ selected, onChange }) {
       <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto">
         {filtered.map((f) => (
           <button key={f.name} onClick={() => { loadGoogleFont(f.name); onChange(f.name); }}
-            className={`text-left px-2 py-1.5 rounded text-xs transition-all ${selected === f.name ? 'bg-glint-accent-muted text-glint-accent font-semibold' : 'hover:bg-gray-50 text-gray-700'}`}
+            className={`text-left px-2 py-1.5 rounded text-xs transition-all ${selected === f.name ? 'bg-glint-accent-muted text-glint-accent font-semibold' : 'hover:bg-glint-surface-2 text-glint-text-secondary'}`}
             style={{ fontFamily: `"${f.name}", sans-serif` }}>
             {f.name}
           </button>
@@ -109,9 +109,9 @@ export default function FontPicker({ selected, onChange }) {
       </div>
 
       {selected && (
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <div className="text-2xl font-bold text-gray-900" style={{ fontFamily: `"${selected}", sans-serif` }}>Aa</div>
-          <div className="text-xs text-gray-500 mt-1">{selected}</div>
+        <div className="p-3 bg-glint-surface-2 rounded-lg">
+          <div className="text-2xl font-bold text-glint-text" style={{ fontFamily: `"${selected}", sans-serif` }}>Aa</div>
+          <div className="text-xs text-glint-text-secondary mt-1">{selected}</div>
         </div>
       )}
     </div>

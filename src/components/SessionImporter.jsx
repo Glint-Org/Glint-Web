@@ -81,7 +81,7 @@ export default function SessionImporter({ onImport }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-700">Import Session</h3>
+      <h3 className="font-semibold text-glint-text-secondary">Import Session</h3>
       <input
         ref={inputRef}
         type="file"
@@ -99,7 +99,7 @@ export default function SessionImporter({ onImport }) {
       </button>
       <button
         onClick={handleJsonPaste}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+        className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary"
       >
         Paste session.json
       </button>

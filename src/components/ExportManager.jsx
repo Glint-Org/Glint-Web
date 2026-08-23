@@ -22,18 +22,18 @@ export default function ExportManager({ canvas, screenshots }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-700">Export</h3>
+      <h3 className="font-semibold text-glint-text-secondary">Export</h3>
       <button
         onClick={handleExportSingle}
         disabled={!canvas}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="w-full px-4 py-2 bg-glint-accent text-glint-text-on-accent rounded-lg hover:bg-glint-accent-hover disabled:opacity-50"
       >
         Export Current Frame
       </button>
       <button
         onClick={handleExportAll}
         disabled={!canvas || !screenshots.length || exporting}
-        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+        className="w-full px-4 py-2 bg-glint-success text-white rounded-lg hover:opacity-90 disabled:opacity-50"
       >
         {exporting ? 'Exporting...' : 'Export All as ZIP'}
       </button>

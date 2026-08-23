@@ -29,15 +29,15 @@ export default function TemplateGallery({ selected, onChange }) {
     loadAllTemplates().then(setTemplates).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-sm text-gray-400">Loading templates...</p>;
+  if (loading) return <p className="text-sm text-glint-text-tertiary">Loading templates...</p>;
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-700 text-sm">Templates</h3>
+      <h3 className="font-semibold text-glint-text-secondary text-sm">Templates</h3>
       <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
         {templates.map((t) => (
           <button key={t.id} onClick={() => onChange(t)}
-            className={`group rounded-xl overflow-hidden border transition-all ${selected?.id === t.id ? 'border-glint-accent ring-2 ring-glint-accent/30' : 'border-gray-200 hover:border-gray-300'}`}>
+            className={`group rounded-xl overflow-hidden border transition-all ${selected?.id === t.id ? 'border-glint-accent ring-2 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}>
             <div className="aspect-[9/16] relative" style={getPreviewStyle(t)}>
               <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
                 {t.layers?.some((l) => l.type === 'device-frame') && (
@@ -48,9 +48,9 @@ export default function TemplateGallery({ selected, onChange }) {
                 ))}
               </div>
             </div>
-            <div className="p-2 bg-white">
-              <div className="font-medium text-xs text-gray-900 truncate">{t.name}</div>
-              <div className="text-[10px] text-gray-500 truncate">{t.description}</div>
+            <div className="p-2 bg-glint-surface">
+              <div className="font-medium text-xs text-glint-text truncate">{t.name}</div>
+              <div className="text-[10px] text-glint-text-secondary truncate">{t.description}</div>
             </div>
           </button>
         ))}

@@ -29,7 +29,7 @@ export default function BatchProcessor({
     try {
       const results = await renderAll();
       setPreviews(results);
-      setProgress(`Rendered ${results.length} frame(s) at ${preset.width}×${preset.height}`);
+      setProgress(`Rendered ${results.length} frame(s) at ${preset.width}x${preset.height}`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);
     } finally {
@@ -59,9 +59,9 @@ export default function BatchProcessor({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-800">Batch Export</h3>
-      <p className="text-xs text-gray-500">
-        {template?.name ?? 'No template'} → {screenshots.length} screen(s) → {preset.label}
+      <h3 className="font-semibold text-glint-text">Batch Export</h3>
+      <p className="text-xs text-glint-text-secondary">
+        {template?.name ?? 'No template'} - {screenshots.length} screen(s) - {preset.label}
       </p>
       <button
         onClick={handleRenderBatch}
@@ -77,11 +77,11 @@ export default function BatchProcessor({
       >
         Export All as ZIP
       </button>
-      {progress && <p className="text-xs text-gray-500">{progress}</p>}
+      {progress && <p className="text-xs text-glint-text-secondary">{progress}</p>}
       {previews.length > 0 && (
         <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
           {previews.map((url, i) => (
-            <img key={i} src={url} alt={`Preview ${i + 1}`} className="rounded-lg border border-gray-200" />
+            <img key={i} src={url} alt={`Preview ${i + 1}`} className="rounded-lg border border-glint-border" />
           ))}
         </div>
       )}

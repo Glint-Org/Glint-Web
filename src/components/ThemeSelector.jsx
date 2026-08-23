@@ -24,11 +24,11 @@ function getSwatchStyle(theme) {
 export default function ThemeSelector({ selected, onChange }) {
   return (
     <div className="space-y-2">
-      <h3 className="font-semibold text-gray-700 text-sm">Background</h3>
+      <h3 className="font-semibold text-glint-text-secondary text-sm">Background</h3>
       <div className="grid grid-cols-4 gap-1.5">
         {THEMES.map((t) => (
           <button key={t.label} onClick={() => onChange(t)}
-            className={`group relative rounded-lg overflow-hidden border-2 transition-all aspect-square ${selected?.label === t.label ? 'border-glint-accent ring-2 ring-glint-accent/30' : 'border-gray-200 hover:border-gray-300'}`}>
+            className={`group relative rounded-lg overflow-hidden border-2 transition-all aspect-square ${selected?.label === t.label ? 'border-glint-accent ring-2 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}>
             <div className="w-full h-full" style={getSwatchStyle(t)} />
             <div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[9px] py-0.5 text-center opacity-0 group-hover:opacity-100 transition-opacity">{t.label}</div>
           </button>
