@@ -63,22 +63,22 @@ export default function Editor() {
   const hasScreenshots = screenshots.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+    <div className="min-h-screen bg-glint-bg flex flex-col">
+      <header className="bg-glint-surface border-b border-glint-border px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="text-gray-500 hover:text-gray-700 text-sm">Home</button>
-          <div className="w-px h-5 bg-gray-300" />
+          <button onClick={() => navigate('/')} className="text-glint-text-secondary hover:text-glint-text text-sm">Home</button>
+          <div className="w-px h-5 bg-glint-border-strong" />
           <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
-          <h1 className="text-lg font-bold text-gray-900">Editor</h1>
+          <h1 className="text-lg font-bold text-glint-text">Editor</h1>
         </div>
         <div className="flex items-center gap-3">
           {bridge.error && !bridge.connected && (
             <div className="flex items-center gap-2">
-              <input type="text" placeholder="Bridge token" value={bridgeToken} onChange={(e) => setBridgeToken(e.target.value)} className="px-3 py-1 border rounded text-xs w-32" />
+              <input type="text" placeholder="Bridge token" value={bridgeToken} onChange={(e) => setBridgeToken(e.target.value)} className="px-3 py-1 border border-glint-border rounded text-xs w-32 bg-glint-surface text-glint-text" />
               <button onClick={() => bridge.connect(bridgeToken)} className="px-3 py-1 bg-glint-accent text-glint-text-on-accent rounded text-xs hover:bg-glint-accent-hover">Pair</button>
             </div>
           )}
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${bridge.connected ? 'bg-green-100 text-green-700' : bridge.pairing ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${bridge.connected ? 'bg-green-500/15 text-green-600 dark:text-green-400' : bridge.pairing ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400' : 'bg-glint-surface-2 text-glint-text-secondary'}`}>
             {bridge.connected ? 'Connected' : bridge.pairing ? 'Pairing...' : 'Bridge Offline'}
           </span>
           <button onClick={toggle} className="p-2 rounded-lg hover:bg-glint-surface-2 transition-colors" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
@@ -88,11 +88,11 @@ export default function Editor() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
-          <div className="flex border-b border-gray-200">
+        <aside className="w-80 bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden">
+          <div className="flex border-b border-glint-border">
             {[{ id: 'templates', label: 'Templates' }, { id: 'design', label: 'Design' }, { id: 'export', label: 'Export' }].map((tab) => (
               <button key={tab.id} onClick={() => setSidebarTab(tab.id)}
-                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${sidebarTab === tab.id ? 'text-glint-accent border-b-2 border-glint-accent' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${sidebarTab === tab.id ? 'text-glint-accent border-b-2 border-glint-accent' : 'text-glint-text-secondary hover:text-glint-text'}`}>
                 {tab.label}
               </button>
             ))}
@@ -104,11 +104,11 @@ export default function Editor() {
                 <TemplateGallery selected={template} onChange={setTemplate} />
                 {template && screenshots.length > 1 && (
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-700 text-sm">Preview Screen</h3>
+                    <h3 className="font-semibold text-glint-text-secondary text-sm">Preview Screen</h3>
                     <div className="flex gap-1 flex-wrap">
                       {screenshots.map((_, i) => (
                         <button key={i} onClick={() => setPreviewIndex(i)}
-                          className={`px-3 py-1 rounded text-xs ${previewIndex === i ? 'bg-glint-accent text-glint-text-on-accent' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                          className={`px-3 py-1 rounded text-xs ${previewIndex === i ? 'bg-glint-accent text-glint-text-on-accent' : 'bg-glint-surface-2 text-glint-text-secondary hover:bg-glint-surface-2'}`}>
                           {i + 1}
                         </button>
                       ))}
@@ -132,19 +132,19 @@ export default function Editor() {
                     <FrameSelector selected={frame} onChange={setFrame} />
                     <ThemeSelector selected={background} onChange={setBackground} />
                     <div className="space-y-2">
-                      <h3 className="font-semibold text-gray-700 text-sm">Text Overlay</h3>
-                      <input type="text" placeholder="App name or tagline" value={textOverlay.text} onChange={(e) => setTextOverlay((p) => ({ ...p, text: e.target.value }))} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                      <h3 className="font-semibold text-glint-text-secondary text-sm">Text Overlay</h3>
+                      <input type="text" placeholder="App name or tagline" value={textOverlay.text} onChange={(e) => setTextOverlay((p) => ({ ...p, text: e.target.value }))} className="w-full px-3 py-2 border border-glint-border rounded-lg text-sm bg-glint-surface text-glint-text" />
                     </div>
                   </>
                 )}
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-gray-700 text-sm">App Info</h3>
-                  <input type="text" placeholder="App name" value={appName} onChange={(e) => setAppName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
-                  <input type="text" placeholder="Tagline / headline" value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                  <h3 className="font-semibold text-glint-text-secondary text-sm">App Info</h3>
+                  <input type="text" placeholder="App name" value={appName} onChange={(e) => setAppName(e.target.value)} className="w-full px-3 py-2 border border-glint-border rounded-lg text-sm bg-glint-surface text-glint-text" />
+                  <input type="text" placeholder="Tagline / headline" value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full px-3 py-2 border border-glint-border rounded-lg text-sm bg-glint-surface text-glint-text" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="font-semibold text-gray-700 text-sm">Export Preset</h3>
-                  <select value={exportPreset} onChange={(e) => setExportPreset(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
+                  <h3 className="font-semibold text-glint-text-secondary text-sm">Export Preset</h3>
+                  <select value={exportPreset} onChange={(e) => setExportPreset(e.target.value)} className="w-full px-3 py-2 border border-glint-border rounded-lg text-sm bg-glint-surface text-glint-text">
                     <option value="play">Play Store (1080x1920)</option>
                     <option value="ios">App Store Phone (1290x2796)</option>
                     <option value="ios-tablet">App Store Tablet (2048x2732)</option>
@@ -166,20 +166,20 @@ export default function Editor() {
           </div>
         </aside>
 
-        <main className="flex-1 p-6 overflow-auto flex items-center justify-center bg-gray-100">
+        <main className="flex-1 p-6 overflow-auto flex items-center justify-center bg-glint-surface-2">
           {!hasScreenshots && !template ? (
             <div className="text-center space-y-4 max-w-md">
               <div className="w-16 h-16 rounded-2xl bg-glint-accent-muted flex items-center justify-center mx-auto">
                 <svg className="w-8 h-8 text-glint-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </div>
-              <p className="text-gray-500">Upload screenshots, import a session, or select a template to get started.</p>
+              <p className="text-glint-text-secondary">Upload screenshots, import a session, or select a template to get started.</p>
             </div>
           ) : (
             <div className="space-y-4 w-full max-w-2xl">
               {template && screenshots.length > 1 && (
                 <div className="flex gap-2 justify-center">
                   {screenshots.map((_, i) => (
-                    <button key={i} onClick={() => setPreviewIndex(i)} className={`w-12 h-20 rounded-lg border-2 overflow-hidden ${previewIndex === i ? 'border-glint-accent' : 'border-gray-300'}`}>
+                    <button key={i} onClick={() => setPreviewIndex(i)} className={`w-12 h-20 rounded-lg border-2 overflow-hidden ${previewIndex === i ? 'border-glint-accent' : 'border-glint-border-strong'}`}>
                       <img src={screenshots[i]} alt={`Screen ${i + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
