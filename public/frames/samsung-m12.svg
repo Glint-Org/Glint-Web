@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <mask id="screen">
+      <rect width="1080" height="1920" fill="white"/>
+      <rect x="12" y="80" width="1056" height="1760" rx="16" fill="black"/>
+    </mask>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="14" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1920" rx="48" fill="#1a1a1a" mask="url(#screen)" filter="url(#shadow)"/>
+  <circle cx="540" cy="44" r="5" fill="#2a2a2a"/>
+  <rect x="480" y="1840" width="120" height="5" rx="2.5" fill="#333"/>
+</svg>
