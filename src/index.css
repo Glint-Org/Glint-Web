@@ -76,6 +76,13 @@
   --color-glint-success: #558B2F;
 }
 
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--glint-bg);

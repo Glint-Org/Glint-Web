@@ -44,7 +44,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen glint-gradient-bg">
+    <div className="h-screen overflow-y-auto glint-gradient-bg">
       <header className="border-b border-glint-border bg-glint-surface/70 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">

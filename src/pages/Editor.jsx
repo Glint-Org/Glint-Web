@@ -63,22 +63,23 @@ export default function Editor() {
   };
 
   const hasScreenshots = screenshots.length > 0;
+  const hasFilmstrip = hasScreenshots && screenshots.length > 1;
 
   return (
-    <div className="h-screen bg-glint-bg flex flex-col overflow-hidden select-none">
+    <div className="h-screen w-screen overflow-hidden bg-glint-bg flex flex-col select-none">
       {/* ── Navbar ── */}
-      <header className="h-12 bg-glint-surface border-b border-glint-border px-3 flex items-center justify-between shrink-0 z-20">
-        <div className="flex items-center gap-2">
+      <header className="h-14 bg-glint-surface border-b border-glint-border px-4 flex items-center justify-between shrink-0 z-20">
+        <div className="flex items-center gap-2.5">
           <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
-            <img src="/logo.png" alt="Glint" className="w-7 h-7 rounded-md" />
+            <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
           </button>
-          <div className="w-px h-4 bg-glint-border-strong" />
+          <div className="w-px h-5 bg-glint-border-strong" />
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-md hover:bg-glint-surface-2 transition-colors text-glint-text-secondary hover:text-glint-text" title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
-            {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
+            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
           </button>
-          <span className="text-xs font-semibold text-glint-text">Editor</span>
+          <span className="text-sm font-semibold text-glint-text">Editor</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {bridge.error && !bridge.connected && (
             <div className="flex items-center gap-1.5">
               <input type="text" placeholder="Bridge token" value={bridgeToken} onChange={(e) => setBridgeToken(e.target.value)} className="px-2 py-1 border border-glint-border rounded text-[11px] w-24 bg-glint-surface text-glint-text" />
@@ -89,28 +90,29 @@ export default function Editor() {
             {bridge.connected ? 'Connected' : bridge.pairing ? 'Pairing...' : 'Offline'}
           </span>
           <button onClick={toggle} className="p-1.5 rounded-md hover:bg-glint-surface-2 transition-colors" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-            {theme === 'dark' ? <Sun size={15} className="text-glint-text-secondary" /> : <Moon size={15} className="text-glint-text-secondary" />}
+            {theme === 'dark' ? <Sun size={16} className="text-glint-text-secondary" /> : <Moon size={16} className="text-glint-text-secondary" />}
           </button>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* ── Body: sidebar + canvas ── */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* ── Sidebar ── */}
         <aside
-          className="bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden shrink-0 transition-all duration-300 ease-in-out"
+          className="bg-glint-surface border-r border-glint-border shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
           style={{ width: sidebarOpen ? '272px' : '0px', opacity: sidebarOpen ? 1 : 0, borderRightWidth: sidebarOpen ? '1px' : '0px' }}
         >
-          <div className="w-68 flex flex-col h-full">
-            <div className="flex border-b border-glint-border">
+          <div className="w-[272px] h-full flex flex-col">
+            <div className="flex border-b border-glint-border shrink-0">
               {[{ id: 'templates', label: 'Templates' }, { id: 'design', label: 'Design' }, { id: 'export', label: 'Export' }].map((tab) => (
                 <button key={tab.id} onClick={() => setSidebarTab(tab.id)}
-                  className={`flex-1 px-2 py-2 text-[11px] font-medium transition-colors ${sidebarTab === tab.id ? 'text-glint-accent border-b-2 border-glint-accent' : 'text-glint-text-secondary hover:text-glint-text'}`}>
+                  className={`flex-1 px-2 py-2.5 text-[11px] font-medium transition-colors ${sidebarTab === tab.id ? 'text-glint-accent border-b-2 border-glint-accent' : 'text-glint-text-secondary hover:text-glint-text'}`}>
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
               {sidebarTab === 'templates' && (
                 <>
                   <TemplateGallery selected={template} onChange={setTemplate} />
@@ -179,18 +181,18 @@ export default function Editor() {
           </div>
         </aside>
 
-        {/* ── Canvas viewport ── */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
-          {/* Canvas background with dot grid */}
-          <div className="flex-1 overflow-hidden relative bg-glint-surface-2">
+        {/* ── Canvas viewport: fills ALL remaining space ── */}
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden relative">
+          {/* Canvas area: fills ALL remaining space after navbar+sidebar */}
+          <div className="flex-1 min-h-0 overflow-hidden relative bg-glint-surface-2">
             {/* Dot grid pattern */}
             <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{
               backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
               backgroundSize: '24px 24px',
             }} />
 
-            {/* Canvas content - centered */}
-            <div className="absolute inset-0 flex items-center justify-center overflow-auto">
+            {/* Canvas content - centered, fills viewport */}
+            <div className="absolute inset-0 flex items-center justify-center">
               {!hasScreenshots && !template ? (
                 <div className="text-center space-y-3 max-w-xs relative z-10">
                   <div className="w-16 h-16 rounded-2xl bg-glint-accent-muted flex items-center justify-center mx-auto">
@@ -218,8 +220,8 @@ export default function Editor() {
           </div>
 
           {/* Filmstrip - bottom */}
-          {hasScreenshots && screenshots.length > 1 && (
-            <div className="h-28 bg-glint-surface border-t border-glint-border shrink-0 px-4 py-2 flex items-center">
+          {hasFilmstrip && (
+            <div className="h-28 bg-glint-surface border-t border-glint-border shrink-0 px-4 flex items-center">
               <div className="flex gap-2 overflow-x-auto mx-auto">
                 {screenshots.map((url, i) => (
                   <button
@@ -233,7 +235,7 @@ export default function Editor() {
               </div>
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
