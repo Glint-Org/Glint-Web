@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sun, Moon, PanelLeftClose, PanelLeft, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Sun, Moon, PanelLeftClose, PanelLeft, ZoomIn, ZoomOut, RotateCcw, Hand, MousePointer } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameEditor from '../components/FrameEditor';
 import FrameSelector from '../components/FrameSelector';
@@ -14,6 +14,11 @@ import QRExporter from '../components/QRExporter';
 import { useGLINTBridge } from '../hooks/useGLINTBridge';
 import { applyTemplate } from '../utils/templateEngine';
 import { loadThemePresets } from '../utils/templateLoader';
+
+const ZOOM_MIN = 10;
+const ZOOM_MAX = 500;
+const ZOOM_STEP = 10;
+const ZOOM_WHEEL_STEP = 5;
 
 export default function Editor() {
   const location = useLocation();
@@ -33,7 +38,16 @@ export default function Editor() {
   const [bridgeToken, setBridgeToken] = useState('');
   const [sidebarTab, setSidebarTab] = useState('templates');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Canvas viewport state (Figma-like)
   const [zoom, setZoom] = useState(100);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panMode, setPanMode] = useState(false); // hand tool vs select
+  const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
+  const spaceRef = useRef(false);
+  const canvasViewportRef = useRef(null);
+
   const bridge = useGLINTBridge();
   const { theme, toggle } = useTheme();
 
@@ -62,11 +76,89 @@ export default function Editor() {
     setPreviewIndex(0);
   };
 
+  // ── Zoom helpers ──
+  const clampZoom = (z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+  const zoomIn = () => setZoom((z) => clampZoom(z + ZOOM_STEP));
+  const zoomOut = () => setZoom((z) => clampZoom(z - ZOOM_STEP));
+  const zoomReset = () => { setZoom(100); setPan({ x: 0, y: 0 }); };
+  const zoomToFit = () => { setZoom(100); setPan({ x: 0, y: 0 }); };
+
+  // ── Wheel zoom (Ctrl+scroll) ──
+  const handleWheel = useCallback((e) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -ZOOM_WHEEL_STEP : ZOOM_WHEEL_STEP;
+    setZoom((z) => clampZoom(z + delta));
+  }, []);
+
+  useEffect(() => {
+    const el = canvasViewportRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
+  // ── Pan (middle mouse / space+drag) ──
+  const handleMouseDown = useCallback((e) => {
+    // Middle mouse OR (space held + left click) OR hand tool active
+    const isMiddle = e.button === 1;
+    const isSpaceDrag = spaceRef.current && e.button === 0;
+    const isHandTool = panMode && e.button === 0;
+    if (!isMiddle && !isSpaceDrag && !isHandTool) return;
+
+    e.preventDefault();
+    setIsPanning(true);
+    panStartRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+  }, [pan.x, pan.y, panMode]);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isPanning) return;
+    const dx = e.clientX - panStartRef.current.x;
+    const dy = e.clientY - panStartRef.current.y;
+    setPan({ x: panStartRef.current.panX + dx, y: panStartRef.current.panY + dy });
+  }, [isPanning]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
+  useEffect(() => {
+    if (isPanning) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isPanning, handleMouseMove, handleMouseUp]);
+
+  // ── Space key for temporary pan ──
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.code === 'Space' && !e.repeat && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        spaceRef.current = true;
+      }
+    };
+    const onKeyUp = (e) => {
+      if (e.code === 'Space') {
+        spaceRef.current = false;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
   const hasScreenshots = screenshots.length > 0;
   const hasFilmstrip = hasScreenshots && screenshots.length > 1;
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-glint-bg flex flex-col select-none">
+    <div className="h-screen w-screen overflow-hidden bg-glint-bg flex flex-col select-none" style={{ cursor: isPanning ? 'grabbing' : spaceRef.current || panMode ? 'grab' : 'default' }}>
       {/* ── Navbar ── */}
       <header className="h-14 bg-glint-surface border-b border-glint-border px-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center gap-2.5">
@@ -99,7 +191,7 @@ export default function Editor() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* ── Sidebar ── */}
         <aside
-          className="bg-glint-surface border-r border-glint-border shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
+          className="bg-glint-surface border-r border-glint-border shrink-0 transition-all duration-300 ease-in-out overflow-hidden z-10"
           style={{ width: sidebarOpen ? '272px' : '0px', opacity: sidebarOpen ? 1 : 0, borderRightWidth: sidebarOpen ? '1px' : '0px' }}
         >
           <div className="w-[272px] h-full flex flex-col">
@@ -181,53 +273,120 @@ export default function Editor() {
           </div>
         </aside>
 
-        {/* ── Canvas viewport: fills ALL remaining space ── */}
-        <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden relative">
-          {/* Canvas area: fills ALL remaining space after navbar+sidebar */}
-          <div className="flex-1 min-h-0 overflow-hidden relative bg-glint-surface-2">
-            {/* Dot grid pattern */}
-            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{
-              backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }} />
+        {/* ── Canvas viewport: the entire remaining area IS the canvas ── */}
+        <main
+          ref={canvasViewportRef}
+          className="flex-1 min-w-0 min-h-0 relative overflow-hidden"
+          onMouseDown={handleMouseDown}
+          style={{ cursor: isPanning ? 'grabbing' : spaceRef.current || panMode ? 'grab' : 'default' }}
+        >
+          {/* Infinite canvas with dot grid */}
+          <div
+            className="absolute"
+            style={{
+              width: '10000px',
+              height: '10000px',
+              left: '50%',
+              top: '50%',
+              transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
+              transformOrigin: 'center center',
+              transition: isPanning ? 'none' : 'transform 80ms ease-out',
+            }}
+          >
+            {/* Dot grid */}
+            <div
+              className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
+              style={{
+                backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
+                backgroundSize: '20px 20px',
+              }}
+            />
 
-            {/* Canvas content - centered, fills viewport */}
+            {/* Canvas content - centered in infinite canvas */}
             <div className="absolute inset-0 flex items-center justify-center">
               {!hasScreenshots && !template ? (
-                <div className="text-center space-y-3 max-w-xs relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-glint-accent-muted flex items-center justify-center mx-auto">
-                    <svg className="w-8 h-8 text-glint-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <div className="text-center space-y-4 max-w-sm relative z-10">
+                  <div className="w-20 h-20 rounded-2xl bg-glint-accent-muted flex items-center justify-center mx-auto">
+                    <svg className="w-10 h-10 text-glint-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   </div>
-                  <p className="text-glint-text-tertiary text-sm">Upload screenshots or select a template to start.</p>
+                  <div>
+                    <p className="text-glint-text-secondary text-base font-medium">Your canvas is empty</p>
+                    <p className="text-glint-text-tertiary text-sm mt-1">Upload screenshots or pick a template to begin.</p>
+                  </div>
+                  <p className="text-glint-text-tertiary text-[11px]">
+                    <kbd className="px-1.5 py-0.5 rounded bg-glint-surface border border-glint-border text-[10px]">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-glint-surface border border-glint-border text-[10px]">Scroll</kbd> to zoom
+                    <span className="mx-1.5">|</span>
+                    <kbd className="px-1.5 py-0.5 rounded bg-glint-surface border border-glint-border text-[10px]">Space</kbd> + drag to pan
+                  </p>
                 </div>
               ) : (
-                <div className="relative z-10" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'center center', transition: 'transform 150ms ease' }}>
+                <div className="relative z-10">
                   <FrameEditor screenshots={template ? [screenshots[previewIndex]] : screenshots} background={background} textOverlay={textOverlay} frame={frame} onCanvasReady={setCanvas} templateMode={!!template} />
                 </div>
               )}
             </div>
-
-            {/* Zoom controls - bottom right */}
-            {hasScreenshots && (
-              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-0.5 bg-glint-surface/90 backdrop-blur border border-glint-border rounded-lg px-1 py-0.5 shadow-lg">
-                <button onClick={() => setZoom((z) => Math.max(25, z - 25))} className="p-1 rounded hover:bg-glint-surface-2 text-glint-text-secondary transition-colors"><ZoomOut size={14} /></button>
-                <span className="text-[10px] font-medium text-glint-text-secondary w-9 text-center">{zoom}%</span>
-                <button onClick={() => setZoom((z) => Math.min(200, z + 25))} className="p-1 rounded hover:bg-glint-surface-2 text-glint-text-secondary transition-colors"><ZoomIn size={14} /></button>
-                <div className="w-px h-3 bg-glint-border-strong mx-0.5" />
-                <button onClick={() => setZoom(100)} className="p-1 rounded hover:bg-glint-surface-2 text-glint-text-secondary transition-colors" title="Reset zoom"><RotateCcw size={12} /></button>
-              </div>
-            )}
           </div>
 
-          {/* Filmstrip - bottom */}
+          {/* ── Toolbar: hand/select + zoom controls (bottom center) ── */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl">
+            {/* Tool selector */}
+            <button onClick={() => setPanMode(false)} className={`p-2 rounded-lg transition-colors ${!panMode ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`} title="Select tool (V)">
+              <MousePointer size={15} />
+            </button>
+            <button onClick={() => setPanMode(true)} className={`p-2 rounded-lg transition-colors ${panMode ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`} title="Hand tool (H)">
+              <Hand size={15} />
+            </button>
+
+            <div className="w-px h-5 bg-glint-border-strong mx-1" />
+
+            {/* Zoom controls */}
+            <button onClick={zoomOut} className="p-2 rounded-lg text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom out">
+              <ZoomOut size={15} />
+            </button>
+
+            {/* Zoom percentage - clickable to type */}
+            <div className="relative group">
+              <button className="px-2 py-1 rounded-lg text-[11px] font-semibold text-glint-text-secondary hover:bg-glint-surface-2 transition-colors w-12 text-center tabular-nums">
+                {Math.round(zoom)}%
+              </button>
+            </div>
+
+            <button onClick={zoomIn} className="p-2 rounded-lg text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom in">
+              <ZoomIn size={15} />
+            </button>
+
+            <div className="w-px h-5 bg-glint-border-strong mx-1" />
+
+            {/* Reset / Fit */}
+            <button onClick={zoomReset} className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Reset zoom (Ctrl+0)">
+              <RotateCcw size={14} />
+            </button>
+            <button onClick={zoomToFit} className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom to fit">
+              Fit
+            </button>
+          </div>
+
+          {/* ── Zoom presets dropdown (top right of canvas) ── */}
+          <div className="absolute top-3 right-3 z-20">
+            <div className="flex items-center gap-0.5 bg-glint-surface/90 backdrop-blur-md border border-glint-border rounded-lg px-1 py-0.5 shadow-lg">
+              {[25, 50, 75, 100, 150, 200, 300].map((preset) => (
+                <button key={preset} onClick={() => setZoom(preset)}
+                  className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${zoom === preset ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`}>
+                  {preset}%
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Filmstrip - bottom (overlaid on canvas) ── */}
           {hasFilmstrip && (
-            <div className="h-28 bg-glint-surface border-t border-glint-border shrink-0 px-4 flex items-center">
-              <div className="flex gap-2 overflow-x-auto mx-auto">
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-3 py-2 shadow-2xl">
+              <div className="flex gap-2 overflow-x-auto">
                 {screenshots.map((url, i) => (
                   <button
                     key={i}
                     onClick={() => setPreviewIndex(i)}
-                    className={`shrink-0 w-16 h-full rounded-lg border-2 overflow-hidden transition-all ${previewIndex === i ? 'border-glint-accent ring-1 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}
+                    className={`shrink-0 w-14 h-20 rounded-lg border-2 overflow-hidden transition-all ${previewIndex === i ? 'border-glint-accent ring-1 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}
                   >
                     <img src={url} alt={`Screen ${i + 1}`} className="w-full h-full object-cover" />
                   </button>
