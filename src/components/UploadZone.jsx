@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { Image } from 'lucide-react';
 
 export default function UploadZone({ onUpload }) {
   const inputRef = useRef(null);
@@ -33,7 +34,7 @@ export default function UploadZone({ onUpload }) {
         onChange={handleChange}
         className="hidden"
       />
-      <div className="text-4xl mb-2">📱</div>
+      <Image size={32} className="mx-auto mb-2 text-glint-text-tertiary" />
       <p className="text-gray-600 font-medium">Drop screenshots here</p>
       <p className="text-gray-400 text-sm mt-1">or click to browse</p>
     </div>
