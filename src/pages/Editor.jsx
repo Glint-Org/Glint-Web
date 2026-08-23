@@ -273,36 +273,36 @@ export default function Editor() {
           </div>
         </aside>
 
-        {/* ── Canvas viewport: the entire remaining area IS the canvas ── */}
+        {/* ── Canvas viewport: fills ALL remaining space ── */}
         <main
           ref={canvasViewportRef}
-          className="flex-1 min-w-0 min-h-0 relative overflow-hidden"
+          className="flex-1 min-w-0 relative overflow-hidden"
           onMouseDown={handleMouseDown}
           style={{ cursor: isPanning ? 'grabbing' : spaceRef.current || panMode ? 'grab' : 'default' }}
         >
           {/* Infinite canvas with dot grid */}
           <div
-            className="absolute"
+            className="absolute inset-0"
             style={{
-              width: '10000px',
-              height: '10000px',
-              left: '50%',
-              top: '50%',
-              transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
               transformOrigin: 'center center',
               transition: isPanning ? 'none' : 'transform 80ms ease-out',
             }}
           >
-            {/* Dot grid */}
+            {/* Dot grid - fills entire viewport at all times */}
             <div
-              className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
+              className="absolute opacity-[0.04] dark:opacity-[0.06]"
               style={{
+                width: '200%',
+                height: '200%',
+                left: '-50%',
+                top: '-50%',
                 backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
                 backgroundSize: '20px 20px',
               }}
             />
 
-            {/* Canvas content - centered in infinite canvas */}
+            {/* Canvas content - centered in viewport */}
             <div className="absolute inset-0 flex items-center justify-center">
               {!hasScreenshots && !template ? (
                 <div className="text-center space-y-4 max-w-sm relative z-10">
@@ -344,12 +344,10 @@ export default function Editor() {
               <ZoomOut size={15} />
             </button>
 
-            {/* Zoom percentage - clickable to type */}
-            <div className="relative group">
-              <button className="px-2 py-1 rounded-lg text-[11px] font-semibold text-glint-text-secondary hover:bg-glint-surface-2 transition-colors w-12 text-center tabular-nums">
-                {Math.round(zoom)}%
-              </button>
-            </div>
+            {/* Zoom percentage */}
+            <button className="px-2 py-1 rounded-lg text-[11px] font-semibold text-glint-text-secondary hover:bg-glint-surface-2 transition-colors w-12 text-center tabular-nums">
+              {Math.round(zoom)}%
+            </button>
 
             <button onClick={zoomIn} className="p-2 rounded-lg text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom in">
               <ZoomIn size={15} />
@@ -366,7 +364,7 @@ export default function Editor() {
             </button>
           </div>
 
-          {/* ── Zoom presets dropdown (top right of canvas) ── */}
+          {/* ── Zoom presets (top right of canvas) ── */}
           <div className="absolute top-3 right-3 z-20">
             <div className="flex items-center gap-0.5 bg-glint-surface/90 backdrop-blur-md border border-glint-border rounded-lg px-1 py-0.5 shadow-lg">
               {[25, 50, 75, 100, 150, 200, 300].map((preset) => (
