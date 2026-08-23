@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameEditor from '../components/FrameEditor';
 import FrameSelector from '../components/FrameSelector';
@@ -32,6 +32,7 @@ export default function Editor() {
   const [themes, setThemes] = useState({});
   const [bridgeToken, setBridgeToken] = useState('');
   const [sidebarTab, setSidebarTab] = useState('templates');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const bridge = useGLINTBridge();
   const { theme, toggle } = useTheme();
 
@@ -66,9 +67,13 @@ export default function Editor() {
     <div className="min-h-screen bg-glint-bg flex flex-col">
       <header className="bg-glint-surface border-b border-glint-border px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="text-glint-text-secondary hover:text-glint-text text-sm">Home</button>
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
+          </button>
           <div className="w-px h-5 bg-glint-border-strong" />
-          <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-glint-surface-2 transition-colors text-glint-text-secondary hover:text-glint-text" title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
+            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
+          </button>
           <h1 className="text-lg font-bold text-glint-text">Editor</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -88,7 +93,8 @@ export default function Editor() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden">
+        {sidebarOpen && (
+          <aside className="w-80 bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden shrink-0">
           <div className="flex border-b border-glint-border">
             {[{ id: 'templates', label: 'Templates' }, { id: 'design', label: 'Design' }, { id: 'export', label: 'Export' }].map((tab) => (
               <button key={tab.id} onClick={() => setSidebarTab(tab.id)}
@@ -165,6 +171,7 @@ export default function Editor() {
             )}
           </div>
         </aside>
+        )}
 
         <main className="flex-1 p-6 overflow-auto flex items-center justify-center bg-glint-surface-2">
           {!hasScreenshots && !template ? (
