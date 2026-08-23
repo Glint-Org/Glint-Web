@@ -2,43 +2,75 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-glint-50: #f5f3ff;
-  --color-glint-100: #ede9fe;
-  --color-glint-500: #6c5ce7;
-  --color-glint-600: #5b4cdb;
-  --color-glint-700: #4c3ec9;
-  --color-glint-900: #1e1b4b;
+
+  --color-glint-bg: #0B0D10;
+  --color-glint-surface: #151A21;
+  --color-glint-surface-2: #1C222B;
+
+  --color-glint-accent: #F5D06F;
+  --color-glint-accent-hover: #FFE9A8;
+  --color-glint-accent-muted: rgba(245, 208, 111, 0.1);
+
+  --color-glint-text: #E8E6DF;
+  --color-glint-text-secondary: #8A8F98;
+  --color-glint-text-tertiary: #5F5E5A;
+  --color-glint-text-on-accent: #412402;
+
+  --color-glint-border: rgba(255, 255, 255, 0.08);
+  --color-glint-border-strong: rgba(255, 255, 255, 0.16);
+
+  --color-glint-danger: #E24B4A;
+  --color-glint-success: #639922;
+}
+
+:root {
+  --glint-bg: #0B0D10;
+  --glint-surface: #151A21;
+  --glint-surface-2: #1C222B;
+  --glint-accent: #F5D06F;
+  --glint-accent-hover: #FFE9A8;
+  --glint-accent-muted: rgba(245, 208, 111, 0.1);
+  --glint-text: #E8E6DF;
+  --glint-text-secondary: #8A8F98;
+  --glint-text-tertiary: #5F5E5A;
+  --glint-text-on-accent: #412402;
+  --glint-border: rgba(255, 255, 255, 0.08);
+  --glint-border-strong: rgba(255, 255, 255, 0.16);
+  --glint-danger: #E24B4A;
+  --glint-success: #639922;
 }
 
 body {
   font-family: var(--font-sans);
+  background: var(--glint-bg);
+  color: var(--glint-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .glint-gradient-bg {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 92, 231, 0.15), transparent),
-    linear-gradient(to bottom, #fafbff, #f4f6fb);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 208, 111, 0.06), transparent),
+    linear-gradient(to bottom, #0B0D10, #111318);
 }
 
 .glint-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(108, 92, 231, 0.1);
-  box-shadow: 0 4px 24px rgba(30, 27, 75, 0.06);
+  background: var(--glint-surface);
+  border: 1px solid var(--glint-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 }
 
 .glint-btn-primary {
-  background: linear-gradient(135deg, #6c5ce7 0%, #5b4cdb 100%);
-  color: white;
+  background: var(--glint-accent);
+  color: var(--glint-text-on-accent);
   font-weight: 600;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glint-btn-primary:hover:not(:disabled) {
+  background: var(--glint-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+  box-shadow: 0 8px 24px rgba(245, 208, 111, 0.25);
 }
 
 .glint-btn-primary:disabled {
