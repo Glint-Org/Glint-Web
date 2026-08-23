@@ -8,7 +8,7 @@ export default function AdSlot({ slot, format = 'banner' }) {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch {
-        // silent fail — ad blocker may be active
+        // silent fail - ad blocker may be active
       }
     }
   }, []);
