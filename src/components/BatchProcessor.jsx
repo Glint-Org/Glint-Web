@@ -73,7 +73,7 @@ export default function BatchProcessor({
       <button
         onClick={handleExportZip}
         disabled={!template || !screenshots.length || processing}
-        className="w-full px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 text-sm font-semibold"
+        className="w-full px-4 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
       >
         Export All as ZIP
       </button>

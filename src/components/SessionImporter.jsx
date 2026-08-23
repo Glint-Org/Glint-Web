@@ -93,7 +93,7 @@ export default function SessionImporter({ onImport }) {
       />
       <button
         onClick={() => inputRef.current?.click()}
-        className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+        className="w-full px-4 py-2 glint-btn-primary rounded-lg text-sm"
       >
         Import Folder (session.json + PNGs)
       </button>
