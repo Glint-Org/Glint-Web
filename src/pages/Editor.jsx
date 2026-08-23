@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 import FrameEditor from '../components/FrameEditor';
 import FrameSelector from '../components/FrameSelector';
 import ThemeSelector from '../components/ThemeSelector';
@@ -31,6 +33,7 @@ export default function Editor() {
   const [bridgeToken, setBridgeToken] = useState('');
   const [sidebarTab, setSidebarTab] = useState('templates');
   const bridge = useGLINTBridge();
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     loadThemePresets().then(setThemes);
@@ -78,6 +81,9 @@ export default function Editor() {
           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${bridge.connected ? 'bg-green-100 text-green-700' : bridge.pairing ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
             {bridge.connected ? 'Connected' : bridge.pairing ? 'Pairing...' : 'Bridge Offline'}
           </span>
+          <button onClick={toggle} className="p-2 rounded-lg hover:bg-glint-surface-2 transition-colors" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <Sun size={18} className="text-glint-text-secondary" /> : <Moon size={18} className="text-glint-text-secondary" />}
+          </button>
         </div>
       </header>
 
