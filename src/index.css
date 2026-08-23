@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
@@ -40,6 +42,7 @@
   --glint-success: #639922;
 }
 
+/* Light mode - override both CSS vars AND Tailwind @theme vars */
 [data-theme="light"] {
   --glint-bg: #F5F5F0;
   --glint-surface: #FFFFFF;
@@ -55,6 +58,22 @@
   --glint-border-strong: rgba(0, 0, 0, 0.16);
   --glint-danger: #D32F2F;
   --glint-success: #558B2F;
+
+  /* Override Tailwind @theme generated variables */
+  --color-glint-bg: #F5F5F0;
+  --color-glint-surface: #FFFFFF;
+  --color-glint-surface-2: #F0EFE9;
+  --color-glint-accent: #C4960A;
+  --color-glint-accent-hover: #A67E08;
+  --color-glint-accent-muted: rgba(196, 150, 10, 0.1);
+  --color-glint-text: #1A1A1A;
+  --color-glint-text-secondary: #6B6B6B;
+  --color-glint-text-tertiary: #9E9E9E;
+  --color-glint-text-on-accent: #FFFFFF;
+  --color-glint-border: rgba(0, 0, 0, 0.08);
+  --color-glint-border-strong: rgba(0, 0, 0, 0.16);
+  --color-glint-danger: #D32F2F;
+  --color-glint-success: #558B2F;
 }
 
 body {
@@ -107,4 +126,23 @@ body {
 .glint-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Ensure native elements respect theme */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background-color: var(--glint-surface);
+  color: var(--glint-text);
+  border-color: var(--glint-border-strong);
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--glint-text-tertiary);
+}
+
+[data-theme="light"] option {
+  background-color: var(--glint-surface);
+  color: var(--glint-text);
 }
