@@ -52,8 +52,6 @@ export default function FrameEditor({ screenshots, background, textOverlay, fram
   }, [frameId]);
 
   return (
-    <div className="flex justify-center">
-      <canvas ref={containerRef} className="border rounded-lg shadow-lg max-w-full" />
-    </div>
+    <canvas ref={containerRef} className="border rounded-lg shadow-2xl" />
   );
 }
