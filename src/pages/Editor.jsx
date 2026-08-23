@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FrameEditor from '../components/FrameEditor';
 import FrameSelector from '../components/FrameSelector';
 import ThemeSelector from '../components/ThemeSelector';
@@ -15,11 +15,12 @@ import { loadThemePresets } from '../utils/templateLoader';
 
 export default function Editor() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [screenshots, setScreenshots] = useState(location.state?.screenshots || []);
   const [session, setSession] = useState(location.state?.session || null);
   const [background, setBackground] = useState(null);
   const [frame, setFrame] = useState(null);
-  const [template, setTemplate] = useState(null);
+  const [template, setTemplate] = useState(location.state?.template || null);
   const [textOverlay, setTextOverlay] = useState({ text: '', style: {} });
   const [appName, setAppName] = useState(session?.app ?? '');
   const [tagline, setTagline] = useState(session?.tagline ?? '');
@@ -28,6 +29,7 @@ export default function Editor() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [themes, setThemes] = useState({});
   const [bridgeToken, setBridgeToken] = useState('');
+  const [sidebarTab, setSidebarTab] = useState('templates');
   const bridge = useGLINTBridge();
 
   useEffect(() => {
@@ -55,151 +57,129 @@ export default function Editor() {
     setPreviewIndex(0);
   };
 
+  const hasScreenshots = screenshots.length > 0;
+
   return (
-    <div className="min-h-screen glint-gradient-bg flex flex-col">
-      <header className="bg-white/80 backdrop-blur-md border-b border-violet-100/60 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">T</div>
-          <h1 className="text-lg font-bold text-gray-900">Glint Editor</h1>
+          <button onClick={() => navigate('/')} className="text-gray-500 hover:text-gray-700 text-sm">Home</button>
+          <div className="w-px h-5 bg-gray-300" />
+          <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
+          <h1 className="text-lg font-bold text-gray-900">Editor</h1>
         </div>
         <div className="flex items-center gap-3">
           {bridge.error && !bridge.connected && (
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Bridge pairing token"
-                value={bridgeToken}
-                onChange={(e) => setBridgeToken(e.target.value)}
-                className="px-3 py-1 border rounded text-xs w-36"
-              />
-              <button
-                onClick={() => bridge.connect(bridgeToken)}
-                className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
-              >
-                Pair
-              </button>
+              <input type="text" placeholder="Bridge token" value={bridgeToken} onChange={(e) => setBridgeToken(e.target.value)} className="px-3 py-1 border rounded text-xs w-32" />
+              <button onClick={() => bridge.connect(bridgeToken)} className="px-3 py-1 bg-glint-accent text-glint-text-on-accent rounded text-xs hover:bg-glint-accent-hover">Pair</button>
             </div>
           )}
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            bridge.connected ? 'bg-emerald-100 text-emerald-700' :
-            bridge.pairing ? 'bg-amber-100 text-amber-700' :
-            'bg-gray-100 text-gray-500'
-          }`}>
-            {bridge.connected ? '● Bridge Connected' :
-             bridge.pairing ? '◌ Pairing...' :
-             '○ Bridge Offline'}
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${bridge.connected ? 'bg-green-100 text-green-700' : bridge.pairing ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+            {bridge.connected ? 'Connected' : bridge.pairing ? 'Pairing...' : 'Bridge Offline'}
           </span>
         </div>
       </header>
 
-      <div className="flex flex-1">
-        <aside className="w-72 bg-white/90 backdrop-blur-sm border-r border-violet-100/60 p-4 space-y-6 overflow-y-auto">
-          <SessionImporter onImport={handleSessionImport} />
-
-          {bridge.connected && (
-            <button
-              onClick={() => bridge.captureSingle()}
-              className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-            >
-              Capture from Device
-            </button>
-          )}
-
-          <TemplateGallery selected={template} onChange={setTemplate} />
-
-          <ScreenshotReorder screenshots={screenshots} onReorder={setScreenshots} />
-
-          <div className="space-y-2">
-            <h3 className="font-semibold text-gray-700">App Info</h3>
-            <input
-              type="text"
-              placeholder="App name"
-              value={appName}
-              onChange={(e) => setAppName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
-            <input
-              type="text"
-              placeholder="Tagline / headline"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            />
+      <div className="flex flex-1 overflow-hidden">
+        <aside className="w-80 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
+          <div className="flex border-b border-gray-200">
+            {[{ id: 'templates', label: 'Templates' }, { id: 'design', label: 'Design' }, { id: 'export', label: 'Export' }].map((tab) => (
+              <button key={tab.id} onClick={() => setSidebarTab(tab.id)}
+                className={`flex-1 px-3 py-3 text-sm font-medium transition-colors ${sidebarTab === tab.id ? 'text-glint-accent border-b-2 border-glint-accent' : 'text-gray-500 hover:text-gray-700'}`}>
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          <div className="space-y-2">
-            <h3 className="font-semibold text-gray-700">Export Preset</h3>
-            <select
-              value={exportPreset}
-              onChange={(e) => setExportPreset(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg text-sm"
-            >
-              <option value="play">Play Store (1080×1920)</option>
-              <option value="ios">App Store Phone (1290×2796)</option>
-              <option value="ios-tablet">App Store Tablet (2048×2732)</option>
-            </select>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {sidebarTab === 'templates' && (
+              <>
+                <TemplateGallery selected={template} onChange={setTemplate} />
+                {template && screenshots.length > 1 && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-700 text-sm">Preview Screen</h3>
+                    <div className="flex gap-1 flex-wrap">
+                      {screenshots.map((_, i) => (
+                        <button key={i} onClick={() => setPreviewIndex(i)}
+                          className={`px-3 py-1 rounded text-xs ${previewIndex === i ? 'bg-glint-accent text-glint-text-on-accent' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {sidebarTab === 'design' && (
+              <>
+                <SessionImporter onImport={handleSessionImport} />
+                {bridge.connected && (
+                  <button onClick={() => bridge.captureSingle()} className="w-full px-4 py-2 glint-btn-primary rounded-lg text-sm">
+                    Capture from Device
+                  </button>
+                )}
+                <ScreenshotReorder screenshots={screenshots} onReorder={setScreenshots} />
+                {!template && (
+                  <>
+                    <FrameSelector selected={frame} onChange={setFrame} />
+                    <ThemeSelector selected={background} onChange={setBackground} />
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-gray-700 text-sm">Text Overlay</h3>
+                      <input type="text" placeholder="App name or tagline" value={textOverlay.text} onChange={(e) => setTextOverlay((p) => ({ ...p, text: e.target.value }))} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </>
+                )}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-gray-700 text-sm">App Info</h3>
+                  <input type="text" placeholder="App name" value={appName} onChange={(e) => setAppName(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                  <input type="text" placeholder="Tagline / headline" value={tagline} onChange={(e) => setTagline(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-gray-700 text-sm">Export Preset</h3>
+                  <select value={exportPreset} onChange={(e) => setExportPreset(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm">
+                    <option value="play">Play Store (1080x1920)</option>
+                    <option value="ios">App Store Phone (1290x2796)</option>
+                    <option value="ios-tablet">App Store Tablet (2048x2732)</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            {sidebarTab === 'export' && (
+              <>
+                {template ? (
+                  <BatchProcessor screenshots={screenshots} template={template} metadata={{ headline: tagline, tagline, app: appName }} exportPreset={exportPreset} />
+                ) : (
+                  <ExportManager canvas={canvas} screenshots={screenshots} />
+                )}
+                <QRExporter session={session ?? { app: appName, tagline, store: exportPreset }} />
+              </>
+            )}
           </div>
-
-          {!template && (
-            <>
-              <FrameSelector selected={frame} onChange={setFrame} />
-              <ThemeSelector selected={background} onChange={setBackground} />
-              <div className="space-y-2">
-                <h3 className="font-semibold text-gray-700">Text Overlay</h3>
-                <input
-                  type="text"
-                  placeholder="App name"
-                  value={textOverlay.text}
-                  onChange={(e) => setTextOverlay((p) => ({ ...p, text: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded-lg text-sm"
-                />
-              </div>
-              <ExportManager canvas={canvas} screenshots={screenshots} />
-            </>
-          )}
-
-          {template && (
-            <BatchProcessor
-              screenshots={screenshots}
-              template={template}
-              metadata={{ headline: tagline, tagline, app: appName }}
-              exportPreset={exportPreset}
-            />
-          )}
-
-          <QRExporter session={session ?? { app: appName, tagline, store: exportPreset }} />
         </aside>
 
-        <main className="flex-1 p-6 overflow-auto">
-          {screenshots.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <p>Upload screenshots, import a session folder, or connect to Glint Bridge</p>
+        <main className="flex-1 p-6 overflow-auto flex items-center justify-center bg-gray-100">
+          {!hasScreenshots && !template ? (
+            <div className="text-center space-y-4 max-w-md">
+              <div className="w-16 h-16 rounded-2xl bg-glint-accent-muted flex items-center justify-center mx-auto">
+                <svg className="w-8 h-8 text-glint-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              </div>
+              <p className="text-gray-500">Upload screenshots, import a session, or select a template to get started.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 w-full max-w-2xl">
               {template && screenshots.length > 1 && (
-                <div className="flex gap-2 justify-center flex-wrap">
+                <div className="flex gap-2 justify-center">
                   {screenshots.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPreviewIndex(i)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        previewIndex === i ? 'bg-purple-600 text-white' : 'bg-gray-200'
-                      }`}
-                    >
-                      Screen {i + 1}
+                    <button key={i} onClick={() => setPreviewIndex(i)} className={`w-12 h-20 rounded-lg border-2 overflow-hidden ${previewIndex === i ? 'border-glint-accent' : 'border-gray-300'}`}>
+                      <img src={screenshots[i]} alt={`Screen ${i + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
               )}
-              <FrameEditor
-                screenshots={template ? [screenshots[previewIndex]] : screenshots}
-                background={background}
-                textOverlay={textOverlay}
-                frame={frame}
-                onCanvasReady={setCanvas}
-                templateMode={!!template}
-              />
+              <FrameEditor screenshots={template ? [screenshots[previewIndex]] : screenshots} background={background} textOverlay={textOverlay} frame={frame} onCanvasReady={setCanvas} templateMode={!!template} />
             </div>
           )}
         </main>
