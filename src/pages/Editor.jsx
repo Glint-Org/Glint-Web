@@ -93,8 +93,11 @@ export default function Editor() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {sidebarOpen && (
-          <aside className="w-80 bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden shrink-0">
+        <aside
+          className="bg-glint-surface border-r border-glint-border flex flex-col overflow-hidden shrink-0 transition-all duration-300 ease-in-out"
+          style={{ width: sidebarOpen ? '288px' : '0px', opacity: sidebarOpen ? 1 : 0, borderRightWidth: sidebarOpen ? '1px' : '0px' }}
+        >
+          <div className="w-72 flex flex-col h-full">
           <div className="flex border-b border-glint-border">
             {[{ id: 'templates', label: 'Templates' }, { id: 'design', label: 'Design' }, { id: 'export', label: 'Export' }].map((tab) => (
               <button key={tab.id} onClick={() => setSidebarTab(tab.id)}
@@ -170,8 +173,8 @@ export default function Editor() {
               </>
             )}
           </div>
+          </div>
         </aside>
-        )}
 
         <main className="flex-1 p-6 overflow-auto flex items-center justify-center bg-glint-surface-2">
           {!hasScreenshots && !template ? (
