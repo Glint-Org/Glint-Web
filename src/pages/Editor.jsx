@@ -15,11 +15,6 @@ import { useGLINTBridge } from '../hooks/useGLINTBridge';
 import { applyTemplate } from '../utils/templateEngine';
 import { loadThemePresets } from '../utils/templateLoader';
 
-const ZOOM_MIN = 10;
-const ZOOM_MAX = 500;
-const ZOOM_STEP = 10;
-const ZOOM_WHEEL_STEP = 5;
-
 export default function Editor() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,16 +33,13 @@ export default function Editor() {
   const [bridgeToken, setBridgeToken] = useState('');
   const [sidebarTab, setSidebarTab] = useState('templates');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // Canvas viewport state (Figma-like)
   const [zoom, setZoom] = useState(100);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
-  const [panMode, setPanMode] = useState(false); // hand tool vs select
+  const [panMode, setPanMode] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const spaceRef = useRef(false);
   const canvasViewportRef = useRef(null);
-
   const bridge = useGLINTBridge();
   const { theme, toggle } = useTheme();
 
@@ -77,17 +69,16 @@ export default function Editor() {
   };
 
   // ── Zoom helpers ──
-  const clampZoom = (z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
-  const zoomIn = () => setZoom((z) => clampZoom(z + ZOOM_STEP));
-  const zoomOut = () => setZoom((z) => clampZoom(z - ZOOM_STEP));
+  const clampZoom = (z) => Math.min(500, Math.max(5, z));
+  const zoomIn = () => setZoom((z) => clampZoom(z + 10));
+  const zoomOut = () => setZoom((z) => clampZoom(z - 10));
   const zoomReset = () => { setZoom(100); setPan({ x: 0, y: 0 }); };
-  const zoomToFit = () => { setZoom(100); setPan({ x: 0, y: 0 }); };
 
   // ── Wheel zoom (Ctrl+scroll) ──
   const handleWheel = useCallback((e) => {
     if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -ZOOM_WHEEL_STEP : ZOOM_WHEEL_STEP;
+    const delta = e.deltaY > 0 ? -5 : 5;
     setZoom((z) => clampZoom(z + delta));
   }, []);
 
@@ -98,14 +89,12 @@ export default function Editor() {
     return () => el.removeEventListener('wheel', handleWheel);
   }, [handleWheel]);
 
-  // ── Pan (middle mouse / space+drag) ──
+  // ── Pan ──
   const handleMouseDown = useCallback((e) => {
-    // Middle mouse OR (space held + left click) OR hand tool active
     const isMiddle = e.button === 1;
     const isSpaceDrag = spaceRef.current && e.button === 0;
     const isHandTool = panMode && e.button === 0;
     if (!isMiddle && !isSpaceDrag && !isHandTool) return;
-
     e.preventDefault();
     setIsPanning(true);
     panStartRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
@@ -118,9 +107,7 @@ export default function Editor() {
     setPan({ x: panStartRef.current.panX + dx, y: panStartRef.current.panY + dy });
   }, [isPanning]);
 
-  const handleMouseUp = useCallback(() => {
-    setIsPanning(false);
-  }, []);
+  const handleMouseUp = useCallback(() => { setIsPanning(false); }, []);
 
   useEffect(() => {
     if (isPanning) {
@@ -133,7 +120,7 @@ export default function Editor() {
     }
   }, [isPanning, handleMouseMove, handleMouseUp]);
 
-  // ── Space key for temporary pan ──
+  // ── Space key for pan ──
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.code === 'Space' && !e.repeat && document.activeElement?.tagName !== 'INPUT') {
@@ -141,17 +128,10 @@ export default function Editor() {
         spaceRef.current = true;
       }
     };
-    const onKeyUp = (e) => {
-      if (e.code === 'Space') {
-        spaceRef.current = false;
-      }
-    };
+    const onKeyUp = (e) => { if (e.code === 'Space') spaceRef.current = false; };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-    };
+    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); };
   }, []);
 
   const hasScreenshots = screenshots.length > 0;
@@ -160,7 +140,7 @@ export default function Editor() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-glint-bg flex flex-col select-none" style={{ cursor: isPanning ? 'grabbing' : spaceRef.current || panMode ? 'grab' : 'default' }}>
       {/* ── Navbar ── */}
-      <header className="h-14 bg-glint-surface border-b border-glint-border px-4 flex items-center justify-between shrink-0 z-20">
+      <header className="h-14 bg-glint-surface border-b border-glint-border px-4 flex items-center justify-between shrink-0 z-30">
         <div className="flex items-center gap-2.5">
           <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity">
             <img src="/logo.png" alt="Glint" className="w-8 h-8 rounded-lg" />
@@ -187,11 +167,11 @@ export default function Editor() {
         </div>
       </header>
 
-      {/* ── Body: sidebar + canvas ── */}
+      {/* ── Body ── */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* ── Sidebar ── */}
+        {/* ── Sidebar (overlay on canvas, doesn't shrink canvas) ── */}
         <aside
-          className="bg-glint-surface border-r border-glint-border shrink-0 transition-all duration-300 ease-in-out overflow-hidden z-10"
+          className="bg-glint-surface border-r border-glint-border shrink-0 transition-all duration-300 ease-in-out overflow-hidden z-20 absolute left-0 top-14 bottom-0"
           style={{ width: sidebarOpen ? '272px' : '0px', opacity: sidebarOpen ? 1 : 0, borderRightWidth: sidebarOpen ? '1px' : '0px' }}
         >
           <div className="w-[272px] h-full flex flex-col">
@@ -203,7 +183,6 @@ export default function Editor() {
                 </button>
               ))}
             </div>
-
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
               {sidebarTab === 'templates' && (
                 <>
@@ -223,7 +202,6 @@ export default function Editor() {
                   )}
                 </>
               )}
-
               {sidebarTab === 'design' && (
                 <>
                   <SessionImporter onImport={handleSessionImport} />
@@ -258,7 +236,6 @@ export default function Editor() {
                   </div>
                 </>
               )}
-
               {sidebarTab === 'export' && (
                 <>
                   {template ? (
@@ -273,10 +250,10 @@ export default function Editor() {
           </div>
         </aside>
 
-        {/* ── Canvas viewport: fills ALL remaining space ── */}
+        {/* ── Canvas: ALWAYS fills full body, sidebar overlays on top ── */}
         <main
           ref={canvasViewportRef}
-          className="flex-1 min-w-0 relative overflow-hidden"
+          className="flex-1 relative overflow-hidden"
           onMouseDown={handleMouseDown}
           style={{ cursor: isPanning ? 'grabbing' : spaceRef.current || panMode ? 'grab' : 'default' }}
         >
@@ -286,23 +263,23 @@ export default function Editor() {
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
               transformOrigin: 'center center',
-              transition: isPanning ? 'none' : 'transform 80ms ease-out',
+              transition: isPanning ? 'none' : 'transform 60ms linear',
             }}
           >
-            {/* Dot grid - fills entire viewport at all times */}
+            {/* Dot grid - infinite */}
             <div
               className="absolute opacity-[0.04] dark:opacity-[0.06]"
               style={{
-                width: '200%',
-                height: '200%',
-                left: '-50%',
-                top: '-50%',
+                width: '300%',
+                height: '300%',
+                left: '-100%',
+                top: '-100%',
                 backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
                 backgroundSize: '20px 20px',
               }}
             />
 
-            {/* Canvas content - centered in viewport */}
+            {/* Canvas content - centered */}
             <div className="absolute inset-0 flex items-center justify-center">
               {!hasScreenshots && !template ? (
                 <div className="text-center space-y-4 max-w-sm relative z-10">
@@ -327,65 +304,37 @@ export default function Editor() {
             </div>
           </div>
 
-          {/* ── Toolbar: hand/select + zoom controls (bottom center) ── */}
+          {/* ── Toolbar (bottom center) ── */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl">
-            {/* Tool selector */}
             <button onClick={() => setPanMode(false)} className={`p-2 rounded-lg transition-colors ${!panMode ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`} title="Select tool (V)">
               <MousePointer size={15} />
             </button>
             <button onClick={() => setPanMode(true)} className={`p-2 rounded-lg transition-colors ${panMode ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`} title="Hand tool (H)">
               <Hand size={15} />
             </button>
-
             <div className="w-px h-5 bg-glint-border-strong mx-1" />
-
-            {/* Zoom controls */}
             <button onClick={zoomOut} className="p-2 rounded-lg text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom out">
               <ZoomOut size={15} />
             </button>
-
-            {/* Zoom percentage */}
             <button className="px-2 py-1 rounded-lg text-[11px] font-semibold text-glint-text-secondary hover:bg-glint-surface-2 transition-colors w-12 text-center tabular-nums">
               {Math.round(zoom)}%
             </button>
-
             <button onClick={zoomIn} className="p-2 rounded-lg text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom in">
               <ZoomIn size={15} />
             </button>
-
             <div className="w-px h-5 bg-glint-border-strong mx-1" />
-
-            {/* Reset / Fit */}
-            <button onClick={zoomReset} className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Reset zoom (Ctrl+0)">
+            <button onClick={zoomReset} className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Reset zoom">
               <RotateCcw size={14} />
             </button>
-            <button onClick={zoomToFit} className="px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-glint-text-secondary hover:bg-glint-surface-2 transition-colors" title="Zoom to fit">
-              Fit
-            </button>
           </div>
 
-          {/* ── Zoom presets (top right of canvas) ── */}
-          <div className="absolute top-3 right-3 z-20">
-            <div className="flex items-center gap-0.5 bg-glint-surface/90 backdrop-blur-md border border-glint-border rounded-lg px-1 py-0.5 shadow-lg">
-              {[25, 50, 75, 100, 150, 200, 300].map((preset) => (
-                <button key={preset} onClick={() => setZoom(preset)}
-                  className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${zoom === preset ? 'bg-glint-accent text-glint-text-on-accent' : 'text-glint-text-secondary hover:bg-glint-surface-2'}`}>
-                  {preset}%
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Filmstrip - bottom (overlaid on canvas) ── */}
+          {/* ── Filmstrip (overlaid bottom) ── */}
           {hasFilmstrip && (
             <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-3 py-2 shadow-2xl">
               <div className="flex gap-2 overflow-x-auto">
                 {screenshots.map((url, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPreviewIndex(i)}
-                    className={`shrink-0 w-14 h-20 rounded-lg border-2 overflow-hidden transition-all ${previewIndex === i ? 'border-glint-accent ring-1 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}
-                  >
+                  <button key={i} onClick={() => setPreviewIndex(i)}
+                    className={`shrink-0 w-14 h-20 rounded-lg border-2 overflow-hidden transition-all ${previewIndex === i ? 'border-glint-accent ring-1 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}>
                     <img src={url} alt={`Screen ${i + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
