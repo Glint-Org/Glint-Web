@@ -1,14 +1,17 @@
 {
   "id": "viral-gradient-hero",
   "name": "Gradient Hero",
-  "description": "Bold gradient background with centered device and headline",
+  "description": "5 screenshots with device frames on gradient",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
     { "type": "background", "theme": "sunset-gradient" },
-    { "type": "headline", "position": "top", "fontSize": 52, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Your tagline here", "marginTop": 120 },
-    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.72, "rounded": 24 },
-    { "type": "device-frame", "frame": "pixel7", "position": "center", "scale": 0.75 },
-    { "type": "badge", "text": "NEW", "position": "top-right", "background": "#ff4757", "color": "#ffffff" }
+    { "type": "headline", "position": "top", "fontSize": 48, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Your app tagline here", "marginTop": 60 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.38, "rounded": 20, "marginTop": 180 },
+    { "type": "device-frame", "frame": "pixel7", "position": "center", "scale": 0.42, "marginTop": 170 },
+    { "type": "screenshot", "slot": 1, "position": "center", "scale": 0.32, "rounded": 18, "marginTop": 780 },
+    { "type": "device-frame", "frame": "galaxy-s23", "position": "center", "scale": 0.36, "marginTop": 770 },
+    { "type": "screenshot", "slot": 2, "position": "center", "scale": 0.28, "rounded": 16, "marginTop": 1280 },
+    { "type": "device-frame", "frame": "samsung-m12", "position": "center", "scale": 0.32, "marginTop": 1270 }
   ]
 }

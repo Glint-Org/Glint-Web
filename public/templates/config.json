@@ -31,8 +31,32 @@
         { "offset": 1, "color": "#38ef7d" }
       ]
     },
+    "fire-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#f12711" },
+        { "offset": 1, "color": "#f5af19" }
+      ]
+    },
+    "royal-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#141e30" },
+        { "offset": 1, "color": "#243b55" }
+      ]
+    },
+    "candy-gradient": {
+      "type": "gradient",
+      "value": [
+        { "offset": 0, "color": "#fc5c7d" },
+        { "offset": 1, "color": "#6a82fb" }
+      ]
+    },
     "dark-minimal": { "type": "solid", "value": "#0d0d0d" },
-    "ios-light": { "type": "solid", "value": "#f5f5f7" }
+    "ios-light": { "type": "solid", "value": "#f5f5f7" },
+    "midnight": { "type": "solid", "value": "#0a0a1a" },
+    "charcoal": { "type": "solid", "value": "#2d2d2d" },
+    "snow": { "type": "solid", "value": "#fafafa" }
   },
   "exportPresets": {
     "play": { "width": 1080, "height": 1920, "label": "Play Store" },

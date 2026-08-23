@@ -1,14 +1,16 @@
 {
   "id": "feature-callout",
   "name": "Feature Callout",
-  "description": "Three bullet points with centered device",
+  "description": "2 large screenshots with feature bullets",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
-    { "type": "background", "theme": "ocean-gradient" },
-    { "type": "headline", "position": "top", "fontSize": 40, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Why users love it", "marginTop": 100 },
-    { "type": "bullets", "position": "left", "items": ["Fast & reliable", "Beautiful design", "Works offline"], "fontSize": 28, "color": "#ffffff", "marginTop": 200, "marginLeft": 80 },
-    { "type": "screenshot", "slot": 0, "position": "bottom-center", "scale": 0.58, "rounded": 16 },
-    { "type": "device-frame", "frame": "pixel7", "position": "bottom-center", "scale": 0.6 }
+    { "type": "background", "theme": "purple-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Why you'll love it", "marginTop": 80 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.42, "rounded": 24, "marginTop": 180 },
+    { "type": "device-frame", "frame": "pixel7", "position": "center", "scale": 0.46, "marginTop": 170 },
+    { "type": "bullets", "position": "left", "marginTop": 920, "marginLeft": 80, "fontSize": 24, "color": "#ffffff", "items": ["Fast & reliable", "Beautiful design", "Free to use"] },
+    { "type": "screenshot", "slot": 1, "position": "center", "scale": 0.38, "rounded": 22, "marginTop": 1200 },
+    { "type": "device-frame", "frame": "galaxy-s23", "position": "center", "scale": 0.42, "marginTop": 1190 }
   ]
 }

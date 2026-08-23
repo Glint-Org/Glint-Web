@@ -1,14 +1,13 @@
 {
   "id": "dual-phone",
   "name": "Dual Phone",
-  "description": "Feature highlight with bullet points and device",
+  "description": "Two phones side by side",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
-    { "type": "background", "theme": "purple-gradient" },
-    { "type": "headline", "position": "top", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Two apps in one", "marginTop": 100 },
-    { "type": "bullets", "position": "left", "items": ["Switch instantly", "Sync everywhere", "Works offline"], "fontSize": 26, "color": "#ffffff", "marginTop": 220, "marginLeft": 70 },
-    { "type": "screenshot", "slot": 0, "position": "bottom-center", "scale": 0.55, "rounded": 16 },
-    { "type": "device-frame", "frame": "galaxy-s23", "position": "bottom-center", "scale": 0.58 }
+    { "type": "background", "theme": "royal-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "See it in action", "marginTop": 100 },
+    { "type": "screenshot", "slot": 0, "position": "left", "scale": 0.45, "rounded": 20, "marginLeft": 40, "marginTop": 300 },
+    { "type": "screenshot", "slot": 1, "position": "right", "scale": 0.45, "rounded": 20, "marginTop": 400 }
   ]
 }

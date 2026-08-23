@@ -1,13 +1,12 @@
 {
   "id": "light-minimal",
   "name": "Light Minimal",
-  "description": "Clean white background with subtle device shadow",
+  "description": "Clean white background",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
     { "type": "background", "theme": "light-solid" },
-    { "type": "headline", "position": "top", "fontSize": 42, "fontWeight": "600", "color": "#1a1a2e", "placeholder": "Clean & Simple", "marginTop": 160 },
-    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.68, "rounded": 12 },
-    { "type": "device-frame", "frame": "generic", "position": "center", "scale": 0.71 }
+    { "type": "headline", "position": "top", "fontSize": 48, "fontWeight": "bold", "color": "#1a1a2e", "placeholder": "Less is more.", "marginTop": 120 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.72, "rounded": 24 }
   ]
 }

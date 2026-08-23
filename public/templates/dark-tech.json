@@ -1,0 +1,14 @@
+{
+  "id": "dark-tech",
+  "name": "Dark Tech",
+  "description": "Professional dark theme for tech apps",
+  "store": "play",
+  "canvas": { "width": 1080, "height": 1920 },
+  "layers": [
+    { "type": "background", "theme": "royal-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Built for developers", "marginTop": 120 },
+    { "type": "subheadline", "position": "top", "fontSize": 22, "color": "rgba(255,255,255,0.7)", "placeholder": "Powerful. Fast. Reliable.", "marginTop": 200 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.68, "rounded": 24 },
+    { "type": "device-frame", "frame": "galaxy-s23", "position": "center", "scale": 0.72 }
+  ]
+}

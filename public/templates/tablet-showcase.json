@@ -1,13 +1,13 @@
 {
   "id": "tablet-showcase",
   "name": "Tablet Showcase",
-  "description": "iPad landscape-style showcase layout",
-  "store": "ios-tablet",
+  "description": "iPad landscape showcase",
+  "store": "ios",
   "canvas": { "width": 2048, "height": 2732 },
   "layers": [
-    { "type": "background", "theme": "dark-solid" },
-    { "type": "headline", "position": "top", "fontSize": 64, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Built for iPad", "marginTop": 180 },
-    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.55, "rounded": 16 },
-    { "type": "device-frame", "frame": "ipad-pro", "position": "center", "scale": 0.58 }
+    { "type": "background", "theme": "ios-light" },
+    { "type": "headline", "position": "top", "fontSize": 64, "fontWeight": "bold", "color": "#1d1d1f", "placeholder": "Your app on iPad.", "marginTop": 200 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.6, "rounded": 32 },
+    { "type": "device-frame", "frame": "ipad-pro", "position": "center", "scale": 0.65 }
   ]
 }

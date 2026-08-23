@@ -1,14 +1,18 @@
 {
   "id": "split-feature",
   "name": "Split Feature",
-  "description": "Text on left, device mockup on right",
+  "description": "3 screenshots side by side with headline",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
-    { "type": "background", "theme": "dark-solid" },
-    { "type": "headline", "position": "left", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Powerful features", "marginTop": 280, "marginLeft": 60, "maxWidth": 420 },
-    { "type": "subheadline", "position": "left", "fontSize": 24, "color": "#aaaaaa", "placeholder": "Built for productivity", "marginTop": 420, "marginLeft": 60, "maxWidth": 400 },
-    { "type": "screenshot", "slot": 0, "position": "right", "scale": 0.65, "rounded": 20 },
-    { "type": "device-frame", "frame": "galaxy-s23", "position": "right", "scale": 0.68 }
+    { "type": "background", "theme": "candy-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 44, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Discover something new", "marginTop": 80 },
+    { "type": "subheadline", "position": "top", "fontSize": 20, "color": "rgba(255,255,255,0.85)", "placeholder": "Available now on all devices", "marginTop": 150 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.35, "rounded": 20, "marginTop": 240 },
+    { "type": "device-frame", "frame": "iphone15", "position": "center", "scale": 0.39, "marginTop": 230 },
+    { "type": "screenshot", "slot": 1, "position": "center", "scale": 0.35, "rounded": 20, "marginTop": 800 },
+    { "type": "device-frame", "frame": "pixel7", "position": "center", "scale": 0.39, "marginTop": 790 },
+    { "type": "screenshot", "slot": 2, "position": "center", "scale": 0.35, "rounded": 20, "marginTop": 1360 },
+    { "type": "device-frame", "frame": "galaxy-s23", "position": "center", "scale": 0.39, "marginTop": 1350 }
   ]
 }

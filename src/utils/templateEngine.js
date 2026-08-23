@@ -1,5 +1,5 @@
-import { Canvas, FabricImage, Gradient, Rect, Text, loadSVGFromString, util } from 'fabric';
-import { createCanvas, setBackground, applyFrame } from './canvasEngine';
+import { FabricImage, Rect, Text, loadSVGFromString, util } from 'fabric';
+import { createCanvas, setBackground } from './canvasEngine';
 import { getTheme } from './templateLoader';
 
 const DEFAULT_WIDTH = 1080;
@@ -10,20 +10,14 @@ function resolvePosition(position, canvasW, canvasH, objW, objH, layer = {}) {
   const marginLeft = layer.marginLeft ?? 0;
 
   switch (position) {
-    case 'top':
-      return { left: (canvasW - objW) / 2, top: marginTop };
-    case 'left':
-      return { left: marginLeft, top: marginTop };
-    case 'right':
-      return { left: canvasW - objW - 40, top: marginTop + 200 };
-    case 'center':
-      return { left: (canvasW - objW) / 2, top: (canvasH - objH) / 2 };
-    case 'bottom-center':
-      return { left: (canvasW - objW) / 2, top: canvasH - objH - 80 };
-    case 'top-right':
-      return { left: canvasW - objW - 60, top: 60 };
-    default:
-      return { left: (canvasW - objW) / 2, top: marginTop || 100 };
+    case 'top': return { left: (canvasW - objW) / 2, top: marginTop };
+    case 'left': return { left: marginLeft, top: marginTop };
+    case 'right': return { left: canvasW - objW - 40, top: marginTop + 200 };
+    case 'center': return { left: (canvasW - objW) / 2, top: (canvasH - objH) / 2 };
+    case 'bottom-center': return { left: (canvasW - objW) / 2, top: canvasH - objH - 80 };
+    case 'top-right': return { left: canvasW - objW - 60, top: 60 };
+    case 'grid-2': return { left: (canvasW - objW) / 2, top: marginTop };
+    default: return { left: (canvasW - objW) / 2, top: marginTop || 100 };
   }
 }
 
@@ -40,12 +34,7 @@ async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH
   const maxH = canvasH * scale;
   const imgScale = Math.min(maxW / (img.width || 1), maxH / (img.height || 1), 1);
 
-  img.set({
-    scaleX: imgScale,
-    scaleY: imgScale,
-    evented: false,
-    selectable: false,
-  });
+  img.set({ scaleX: imgScale, scaleY: imgScale, evented: false, selectable: false });
 
   const objW = img.width * imgScale;
   const objH = img.height * imgScale;
@@ -54,12 +43,8 @@ async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH
 
   if (layer.rounded) {
     img.set({ clipPath: new Rect({
-      width: objW,
-      height: objH,
-      rx: layer.rounded,
-      ry: layer.rounded,
-      originX: 'center',
-      originY: 'center',
+      width: objW, height: objH, rx: layer.rounded, ry: layer.rounded,
+      originX: 'center', originY: 'center',
     })});
   }
 
@@ -75,12 +60,7 @@ async function addFrameLayer(canvas, frameId, layer, canvasW, canvasH) {
     const frame = util.groupSVGElements(objects, options);
     const scale = layer.scale ?? 0.75;
 
-    frame.set({
-      scaleX: scale,
-      scaleY: scale,
-      evented: false,
-      selectable: false,
-    });
+    frame.set({ scaleX: scale, scaleY: scale, evented: false, selectable: false });
 
     const objW = canvasW * scale;
     const objH = canvasH * scale;
@@ -99,7 +79,7 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH) {
 
   const fb = new Text(text, {
     fontSize: layer.fontSize ?? 36,
-    fontFamily: layer.fontFamily ?? 'Inter, sans-serif',
+    fontFamily: `${layer.fontFamily || 'Inter'}, sans-serif`,
     fontWeight: layer.fontWeight ?? 'normal',
     fill: layer.color ?? '#ffffff',
     textAlign: layer.position === 'left' ? 'left' : 'center',
@@ -109,11 +89,7 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH) {
   });
 
   const pos = resolvePosition(layer.position ?? 'top', canvasW, canvasH, fb.width, fb.height, layer);
-  fb.set({
-    left: layer.position === 'left' ? pos.left : canvasW / 2,
-    top: pos.top,
-  });
-
+  fb.set({ left: layer.position === 'left' ? pos.left : canvasW / 2, top: pos.top });
   canvas.add(fb);
   return fb;
 }
@@ -122,32 +98,23 @@ function addBadgeLayer(canvas, layer, canvasW) {
   const text = layer.text ?? 'NEW';
   const padding = 16;
   const fb = new Text(text, {
-    fontSize: 20,
-    fontFamily: 'Inter, sans-serif',
-    fontWeight: 'bold',
-    fill: layer.color ?? '#ffffff',
-    evented: false,
-    selectable: false,
+    fontSize: 20, fontFamily: 'Inter, sans-serif', fontWeight: 'bold',
+    fill: layer.color ?? '#ffffff', evented: false, selectable: false,
   });
 
   const bg = new Rect({
-    width: fb.width + padding * 2,
-    height: fb.height + padding,
-    fill: layer.background ?? '#ff4757',
-    rx: 8,
-    ry: 8,
-    evented: false,
-    selectable: false,
+    width: fb.width + padding * 2, height: fb.height + padding,
+    fill: layer.background ?? '#ff4757', rx: 8, ry: 8,
+    evented: false, selectable: false,
   });
 
   const groupLeft = canvasW - bg.width - 60;
   bg.set({ left: groupLeft, top: 60 });
   fb.set({ left: groupLeft + padding, top: 60 + padding / 2 });
-
   canvas.add(bg, fb);
 }
 
-function addBulletsLayer(canvas, layer, canvasW) {
+function addBulletsLayer(canvas, layer) {
   const items = layer.items ?? [];
   items.forEach((item, i) => {
     const fb = new Text(`• ${item}`, {
@@ -156,17 +123,17 @@ function addBulletsLayer(canvas, layer, canvasW) {
       fontSize: layer.fontSize ?? 28,
       fontFamily: 'Inter, sans-serif',
       fill: layer.color ?? '#ffffff',
-      evented: false,
-      selectable: false,
+      evented: false, selectable: false,
     });
     canvas.add(fb);
   });
 }
 
 /**
- * Render a single screenshot through a template onto an offscreen canvas.
+ * Render a multi-screenshot template.
+ * Supports screenshot slots (0, 1, 2...) and device frames per slot.
  */
-export async function renderTemplateFrame(template, screenshotUrl, metadata = {}, themes = {}) {
+export async function renderTemplateFrame(template, screenshotUrls, metadata = {}, themes = {}) {
   const layers = template?.layers ?? [];
   const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
@@ -187,11 +154,12 @@ export async function renderTemplateFrame(template, screenshotUrl, metadata = {}
         case 'subheadline':
           addTextLayer(canvas, layer, metadata, canvasW, canvasH);
           break;
-        case 'screenshot':
-          if (screenshotUrl) {
-            await addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH);
-          }
+        case 'screenshot': {
+          const slotIndex = layer.slot ?? 0;
+          const url = Array.isArray(screenshotUrls) ? screenshotUrls[slotIndex] : screenshotUrls;
+          if (url) await addScreenshotLayer(canvas, url, layer, canvasW, canvasH);
           break;
+        }
         case 'device-frame':
           await addFrameLayer(canvas, layer.frame, layer, canvasW, canvasH);
           break;
@@ -199,13 +167,10 @@ export async function renderTemplateFrame(template, screenshotUrl, metadata = {}
           addBadgeLayer(canvas, layer, canvasW);
           break;
         case 'bullets':
-          addBulletsLayer(canvas, layer, canvasW);
-          break;
-        default:
+          addBulletsLayer(canvas, layer);
           break;
       }
     }
-
     canvas.renderAll();
     return canvas.toDataURL({ format: 'png', multiplier: 1 });
   } finally {
@@ -214,8 +179,7 @@ export async function renderTemplateFrame(template, screenshotUrl, metadata = {}
 }
 
 /**
- * Render all screenshots through the same template (one frame per screenshot).
- * Continues on individual frame errors instead of aborting the entire batch.
+ * Render all screenshots through a template.
  */
 export async function renderBatch(screenshots, template, metadata = {}, themes = {}, exportSize = null) {
   const effectiveTemplate = exportSize
@@ -223,26 +187,30 @@ export async function renderBatch(screenshots, template, metadata = {}, themes =
     : template;
 
   const results = [];
-  for (let i = 0; i < screenshots.length; i++) {
+  const slotsNeeded = Math.max(
+    ...((template?.layers ?? []).filter((l) => l.type === 'screenshot').map((l) => (l.slot ?? 0) + 1)),
+    1,
+  );
+
+  const chunkSize = Math.max(slotsNeeded, 1);
+
+  for (let i = 0; i < screenshots.length; i += chunkSize) {
+    const chunk = screenshots.slice(i, i + chunkSize);
     try {
-      const frameMeta = {
-        ...metadata,
-        slot: i,
-        headline: metadata.headlines?.[i] ?? metadata.headline,
-      };
-      const dataUrl = await renderTemplateFrame(effectiveTemplate, screenshots[i], frameMeta, themes);
+      const frameMeta = { ...metadata, slot: i };
+      const dataUrl = await renderTemplateFrame(effectiveTemplate, chunk, frameMeta, themes);
       results.push(dataUrl);
     } catch {
-      // Skip failed frames, continue with rest
+      // Skip failed frames
     }
   }
   return results;
 }
 
 /**
- * Apply template to an existing live canvas (editor preview mode).
+ * Apply template to live canvas (editor preview).
  */
-export async function applyTemplate(canvas, template, screenshotUrl, metadata = {}, themes = {}) {
+export async function applyTemplate(canvas, template, screenshotUrls, metadata = {}, themes = {}) {
   const layers = template?.layers ?? [];
   const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
@@ -261,11 +229,12 @@ export async function applyTemplate(canvas, template, screenshotUrl, metadata = 
       case 'subheadline':
         addTextLayer(canvas, layer, metadata, canvasW, canvasH);
         break;
-      case 'screenshot':
-        if (screenshotUrl) {
-          await addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH);
-        }
+      case 'screenshot': {
+        const slotIndex = layer.slot ?? 0;
+        const url = Array.isArray(screenshotUrls) ? screenshotUrls[slotIndex] : screenshotUrls;
+        if (url) await addScreenshotLayer(canvas, url, layer, canvasW, canvasH);
         break;
+      }
       case 'device-frame':
         await addFrameLayer(canvas, layer.frame, layer, canvasW, canvasH);
         break;
@@ -273,12 +242,9 @@ export async function applyTemplate(canvas, template, screenshotUrl, metadata = 
         addBadgeLayer(canvas, layer, canvasW);
         break;
       case 'bullets':
-        addBulletsLayer(canvas, layer, canvasW);
-        break;
-      default:
+        addBulletsLayer(canvas, layer);
         break;
     }
   }
-
   canvas.renderAll();
 }

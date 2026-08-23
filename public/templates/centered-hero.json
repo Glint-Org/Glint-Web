@@ -1,13 +1,12 @@
 {
   "id": "centered-hero",
   "name": "Centered Hero",
-  "description": "Large centered headline above device",
+  "description": "Simple centered layout with gradient",
   "store": "play",
   "canvas": { "width": 1080, "height": 1920 },
   "layers": [
-    { "type": "background", "theme": "dark-solid" },
-    { "type": "headline", "position": "top", "fontSize": 54, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Your app hero", "marginTop": 100 },
-    { "type": "screenshot", "slot": 0, "position": "bottom-center", "scale": 0.62, "rounded": 20 },
-    { "type": "device-frame", "frame": "pixel7", "position": "bottom-center", "scale": 0.65 }
+    { "type": "background", "theme": "mint-gradient" },
+    { "type": "headline", "position": "top", "fontSize": 52, "fontWeight": "bold", "color": "#ffffff", "placeholder": "Your app tagline", "marginTop": 160 },
+    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.68, "rounded": 28 }
   ]
 }

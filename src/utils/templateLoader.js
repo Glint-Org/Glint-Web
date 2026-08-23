@@ -36,6 +36,10 @@ export const TEMPLATE_IDS = [
   'neon-glow',
   'centered-hero',
   'dual-phone',
+  'social-story',
+  'carousel-card',
+  'dark-tech',
+  'clean-pro',
 ];
 
 export async function loadTemplate(templateId) {
