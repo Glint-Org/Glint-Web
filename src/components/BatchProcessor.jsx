@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { renderBatch } from '../utils/templateEngine';
+import { renderBatch, getScreenshotSlotCount } from '../utils/templateEngine';
+import { fillScreenshotSlots } from '../utils/placeholderScreenshots';
 import { loadThemePresets } from '../utils/templateLoader';
-import { downloadBatchZip, EXPORT_PRESETS } from '../utils/exportHelper';
+import { downloadBatchZip, EXPORT_PRESETS, zipFileName } from '../utils/exportHelper';
 
 export default function BatchProcessor({
   screenshots,
   template,
   metadata,
   exportPreset = 'play',
+  appName = '',
 }) {
   const [processing, setProcessing] = useState(false);
   const [previews, setPreviews] = useState([]);
@@ -15,14 +17,17 @@ export default function BatchProcessor({
 
   const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
   const exportSize = { width: preset.width, height: preset.height };
+  const canRun = !!template;
 
   const renderAll = async () => {
     const themes = await loadThemePresets();
-    return renderBatch(screenshots, template, metadata, themes, exportSize);
+    const needed = getScreenshotSlotCount(template);
+    const urls = fillScreenshotSlots(screenshots || [], needed);
+    return renderBatch(urls, template, metadata, themes, exportSize);
   };
 
   const handleRenderBatch = async () => {
-    if (!template || !screenshots.length) return;
+    if (!template) return;
     setProcessing(true);
     setProgress('Rendering templates...');
 
@@ -38,6 +43,7 @@ export default function BatchProcessor({
   };
 
   const handleExportZip = async () => {
+    if (!template) return;
     setProcessing(true);
     try {
       let results = previews;
@@ -48,7 +54,7 @@ export default function BatchProcessor({
       }
       const prefix = preset.filename ?? 'screen';
       const filenames = results.map((_, i) => `${prefix}_${i + 1}.png`);
-      await downloadBatchZip(results, filenames);
+      await downloadBatchZip(results, filenames, zipFileName(appName || metadata?.app));
       setProgress(`Exported ${results.length} screenshot(s) as ZIP (${preset.label})`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);
@@ -61,27 +67,27 @@ export default function BatchProcessor({
     <div className="space-y-3">
       <h3 className="font-semibold text-glint-text">Batch Export</h3>
       <p className="text-xs text-glint-text-secondary">
-        {template?.name ?? 'No template'} - {screenshots.length} screen(s) - {preset.label}
+        {template?.name ?? 'No template'} - 5 slides - {preset.label}
       </p>
       <button
         onClick={handleRenderBatch}
-        disabled={!template || !screenshots.length || processing}
+        disabled={!canRun || processing}
         className="w-full px-4 py-2.5 glint-btn-primary rounded-xl text-sm"
       >
         {processing ? 'Processing...' : 'Preview All Screens'}
       </button>
       <button
         onClick={handleExportZip}
-        disabled={!template || !screenshots.length || processing}
+        disabled={!canRun || processing}
         className="w-full px-4 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
       >
         Export All as ZIP
       </button>
       {progress && <p className="text-xs text-glint-text-secondary">{progress}</p>}
       {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-1 max-h-32 overflow-y-auto">
+        <div className="grid grid-cols-5 gap-1">
           {previews.map((url, i) => (
-            <img key={i} src={url} alt={`Preview ${i + 1}`} className="rounded-lg border border-glint-border" />
+            <img key={i} src={url} alt={`Preview ${i + 1}`} className="rounded border border-glint-border" />
           ))}
         </div>
       )}
