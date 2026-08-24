@@ -1,0 +1,139 @@
+import { useEffect, useRef } from 'react';
+import { createCanvas } from '../utils/canvasEngine';
+import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
+
+function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
+  const cssW = Math.round(canvasWidth * scale);
+  const cssH = Math.round(canvasHeight * scale);
+  if (typeof canvas.setDimensions === 'function') {
+    canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
+  }
+  const els = [canvas.lowerCanvasEl, canvas.upperCanvasEl, canvas.wrapperEl, canvas.container].filter(Boolean);
+  els.forEach((el) => {
+    el.style.width = `${cssW}px`;
+    el.style.height = `${cssH}px`;
+  });
+  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+  canvas.calcOffset?.();
+  canvas.requestRenderAll?.();
+  return { cssW, cssH };
+}
+
+function findDeviceTarget(target) {
+  let t = target;
+  while (t) {
+    if (t.glintRole === 'framed-screenshot') return t;
+    t = t.group || t.parent;
+  }
+  return null;
+}
+
+/**
+ * One Fabric canvas for a single Frame artboard.
+ * Backing store = full store size; CSS display scaled for the board.
+ */
+export default function FrameCanvas({
+  frameId,
+  design,
+  screenshotUrl,
+  canvasWidth = 1080,
+  canvasHeight = 1920,
+  displayScale = 0.16,
+  themes = {},
+  editable = true,
+  onCanvasReady,
+  onDeviceContextMenu,
+  paintKey,
+}) {
+  const elRef = useRef(null);
+  const canvasRef = useRef(null);
+  const themesRef = useRef(themes);
+  const editableRef = useRef(editable);
+  const menuRef = useRef(onDeviceContextMenu);
+  const screenshotRef = useRef(screenshotUrl);
+  const scale = Math.max(0.05, displayScale);
+  themesRef.current = themes;
+  editableRef.current = editable;
+  menuRef.current = onDeviceContextMenu;
+  screenshotRef.current = screenshotUrl;
+
+  const themesReady = Object.keys(themes).length > 0 ? 1 : 0;
+
+  useEffect(() => {
+    if (!elRef.current) return;
+    const c = createCanvas(elRef.current, canvasWidth, canvasHeight);
+    applyDisplayScale(c, canvasWidth, canvasHeight, scale);
+    setFrameEditable(c, editableRef.current);
+    canvasRef.current = c;
+    onCanvasReady?.(frameId, c);
+
+    const onMouseDown = (opt) => {
+      if (opt.e?.button !== 2) return;
+      const device = findDeviceTarget(opt.target);
+      if (!device) return;
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+      c.setActiveObject(device);
+      c.requestRenderAll();
+      menuRef.current?.({
+        frameId,
+        device,
+        canvas: c,
+        clientX: opt.e.clientX,
+        clientY: opt.e.clientY,
+      });
+    };
+
+    const blockBrowserMenu = (e) => {
+      // Only block when over a device; let other UI keep default menu.
+      const target = c.findTarget?.(e, false);
+      if (findDeviceTarget(target)) e.preventDefault();
+    };
+
+    c.on('mouse:down', onMouseDown);
+    c.wrapperEl?.addEventListener('contextmenu', blockBrowserMenu);
+
+    return () => {
+      c.off('mouse:down', onMouseDown);
+      c.wrapperEl?.removeEventListener('contextmenu', blockBrowserMenu);
+      onCanvasReady?.(frameId, null);
+      c.dispose();
+      canvasRef.current = null;
+    };
+  }, [canvasWidth, canvasHeight, frameId]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    applyDisplayScale(canvas, canvasWidth, canvasHeight, scale);
+  }, [scale, canvasWidth, canvasHeight]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setFrameEditable(canvas, editable);
+  }, [editable]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ac = new AbortController();
+    (async () => {
+      await applyDesignToFrame(canvas, design, screenshotRef.current, {
+        canvasWidth,
+        canvasHeight,
+        themes: themesRef.current,
+        editable: editableRef.current,
+        signal: ac.signal,
+      });
+      if (ac.signal.aborted) return;
+      applyDisplayScale(canvas, canvasWidth, canvasHeight, scale);
+      setFrameEditable(canvas, editableRef.current);
+    })();
+    return () => ac.abort();
+    // screenshotUrl is applied on design paint; later swaps use replaceDeviceScreenshot in-place.
+  }, [design, canvasWidth, canvasHeight, paintKey, themesReady]);
+
+  return <canvas ref={elRef} className="block rounded-sm" />;
+}
