@@ -9,7 +9,17 @@ export function downloadSinglePNG(dataUrl, filename = 'screenshot.png') {
   document.body.removeChild(link);
 }
 
-export async function downloadBatchZip(dataUrls, filenames) {
+/** ZIP name: MyApp.zip, or glint.zip when app name is empty. */
+export function zipFileName(appName) {
+  const slug = String(appName || '')
+    .trim()
+    .replace(/[^\w\s-]+/g, '')
+    .replace(/\s+/g, '-')
+    .slice(0, 48);
+  return slug ? `${slug}.zip` : 'glint.zip';
+}
+
+export async function downloadBatchZip(dataUrls, filenames, zipName = 'glint.zip') {
   const zip = new JSZip();
   dataUrls.forEach((url, i) => {
     const base64 = url.split(',')[1];
@@ -17,7 +27,7 @@ export async function downloadBatchZip(dataUrls, filenames) {
   });
   const blob = await zip.generateAsync({ type: 'blob' });
   const link = document.createElement('a');
-  link.download = 'glint-export.zip';
+  link.download = zipName || 'glint.zip';
   link.href = URL.createObjectURL(blob);
   document.body.appendChild(link);
   link.click();
