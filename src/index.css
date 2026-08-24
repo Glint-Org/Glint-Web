@@ -135,6 +135,47 @@ body {
   cursor: not-allowed;
 }
 
+/* Editor infinite canvas plane */
+[data-theme-canvas] {
+  background: #0E1116;
+}
+
+.canvas-dot-field {
+  --mx: 50%;
+  --my: 50%;
+}
+
+.canvas-dot-base,
+.canvas-dot-glow {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+}
+
+.canvas-dot-base {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1.15px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+.canvas-dot-glow {
+  background-image: radial-gradient(circle, rgba(245, 208, 111, 0.95) 2.4px, transparent 2.7px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(circle 160px at var(--mx) var(--my), #000 0%, transparent 72%);
+  mask-image: radial-gradient(circle 160px at var(--mx) var(--my), #000 0%, transparent 72%);
+}
+
+[data-theme="light"] [data-theme-canvas] {
+  background: #E8E8E2;
+}
+
+[data-theme="light"] .canvas-dot-base {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.16) 1.15px, transparent 1.4px);
+}
+
+[data-theme="light"] .canvas-dot-glow {
+  background-image: radial-gradient(circle, rgba(196, 150, 10, 0.9) 2.4px, transparent 2.7px);
+}
+
 /* Ensure native elements respect theme */
 [data-theme="light"] input,
 [data-theme="light"] select,
@@ -152,4 +193,15 @@ body {
 [data-theme="light"] option {
   background-color: var(--glint-surface);
   color: var(--glint-text);
+}
+
+/* Hide scrollbar chrome (developers know they can scroll) */
+.hide-scrollbar,
+.frame-board-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar,
+.frame-board-scroll::-webkit-scrollbar {
+  display: none;
 }
