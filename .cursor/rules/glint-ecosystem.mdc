@@ -1,0 +1,25 @@
+---
+description: Glint-Web conventions for screenshot editing and export
+alwaysApply: true
+---
+
+# Glint-Web Rules
+
+Use this editor to turn real screenshots into polished store assets.
+
+## Must keep
+
+1. Left sidebar: templates/assets/export only
+2. Right sidebar: design properties only
+3. Device frames must fill screenshot insets without gaps
+4. No-frame mode supports rounded corners + stroke
+5. Export sizes stay store-correct (Play/iOS/iPad presets)
+6. ZIP file naming: `{appName}.zip` when app name exists, else `glint.zip`
+
+## Assets behavior
+
+- Session import reads `session.json` and maps ordered `screens` to PNG files
+- Canvas assets panel must allow:
+  - selecting assets
+  - move forward/back one level
+  - bring to front / send to back
