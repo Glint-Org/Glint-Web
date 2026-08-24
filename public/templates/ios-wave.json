@@ -1,0 +1,67 @@
+{
+  "id": "ios-wave",
+  "name": "Coral Arch",
+  "description": "Warm coral arch framing an iPhone",
+  "store": "ios",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "preview": {
+    "bg": "#FF7A59",
+    "textColor": "#FFFFFF",
+    "frame": "iphone15",
+    "art": [
+      {
+        "kind": "arch",
+        "color": "#FF4D3A",
+        "x": "8%",
+        "y": "42%",
+        "w": "84%",
+        "h": "55%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#FF7A59"
+    },
+    {
+      "type": "graphic",
+      "src": "arch.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#FF4D3A",
+      "fill2": "#FF9A7A"
+    },
+    {
+      "type": "graphic",
+      "src": "orb-cluster.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#FFE08A",
+      "fill2": "#FFFFFF",
+      "fill3": "#FFB4A2"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 62,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "Feel the warmth",
+      "marginTop": 180
+    },
+    {
+      "type": "device",
+      "frame": "iphone15",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 540
+    }
+  ]
+}
