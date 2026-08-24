@@ -20,26 +20,20 @@ export async function loadExportPresets() {
 }
 
 export function getTheme(themeId, themes) {
-  return themes[themeId] || { type: 'solid', value: '#1a1a2e' };
+  return themes[themeId] || { type: 'solid', value: '#1C1C1E' };
 }
 
+/** Curated store-only templates - simple, premium, few. */
 export const TEMPLATE_IDS = [
-  'viral-gradient-hero',
-  'split-feature',
-  'feature-callout',
-  'dark-minimal',
+  'play-hero',
+  'play-pop',
+  'play-feature',
+  'play-dual',
+  'play-minimal',
   'ios-clean',
-  'purple-viral',
+  'ios-wave',
+  'ios-dark',
   'tablet-showcase',
-  'light-minimal',
-  'gradient-badge',
-  'neon-glow',
-  'centered-hero',
-  'dual-phone',
-  'social-story',
-  'carousel-card',
-  'dark-tech',
-  'clean-pro',
 ];
 
 export async function loadTemplate(templateId) {
