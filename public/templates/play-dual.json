@@ -1,0 +1,87 @@
+{
+  "id": "play-dual",
+  "name": "Split Dual",
+  "description": "Diagonal color bars with two phones",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#12151A",
+    "textColor": "#FFFFFF",
+    "frame": "pixel7",
+    "dual": true,
+    "art": [
+      {
+        "kind": "bar",
+        "color": "#7C3AED",
+        "x": "-20%",
+        "y": "12%",
+        "w": "140%",
+        "h": "18%"
+      },
+      {
+        "kind": "bar",
+        "color": "#F43F5E",
+        "x": "-20%",
+        "y": "70%",
+        "w": "140%",
+        "h": "16%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#12151A"
+    },
+    {
+      "type": "graphic",
+      "src": "diagonal-bars.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#7C3AED",
+      "fill2": "#A78BFA",
+      "fill3": "#F43F5E"
+    },
+    {
+      "type": "graphic",
+      "src": "confetti.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#FDE68A",
+      "fill2": "#FB7185",
+      "fill3": "#67E8F9"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 50,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "See every angle",
+      "marginTop": 110
+    },
+    {
+      "type": "device",
+      "frame": "pixel7",
+      "slot": 0,
+      "scale": 0.42,
+      "marginLeft": 70,
+      "marginTop": 400,
+      "minCoverage": 0.35
+    },
+    {
+      "type": "device",
+      "frame": "galaxy-s23",
+      "slot": 1,
+      "scale": 0.42,
+      "marginLeft": 530,
+      "marginTop": 460,
+      "minCoverage": 0.35
+    }
+  ]
+}
