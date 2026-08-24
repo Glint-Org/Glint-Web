@@ -16,13 +16,18 @@ export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(getInitialTheme);
 
   const setTheme = useCallback((next) => {
+    if (next !== 'light' && next !== 'dark') return;
     setThemeState(next);
     try { localStorage.setItem(STORAGE_KEY, next); } catch { /* ignore */ }
   }, []);
 
   const toggle = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  }, [setTheme]);
+    setThemeState((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(STORAGE_KEY, next); } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

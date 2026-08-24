@@ -12,7 +12,8 @@ export default function SessionImporter({ onImport }) {
     const pngFiles = [];
 
     for (const file of fileList) {
-      if (file.name === 'session.json') {
+      const base = file.name.toLowerCase();
+      if (base.endsWith('.json') && base.includes('session')) {
         const text = await file.text();
         sessionData = JSON.parse(text);
       } else if (file.name.toLowerCase().endsWith('.png')) {
@@ -25,7 +26,14 @@ export default function SessionImporter({ onImport }) {
     }
 
     const screenOrder = sessionData?.screens ?? pngFiles.map((f) => f.name).sort();
-    const urlMap = new Map(pngFiles.map((f) => [f.name, URL.createObjectURL(f)]));
+    // Prefer relative folder paths (webkitdirectory) so Capture nested paths resolve.
+    const urlMap = new Map();
+    for (const f of pngFiles) {
+      const rel = (f.webkitRelativePath || f.name).replace(/^[^/]+\//, '');
+      urlMap.set(f.name, URL.createObjectURL(f));
+      urlMap.set(rel, urlMap.get(f.name));
+      urlMap.set(rel.split('/').pop(), urlMap.get(f.name));
+    }
 
     const screenshots = screenOrder
       .map((name) => urlMap.get(name) || urlMap.get(name.split('/').pop()))
