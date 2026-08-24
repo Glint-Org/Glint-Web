@@ -45,7 +45,7 @@ function loadGoogleFont(fontName) {
   loadedFonts.add(fontName);
 }
 
-export default function FontPicker({ selected, onChange }) {
+export default function FontPicker({ selected, onChange, compact = false }) {
   const [search, setSearch] = useState('');
   const [customFonts, setCustomFonts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -77,6 +77,27 @@ export default function FontPicker({ selected, onChange }) {
   useEffect(() => {
     if (selected) loadGoogleFont(selected);
   }, [selected]);
+
+  if (compact) {
+    return (
+      <div className="space-y-1">
+        <span className="text-[10px] text-glint-text-tertiary">Font</span>
+        <select
+          value={selected || 'Inter'}
+          onChange={(e) => {
+            loadGoogleFont(e.target.value);
+            onChange(e.target.value);
+          }}
+          className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
+          style={{ fontFamily: `"${selected || 'Inter'}", sans-serif` }}
+        >
+          {allFonts.map((f) => (
+            <option key={f.name} value={f.name}>{f.name}</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
