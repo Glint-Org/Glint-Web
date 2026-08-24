@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { ImagePlus, Trash2 } from 'lucide-react';
 
 /**
- * Per-frame screenshot slots: import / replace / clear (no reorder — use frame move on canvas).
+ * Per-frame screenshot slots: import / replace / clear (no reorder - use frame move on canvas).
  */
 export default function FrameScreenshotsPanel({ frames, onReplace, onClear }) {
   const inputRefs = useRef({});

@@ -72,7 +72,7 @@ export default function Home() {
             <span className="text-glint-accent font-bold">No device needed.</span>
           </h2>
           <p className="text-glint-text-secondary text-lg max-w-xl mx-auto">
-            Simple, stable, professional. Capture real app UI, polish in a graphic editor, export store-ready ZIP — by hand, in CI, or with an AI agent.
+            Simple, stable, professional. Capture real app UI, polish in a graphic editor, export store-ready ZIP - by hand, in CI, or with an AI agent.
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <button onClick={() => document.getElementById('templates')?.scrollIntoView({ behavior: 'smooth' })} className="px-6 py-3 glint-btn-primary rounded-xl text-base">Browse Templates</button>

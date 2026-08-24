@@ -1,4 +1,4 @@
-# Glint-Web — Agent Instructions
+# Glint-Web - Agent Instructions
 
 Glint-Web is the screenshot polishing editor in the Glint ecosystem.
 

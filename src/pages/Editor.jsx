@@ -247,7 +247,7 @@ export default function Editor() {
     return () => ro.disconnect();
   }, [recomputeFitZoom]);
 
-  // Zoom only the frame board — block browser page zoom over the canvas
+  // Zoom only the frame board - block browser page zoom over the canvas
   useEffect(() => {
     const el = boardRef.current;
     if (!el) return;

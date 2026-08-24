@@ -357,7 +357,7 @@ function expandToFiveSlides(template) {
     }
 
     if (layout.band) {
-      // Bottom accent strip (clipped to frame) — Blink-style
+      // Bottom accent strip (clipped to frame) - Blink-style
       layers.push({
         type: 'shape',
         shape: 'rect',

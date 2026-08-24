@@ -25,7 +25,7 @@ export default function FrameExport({
   const renderFrames = async () => {
     // Always re-render at full store size so viewport zoom on the board
     // cannot shrink exported PNGs. Live edits to text/colors are still on
-    // the Fabric objects — for now designs are re-applied from frame state.
+    // the Fabric objects - for now designs are re-applied from frame state.
     const results = [];
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
