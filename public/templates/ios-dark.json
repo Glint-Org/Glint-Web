@@ -1,0 +1,85 @@
+{
+  "id": "ios-dark",
+  "name": "Night Gold",
+  "description": "Midnight field, gold rings, sparkles",
+  "store": "ios",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "preview": {
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "frame": "iphone14-pro",
+    "art": [
+      {
+        "kind": "ring",
+        "color": "#F5D06F",
+        "x": "64%",
+        "y": "6%",
+        "w": "48%",
+        "h": "22%"
+      },
+      {
+        "kind": "circle",
+        "color": "#1A1D24",
+        "x": "-8%",
+        "y": "74%",
+        "w": "42%",
+        "h": "18%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#0B0D10"
+    },
+    {
+      "type": "graphic",
+      "src": "rings.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#F5D06F",
+      "fill2": "#E8C547",
+      "fill3": "#FFF3C4"
+    },
+    {
+      "type": "graphic",
+      "src": "sparkles.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#F5D06F",
+      "fill2": "#FFFFFF",
+      "fill3": "#C9A227"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 62,
+      "fontWeight": "800",
+      "color": "#F5D06F",
+      "placeholder": "A flash of brilliance",
+      "marginTop": 190
+    },
+    {
+      "type": "subheadline",
+      "position": "top",
+      "fontSize": 32,
+      "fontWeight": "500",
+      "color": "#8A8F98",
+      "placeholder": "Store-ready in minutes",
+      "marginTop": 300
+    },
+    {
+      "type": "device",
+      "frame": "iphone14-pro",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 560
+    }
+  ]
+}
