@@ -1,17 +1,76 @@
 {
   "id": "ios-clean",
-  "name": "iOS Clean",
-  "description": "Light iOS style with iPhone frames",
+  "name": "Air Pastel",
+  "description": "Mint and lavender blobs - App Store light",
   "store": "ios",
-  "canvas": { "width": 1290, "height": 2796 },
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "preview": {
+    "bg": "#E8F6F1",
+    "textColor": "#12352C",
+    "frame": "iphone15",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#B8E0D2",
+        "x": "50%",
+        "y": "-10%",
+        "w": "75%",
+        "h": "36%"
+      },
+      {
+        "kind": "blob",
+        "color": "#D7C6F3",
+        "x": "-16%",
+        "y": "62%",
+        "w": "58%",
+        "h": "30%"
+      }
+    ]
+  },
   "layers": [
-    { "type": "background", "theme": "ios-light" },
-    { "type": "headline", "position": "top", "fontSize": 56, "fontWeight": "bold", "color": "#1d1d1f", "placeholder": "Designed for iPhone.", "marginTop": 120 },
-    { "type": "screenshot", "slot": 0, "position": "center", "scale": 0.35, "rounded": 28, "marginTop": 280 },
-    { "type": "device-frame", "frame": "iphone15", "position": "center", "scale": 0.39, "marginTop": 270 },
-    { "type": "screenshot", "slot": 1, "position": "center", "scale": 0.32, "rounded": 24, "marginTop": 1020 },
-    { "type": "device-frame", "frame": "iphone14-pro", "position": "center", "scale": 0.36, "marginTop": 1010 },
-    { "type": "screenshot", "slot": 2, "position": "center", "scale": 0.28, "rounded": 20, "marginTop": 1700 },
-    { "type": "device-frame", "frame": "iphone15", "position": "center", "scale": 0.32, "marginTop": 1690 }
+    {
+      "type": "background",
+      "color": "#E8F6F1"
+    },
+    {
+      "type": "graphic",
+      "src": "blob-cluster.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#A8D5C4",
+      "fill2": "#C4B5E8",
+      "fill3": "#F9E4C8"
+    },
+    {
+      "type": "graphic",
+      "src": "leaf-flourish.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1290,
+      "fill": "#9FD0BE",
+      "fill2": "#C9B6E8",
+      "fill3": "#F3D9A4"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 64,
+      "fontWeight": "800",
+      "color": "#12352C",
+      "placeholder": "Designed for iPhone",
+      "marginTop": 180
+    },
+    {
+      "type": "device",
+      "frame": "iphone15",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 520
+    }
   ]
 }
