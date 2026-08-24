@@ -1,0 +1,76 @@
+{
+  "id": "play-minimal",
+  "name": "Soft Cream",
+  "description": "Warm cream canvas, botanical flourish, light phone",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#F4EFE6",
+    "textColor": "#1A1A1A",
+    "frame": "pixel7",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#D9C4A8",
+        "x": "55%",
+        "y": "-6%",
+        "w": "60%",
+        "h": "32%"
+      },
+      {
+        "kind": "blob",
+        "color": "#C9DCC4",
+        "x": "-8%",
+        "y": "68%",
+        "w": "50%",
+        "h": "28%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#F4EFE6"
+    },
+    {
+      "type": "graphic",
+      "src": "leaf-flourish.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#C9DCC4",
+      "fill2": "#D9C4A8",
+      "fill3": "#E8D5C4"
+    },
+    {
+      "type": "graphic",
+      "src": "dots-grid.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#C4B8A8",
+      "fill2": "#A3B18A",
+      "opacity": 0.7
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 54,
+      "fontWeight": "800",
+      "color": "#1A1A1A",
+      "placeholder": "Simple. Beautiful.",
+      "marginTop": 130
+    },
+    {
+      "type": "device",
+      "frame": "pixel7",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 380
+    }
+  ]
+}
