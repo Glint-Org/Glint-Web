@@ -1,14 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 393 852" width="393" height="852">
   <defs>
-    <mask id="screen">
-      <rect width="1080" height="1920" fill="white"/>
-      <rect x="10" y="60" width="1060" height="1800" rx="24" fill="black"/>
-    </mask>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="4" stdDeviation="14" flood-color="#000" flood-opacity="0.4"/>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000" flood-opacity="0.4"/>
     </filter>
   </defs>
-  <rect width="1080" height="1920" rx="52" fill="#1c1c1e" mask="url(#screen)" filter="url(#shadow)"/>
-  <rect x="420" y="28" width="240" height="24" rx="12" fill="#0a0a0a"/>
-  <circle cx="540" cy="40" r="4" fill="#2a2a2a"/>
+  <path fill-rule="evenodd" filter="url(#shadow)" fill="#0A0A0A" d="M55,0 H338 A55,55 0 0 1 393,55 V797 A55,55 0 0 1 338,852 H55 A55,55 0 0 1 0,797 V55 A55,55 0 0 1 55,0 Z M56,12 H337 A44,44 0 0 1 381,56 V796 A44,44 0 0 1 337,840 H56 A44,44 0 0 1 12,796 V56 A44,44 0 0 1 56,12 Z"/>
+  <rect x="122" y="18" width="149" height="34" rx="17" fill="#0A0A0A"/>
 </svg>
