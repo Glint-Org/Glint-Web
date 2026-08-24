@@ -1,0 +1,87 @@
+{
+  "id": "play-hero",
+  "name": "Sunset Bloom",
+  "description": "Coral blobs, gold orbs, framed phone - Play Store hero",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#FF6B4A",
+    "textColor": "#FFFFFF",
+    "frame": "pixel7",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#FF3D54",
+        "x": "62%",
+        "y": "-8%",
+        "w": "70%",
+        "h": "42%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FFD166",
+        "x": "-12%",
+        "y": "58%",
+        "w": "48%",
+        "h": "28%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#FF6B4A"
+    },
+    {
+      "type": "graphic",
+      "src": "blob-cluster.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#E11D48",
+      "fill2": "#FB7185",
+      "fill3": "#FFD166",
+      "sendToBack": true
+    },
+    {
+      "type": "graphic",
+      "src": "orb-cluster.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#FFD166",
+      "fill2": "#FDE68A",
+      "fill3": "#FFFFFF"
+    },
+    {
+      "type": "graphic",
+      "src": "sparkles.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#FFFFFF",
+      "fill2": "#FFD166",
+      "fill3": "#FFE4C7"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 58,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "Make every moment shine",
+      "marginTop": 100
+    },
+    {
+      "type": "device",
+      "frame": "pixel7",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 380
+    }
+  ]
+}
