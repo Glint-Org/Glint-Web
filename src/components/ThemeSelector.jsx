@@ -1,38 +1,106 @@
 const THEMES = [
-  { label: 'Sunset', type: 'gradient', value: [{ offset: 0, color: '#ff7e5f' }, { offset: 1, color: '#feb47b' }] },
-  { label: 'Ocean', type: 'gradient', value: [{ offset: 0, color: '#0f2027' }, { offset: 0.5, color: '#203a43' }, { offset: 1, color: '#2c5364' }] },
-  { label: 'Purple', type: 'gradient', value: [{ offset: 0, color: '#667eea' }, { offset: 1, color: '#764ba2' }] },
-  { label: 'Mint', type: 'gradient', value: [{ offset: 0, color: '#11998e' }, { offset: 1, color: '#38ef7d' }] },
-  { label: 'Fire', type: 'gradient', value: [{ offset: 0, color: '#f12711' }, { offset: 1, color: '#f5af19' }] },
-  { label: 'Candy', type: 'gradient', value: [{ offset: 0, color: '#fc5c7d' }, { offset: 1, color: '#6a82fb' }] },
-  { label: 'Royal', type: 'gradient', value: [{ offset: 0, color: '#141e30' }, { offset: 1, color: '#243b55' }] },
-  { label: 'Dark', type: 'solid', value: '#1a1a2e' },
-  { label: 'Black', type: 'solid', value: '#0d0d0d' },
-  { label: 'White', type: 'solid', value: '#ffffff' },
-  { label: 'Light Gray', type: 'solid', value: '#f5f5f7' },
-  { label: 'Charcoal', type: 'solid', value: '#2d2d2d' },
+  { label: 'Charcoal', type: 'solid', value: '#1C1C1E' },
+  { label: 'Midnight', type: 'solid', value: '#0B0D10' },
+  { label: 'Slate', type: 'solid', value: '#2C2C2E' },
+  { label: 'Ocean', type: 'solid', value: '#0F2744' },
+  { label: 'Forest', type: 'solid', value: '#1A2F23' },
+  { label: 'Snow', type: 'solid', value: '#F5F5F7' },
+  { label: 'White', type: 'solid', value: '#FFFFFF' },
+  { label: 'Sand', type: 'solid', value: '#F0EBE3' },
+  {
+    label: 'Graphite',
+    type: 'gradient',
+    value: [
+      { offset: 0, color: '#2A2D34' },
+      { offset: 1, color: '#12151A' },
+    ],
+  },
+  {
+    label: 'Soft Blue',
+    type: 'gradient',
+    value: [
+      { offset: 0, color: '#E8F1F8' },
+      { offset: 1, color: '#D4E4F0' },
+    ],
+  },
+  {
+    label: 'Warm',
+    type: 'gradient',
+    value: [
+      { offset: 0, color: '#FF8A5C' },
+      { offset: 1, color: '#FFB347' },
+    ],
+  },
+  {
+    label: 'Amber',
+    type: 'gradient',
+    value: [
+      { offset: 0, color: '#2A2118' },
+      { offset: 1, color: '#1A1510' },
+    ],
+  },
 ];
 
 function getSwatchStyle(theme) {
   if (theme.type === 'gradient') {
     const stops = theme.value.map((s) => `${s.color} ${s.offset * 100}%`).join(', ');
-    return { background: `linear-gradient(135deg, ${stops})` };
+    return { background: `linear-gradient(180deg, ${stops})` };
   }
   return { background: theme.value };
 }
 
+function isSelected(selected, theme) {
+  if (!selected) return false;
+  if (selected.label && theme.label) return selected.label === theme.label;
+  if (selected.type === 'solid' && theme.type === 'solid') return selected.value === theme.value;
+  return false;
+}
+
 export default function ThemeSelector({ selected, onChange }) {
+  const customColor =
+    selected?.type === 'solid' && !THEMES.some((t) => t.type === 'solid' && t.value === selected.value)
+      ? selected.value
+      : '#F5D06F';
+
   return (
     <div className="space-y-2">
-      <h3 className="font-semibold text-glint-text-secondary text-sm">Background</h3>
+      <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">Background</h3>
       <div className="grid grid-cols-4 gap-1.5">
         {THEMES.map((t) => (
-          <button key={t.label} onClick={() => onChange(t)}
-            className={`group relative rounded-lg overflow-hidden border-2 transition-all aspect-square ${selected?.label === t.label ? 'border-glint-accent ring-2 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'}`}>
+          <button
+            key={t.label}
+            onClick={() => onChange(t)}
+            title={t.label}
+            className={`group relative rounded-lg overflow-hidden border-2 transition-all aspect-square ${
+              isSelected(selected, t)
+                ? 'border-glint-accent ring-2 ring-glint-accent/30'
+                : 'border-glint-border hover:border-glint-border-strong'
+            }`}
+          >
             <div className="w-full h-full" style={getSwatchStyle(t)} />
-            <div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[9px] py-0.5 text-center opacity-0 group-hover:opacity-100 transition-opacity">{t.label}</div>
           </button>
         ))}
+      </div>
+      <div className="flex items-center gap-2 pt-1">
+        <label className="text-[10px] text-glint-text-secondary shrink-0">Custom</label>
+        <input
+          type="color"
+          value={selected?.type === 'solid' ? selected.value : customColor}
+          onChange={(e) => onChange({ label: 'Custom', type: 'solid', value: e.target.value })}
+          className="w-8 h-8 rounded cursor-pointer border border-glint-border bg-transparent p-0"
+        />
+        <input
+          type="text"
+          value={selected?.type === 'solid' ? selected.value : ''}
+          placeholder="#1C1C1E"
+          onChange={(e) => {
+            const v = e.target.value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+              onChange({ label: 'Custom', type: 'solid', value: v });
+            }
+          }}
+          className="flex-1 px-2 py-1.5 border border-glint-border rounded-lg text-[11px] font-mono bg-glint-surface text-glint-text"
+        />
       </div>
     </div>
   );

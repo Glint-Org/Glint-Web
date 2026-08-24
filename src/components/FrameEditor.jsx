@@ -1,57 +1,78 @@
 import { useEffect, useRef } from 'react';
-import { createCanvas, addImageToCanvas, setBackground, addTextOverlay, applyFrame, clearCanvas } from '../utils/canvasEngine';
+import {
+  createCanvas,
+  setBackground,
+  addTextOverlay,
+  addFramedScreenshot,
+  addStyledScreenshot,
+  clearCanvas,
+  computeCenteredFramePlacement,
+} from '../utils/canvasEngine';
+import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 
-export default function FrameEditor({ screenshots, background, textOverlay, frame: frameId, onCanvasReady, templateMode = false }) {
+export default function FrameEditor({
+  screenshots,
+  background,
+  textOverlay,
+  frame: frameId,
+  screenshotStyle,
+  onCanvasReady,
+  templateMode = false,
+  canvasWidth = 1080,
+  canvasHeight = 1920,
+}) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
-  const frameObjRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const c = createCanvas(containerRef.current);
+    const c = createCanvas(containerRef.current, canvasWidth, canvasHeight);
     canvasRef.current = c;
     onCanvasReady?.(c);
     return () => {
       onCanvasReady?.(null);
       c.dispose();
+      canvasRef.current = null;
     };
-  }, []);
+  }, [canvasWidth, canvasHeight]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || templateMode) return;
-    clearCanvas(canvas);
-    if (background) setBackground(canvas, background.type, background.value);
-    if (!screenshots.length) return;
-    Promise.all(screenshots.map((url, i) =>
-      addImageToCanvas(canvas, url, {
-        top: 100 + i * (canvas.height / Math.max(screenshots.length, 1)),
-      }),
-    ));
-  }, [screenshots, background, templateMode]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !textOverlay?.text) return;
-    canvas.getObjects().filter((o) => o.type === 'text').forEach((t) => canvas.remove(t));
-    addTextOverlay(canvas, textOverlay.text, textOverlay.style);
-  }, [textOverlay]);
+    let cancelled = false;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (frameObjRef.current) {
-      canvas.remove(frameObjRef.current);
-      frameObjRef.current = null;
-    }
-    if (!frameId) return;
-    fetch(`/frames/${frameId}.svg`)
-      .then((r) => r.text())
-      .then((svg) => applyFrame(canvas, svg))
-      .then((obj) => { frameObjRef.current = obj; });
-  }, [frameId]);
+    const paint = async () => {
+      clearCanvas(canvas);
+      canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+      if (background) setBackground(canvas, background.type, background.value);
+      else setBackground(canvas, 'solid', '#1C1C1E');
 
-  return (
-    <canvas ref={containerRef} className="border rounded-lg shadow-2xl" />
-  );
+      if (!screenshots.length) return;
+
+      const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
+
+      if (frameId && screenshots[0]) {
+        const { scale, left, top } = computeCenteredFramePlacement(frameId, canvasWidth, canvasHeight);
+        if (cancelled) return;
+        await addFramedScreenshot(canvas, screenshots[0], frameId, { scale, left, top });
+      } else if (screenshots[0]) {
+        if (cancelled) return;
+        await addStyledScreenshot(canvas, screenshots[0], {
+          ...style,
+          left: (canvasWidth - canvasWidth * style.scale) / 2,
+          top: canvasHeight * 0.18,
+        });
+      }
+
+      if (textOverlay?.text && !cancelled) {
+        addTextOverlay(canvas, textOverlay.text, textOverlay.style);
+      }
+    };
+
+    paint();
+    return () => { cancelled = true; };
+  }, [screenshots, background, frameId, screenshotStyle, templateMode, canvasWidth, canvasHeight, textOverlay]);
+
+  return <canvas ref={containerRef} className="shadow-2xl rounded-sm" />;
 }
