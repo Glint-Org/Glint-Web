@@ -1,0 +1,76 @@
+{
+  "id": "play-pop",
+  "name": "Pop Wave",
+  "description": "Magenta waves and confetti - bold Play Store look",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#7C1D6F",
+    "textColor": "#FFFFFF",
+    "frame": "pixel7",
+    "art": [
+      {
+        "kind": "wave",
+        "color": "#E11D8F",
+        "x": "0%",
+        "y": "62%",
+        "w": "100%",
+        "h": "40%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FDE68A",
+        "x": "70%",
+        "y": "8%",
+        "w": "36%",
+        "h": "20%"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#7C1D6F"
+    },
+    {
+      "type": "graphic",
+      "src": "wave-layers.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#BE185D",
+      "fill2": "#DB2777",
+      "fill3": "#F472B6"
+    },
+    {
+      "type": "graphic",
+      "src": "confetti.svg",
+      "left": 0,
+      "top": 0,
+      "width": 1080,
+      "fill": "#FDE68A",
+      "fill2": "#67E8F9",
+      "fill3": "#FFFFFF"
+    },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 56,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "Stand out on the store",
+      "marginTop": 110
+    },
+    {
+      "type": "device",
+      "frame": "pixel7",
+      "slot": 0,
+      "scale": 0.62,
+      "position": "center",
+      "marginTop": 360
+    }
+  ]
+}
