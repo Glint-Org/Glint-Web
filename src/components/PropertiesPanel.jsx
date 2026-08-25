@@ -7,6 +7,7 @@ import FrameSelector from './FrameSelector';
 import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
+import { getGraphicBySrc } from '../utils/graphicsCatalog';
 
 const FONT_SIZES = [24, 32, 40, 48, 56, 64, 72, 80, 96, 120];
 const WEIGHTS = [
@@ -134,12 +135,20 @@ export default function PropertiesPanel({
 
   const handleInsertGraphic = async (src) => {
     if (!canvas) return;
+    const canvasW = canvas.getWidth?.() || 1080;
+    const canvasH = canvas.getHeight?.() || 1920;
+    const sx = canvasW / 1080;
+    const sy = canvasH / 1920;
+    const meta = getGraphicBySrc(src);
+    const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
     await addGraphicLayer(canvas, {
       src,
       fill: '#FF6B4A',
       fill2: '#FFD166',
       fill3: '#FFFFFF',
-      width: canvas.getWidth?.() || 1080,
+      left: Math.round((place.left ?? 0) * sx),
+      top: Math.round((place.top ?? 0) * sy),
+      width: Math.round((place.width ?? 1080) * sx),
     }, { selectable: true });
   };
 

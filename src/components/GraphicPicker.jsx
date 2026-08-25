@@ -28,7 +28,7 @@ export default function GraphicPicker({ onInsert }) {
         ))}
       </div>
       <p className="text-[10px] text-glint-text-tertiary">
-        Click a graphic to insert. Select it on the canvas to recolor.
+        Click to insert at a default spot. Drag freely after. Select to recolor.
       </p>
     </div>
   );
