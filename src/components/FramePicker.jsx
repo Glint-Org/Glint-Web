@@ -4,7 +4,9 @@ import { Smartphone, Tablet, Image, Minus } from 'lucide-react';
 const BUILTIN_FRAMES = [
   { id: null, label: 'No Frame', Icon: Minus },
   { id: 'pixel9', label: 'Pixel 9', Icon: Smartphone },
-  { id: 'galaxy-s24', label: 'Galaxy S24', Icon: Smartphone },
+  { id: 'galaxy-s24', label: 'Galaxy', Icon: Smartphone },
+  { id: 'phone-3d', label: 'Phone Shadow', Icon: Smartphone },
+  { id: 'simple-dark', label: 'Simple Dark', Icon: Smartphone },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', Icon: Smartphone },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro', Icon: Smartphone },
   { id: 'ipad-pro-13', label: 'iPad Pro 13"', Icon: Tablet },

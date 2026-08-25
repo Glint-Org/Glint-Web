@@ -1,13 +1,102 @@
-/** Screen insets for curated device frames only (`public/frames/*.svg`). */
+/**
+ * Screen insets for curated device frames (`public/frames/*`).
+ * Photo-real PNGs use native pixel sizes from device-frames-media template.json.
+ * `ext`: asset extension. `rx`: screen corner radius in frame pixels.
+ */
 export const FRAME_INSETS = {
-  pixel9: { top: 12, right: 12, bottom: 12, left: 12, rx: 26, width: 412, height: 915 },
-  'galaxy-s24': { top: 12, right: 12, bottom: 12, left: 12, rx: 30, width: 360, height: 780 },
-  'iphone16-pro': { top: 12, right: 12, bottom: 12, left: 12, rx: 44, width: 393, height: 852 },
-  'iphone16-pro-max': { top: 14, right: 16, bottom: 14, left: 16, rx: 48, width: 430, height: 932 },
-  'ipad-pro-13': { top: 30, right: 30, bottom: 30, left: 30, rx: 18, width: 1024, height: 1366 },
-  'ipad-pro': { top: 28, right: 28, bottom: 28, left: 28, rx: 16, width: 834, height: 1194 },
+  pixel9: {
+    ext: 'png',
+    top: 142,
+    right: 170,
+    bottom: 138,
+    left: 170,
+    rx: 90,
+    width: 1620,
+    height: 3136,
+  },
+  'galaxy-s24': {
+    ext: 'png',
+    top: 200,
+    right: 200,
+    bottom: 200,
+    left: 200,
+    rx: 80,
+    width: 1480,
+    height: 2800,
+  },
+  'iphone16-pro': {
+    ext: 'png',
+    top: 100,
+    right: 98,
+    bottom: 100,
+    left: 102,
+    rx: 100,
+    width: 1406,
+    height: 2822,
+  },
+  'iphone16-pro-max': {
+    ext: 'png',
+    top: 100,
+    right: 100,
+    bottom: 100,
+    left: 100,
+    rx: 105,
+    width: 1520,
+    height: 3068,
+  },
+  'ipad-pro-13': {
+    ext: 'png',
+    top: 100,
+    right: 100,
+    bottom: 100,
+    left: 100,
+    rx: 55,
+    width: 2264,
+    height: 2952,
+  },
+  'ipad-pro': {
+    ext: 'png',
+    top: 100,
+    right: 101,
+    bottom: 100,
+    left: 99,
+    rx: 50,
+    width: 1868,
+    height: 2620,
+  },
   /** Matches Blink/BoxLock Figma bezel (975x1966, rx ~82). */
-  'simple-dark': { top: 25, right: 25, bottom: 25, left: 25, rx: 62, width: 975, height: 1966 },
+  'simple-dark': {
+    ext: 'svg',
+    top: 25,
+    right: 25,
+    bottom: 25,
+    left: 25,
+    rx: 62,
+    width: 975,
+    height: 1966,
+  },
+  /** iPhone 14 Pro Max with soft drop shadow (dimensional). */
+  'phone-3d': {
+    ext: 'png',
+    top: 100,
+    right: 99,
+    bottom: 100,
+    left: 101,
+    rx: 100,
+    width: 1490,
+    height: 2996,
+  },
+  /** iPad Pro 13 photo-real bezel. */
+  'tablet-3d': {
+    ext: 'png',
+    top: 100,
+    right: 100,
+    bottom: 100,
+    left: 100,
+    rx: 55,
+    width: 2264,
+    height: 2952,
+  },
 };
 
 /** Fallback when an unknown frame id is requested. */
@@ -21,8 +110,15 @@ export function getFrameMeta(frameId) {
   return FRAME_INSETS[frameId] || FRAME_INSETS[DEFAULT_FRAME];
 }
 
+/** Public URL for a curated frame asset. */
+export function getFrameSrc(frameId) {
+  const meta = getFrameMeta(frameId);
+  const ext = meta.ext || 'png';
+  return `/frames/${frameId}.${ext}`;
+}
+
 /**
- * Convert canvas coverage (e.g. 0.6 = 60% of frame) into SVG unit scale.
+ * Convert canvas coverage (e.g. 0.6 = 60% of frame) into SVG/PNG unit scale.
  * Device keeps aspect ratio; size is limited by the tighter canvas axis.
  */
 export function resolveDeviceScale(

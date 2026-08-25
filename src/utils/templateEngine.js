@@ -1,5 +1,5 @@
-import { FabricImage, Rect, Text, loadSVGFromString, util } from 'fabric';
-import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS } from './canvasEngine';
+import { FabricImage, Rect, Text } from 'fabric';
+import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS, loadFrameBezel } from './canvasEngine';
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
@@ -96,11 +96,7 @@ async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH
 async function addFrameLayer(canvas, frameId, layer, canvasW, canvasH, editable, originX = 0) {
   if (!frameId) return null;
   try {
-    const res = await fetch(`/frames/${frameId}.svg`);
-    if (!res.ok) return null;
-    const svg = await res.text();
-    const { objects, options } = await loadSVGFromString(svg);
-    const frame = util.groupSVGElements(objects, options);
+    const frame = await loadFrameBezel(frameId);
     const meta = getFrameMeta(frameId);
     const scale = layer.scale ?? 0.75;
     const frameW = meta.width * scale;

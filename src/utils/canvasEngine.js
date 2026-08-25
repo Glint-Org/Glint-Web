@@ -154,6 +154,24 @@ export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
   return group;
 }
 
+/** Load a curated bezel as a Fabric object (PNG image or SVG group). */
+export async function loadFrameBezel(frameId) {
+  const meta = getFrameMeta(frameId);
+  const ext = meta.ext || 'png';
+  const src = `/frames/${frameId}.${ext}`;
+
+  if (ext === 'svg') {
+    const res = await fetch(src);
+    if (!res.ok) throw new Error(`Frame not found: ${frameId}`);
+    const svg = await res.text();
+    const { objects, options } = await loadSVGFromString(svg);
+    return util.groupSVGElements(objects, options);
+  }
+
+  return FabricImage.fromURL(src, { crossOrigin: 'anonymous' });
+}
+
+/** @deprecated Prefer loadFrameBezel — kept for callers that need raw SVG text. */
 export async function loadFrameSvg(frameId) {
   const res = await fetch(`/frames/${frameId}.svg`);
   if (!res.ok) throw new Error(`Frame not found: ${frameId}`);
@@ -369,12 +387,12 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     top: insetT,
   });
 
-  const svg = await loadFrameSvg(frameId);
-  const { objects, options } = await loadSVGFromString(svg);
-  const frame = util.groupSVGElements(objects, options);
+  const frame = await loadFrameBezel(frameId);
+  const fw = frame.width || meta.width;
+  const fh = frame.height || meta.height;
   frame.set({
-    scaleX: frameW / meta.width,
-    scaleY: frameH / meta.height,
+    scaleX: frameW / fw,
+    scaleY: frameH / fh,
     left: 0,
     top: 0,
     originX: 'left',

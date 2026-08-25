@@ -1,10 +1,12 @@
 import { Minus } from 'lucide-react';
+import { getFrameSrc } from '../utils/frameMeta';
 
 /** Curated frames only — most-used Play / App Store devices. */
 export const FRAME_OPTIONS = [
   { id: null, label: 'None' },
   { id: 'pixel9', label: 'Pixel 9' },
-  { id: 'galaxy-s24', label: 'Galaxy S24' },
+  { id: 'galaxy-s24', label: 'Galaxy' },
+  { id: 'phone-3d', label: 'Phone Shadow' },
   { id: 'simple-dark', label: 'Simple Dark' },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max' },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro' },
@@ -13,7 +15,7 @@ export const FRAME_OPTIONS = [
 ];
 
 /**
- * Visual device frame picker — SVG tiles with clear selected state.
+ * Visual device frame picker — tiles with clear selected state.
  */
 export default function FrameSelector({ selected, onChange }) {
   return (
@@ -35,7 +37,7 @@ export default function FrameSelector({ selected, onChange }) {
             >
               {f.id ? (
                 <img
-                  src={`/frames/${f.id}.svg`}
+                  src={getFrameSrc(f.id)}
                   alt={f.label}
                   className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-2.25rem)] object-contain pointer-events-none"
                   draggable={false}

@@ -67,7 +67,6 @@ export default function Editor() {
   const [deviceFrame, setDeviceFrame] = useState(null);
   const [screenshotStyle, setScreenshotStyle] = useState({ ...DEFAULT_SCREENSHOT_STYLE });
   const [template, setTemplate] = useState(initialTemplate);
-  const [pendingTemplate, setPendingTemplate] = useState(null);
   const [textOverlay, setTextOverlay] = useState({ text: '', style: {} });
   const [appName, setAppName] = useState(session?.app ?? '');
   const [tagline, setTagline] = useState(session?.tagline ?? '');
@@ -123,20 +122,9 @@ export default function Editor() {
 
   const handleSelectTemplate = (t) => {
     if (!t) return;
-    const hasDesigns = frames.some((f) => f.design);
-    if (hasDesigns && template?.id !== t.id) {
-      setPendingTemplate(t);
-      return;
-    }
+    // Always replace — screenshots stay; designs swap to the new pack.
     loadTemplate(t);
   };
-
-  const confirmReplaceTemplate = () => {
-    if (pendingTemplate) loadTemplate(pendingTemplate);
-    setPendingTemplate(null);
-  };
-
-  const cancelReplaceTemplate = () => setPendingTemplate(null);
 
   const handleBackgroundChange = (bg) => {
     setBackgroundState(bg);
@@ -666,33 +654,6 @@ export default function Editor() {
         className="hidden"
         onChange={handleDeviceFileChange}
       />
-
-      {pendingTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-glint-surface border border-glint-border shadow-2xl p-5 space-y-4">
-            <h3 className="text-base font-semibold text-glint-text">Replace template?</h3>
-            <p className="text-sm text-glint-text-secondary leading-relaxed">
-              Loading this template will replace the designs on your current frames. Your screenshots stay in place.
-            </p>
-            <div className="flex gap-2 justify-end pt-1">
-              <button
-                type="button"
-                onClick={cancelReplaceTemplate}
-                className="px-3 py-1.5 text-sm rounded-lg border border-glint-border text-glint-text-secondary hover:bg-glint-surface-2"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmReplaceTemplate}
-                className="px-3 py-1.5 text-sm rounded-lg glint-btn-primary"
-              >
-                Replace
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
