@@ -5,21 +5,25 @@ alwaysApply: true
 
 # Glint-Web Rules
 
-Use this editor to turn real screenshots into polished store assets.
+Use this editor to turn real screenshots into polished store frames.
 
 ## Must keep
 
-1. Left sidebar: templates/assets/export only
-2. Right sidebar: design properties only
-3. Device frames must fill screenshot insets without gaps
-4. No-frame mode supports rounded corners + stroke
-5. Export sizes stay store-correct (Play/iOS/iPad presets)
-6. ZIP file naming: `{appName}.zip` when app name exists, else `glint.zip`
+1. Left sidebar: Templates · Assets · Frames · Export
+2. Center: frames board (1–10 store-size artboards), not an infinite canvas
+3. Right sidebar: design properties for the selected frame/object
+4. Device frames must fill screenshot insets without gaps
+5. Export sizes stay store-correct (Play / iOS / iPad presets)
+6. ZIP naming: `{appName}.zip` when app name exists, else `glint.zip`
+7. View handoff: after Preview/Export, Copy for Glint View embeds `data:` screens
 
 ## Assets behavior
 
 - Session import reads `session.json` and maps ordered `screens` to PNG files
-- Canvas assets panel must allow:
-  - selecting assets
-  - move forward/back one level
-  - bring to front / send to back
+- Prefer one device in Capture for Web frames (primary device in session.json)
+- Frames panel: reorder layers; device right-click to import/clear screenshot
+
+## Guardrails
+
+- Real UI only — never invent product screens
+- Soft-launch path: Capture/Bridge → Web → View (preview only)

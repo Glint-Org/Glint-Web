@@ -1,12 +1,12 @@
 # Glint-Web - Agent Instructions
 
-Glint-Web is the screenshot polishing editor in the Glint ecosystem.
+Glint-Web is the frames editor in the Glint ecosystem (AppLaunchpad-style board, not an infinite canvas).
 
 ## Core UI model
 
-- Left sidebar: `Templates` · `Assets` · `Export`
-- Right sidebar: design controls only (graphics, canvas, frame, screenshot style, typography)
-- Center: infinite canvas
+- Left sidebar: `Templates` · `Assets` · `Frames` · `Export`
+- Center: **frames board** (1–10 store-size artboards)
+- Right sidebar: design controls for the selected frame/object
 
 ## Rules
 
@@ -17,6 +17,7 @@ Glint-Web is the screenshot polishing editor in the Glint ecosystem.
    - iOS phone: `1290x2796`
    - iPad: `2048x2732`
 4. If app name is set, export ZIP as `{AppName}.zip`; else `glint.zip`
+5. View handoff: after Preview/Export, **Copy for Glint View** embeds `data:` screens (QR is metadata-only)
 
 ## Related docs
 

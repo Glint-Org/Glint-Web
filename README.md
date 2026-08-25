@@ -1,17 +1,15 @@
 # Glint Web
 
-Browser-based editor that turns app screenshots into store-ready marketing visuals with curated templates. Frame, theme, batch export - no login, no backend.
+Browser editor that turns real app screenshots into store-ready frames. No login, no backend.
 
 ## Features
 
-- **Session import** - drag `session.json` + PNGs from `glint_capture` or Glint Bridge
-- **Curated templates** - 7 simple Play Store / App Store / iPad layouts
-- **Figma-like editor** - pan/zoom canvas, add/delete text, background color picker, fonts
-- **Batch export** - apply one template to all screenshots, export as ZIP
-- **Upload** - drag & drop or import from Glint Bridge via WebSocket
-- **Device frames** - Pixel, Samsung, iPhone, iPad with screenshot compositing
-- **Export presets** - Play Store (1080×1920), App Store (1290×2796), iPad (2048×2732)
-- **QR export** - generate QR for Glint View preview on device
+- **Frames board** - 1–10 store-size artboards (AppLaunchpad-style), not an infinite canvas
+- **Graphic templates** - curated Play / App Store / iPad packs with premium device frames (Pixel 9, Galaxy S24, iPhone 16 Pro Max, iPad Pro)
+- **Assets** - import screenshots, sessions, or Bridge captures; map 1:1 onto frames
+- **Layers** - drag to restack, device right-click → import screenshot
+- **Export** - ZIP at Play (1080×1920), App Store phone, or iPad sizes
+- **Glint View handoff** - Preview frames → **Copy for Glint View** → paste on device
 
 ## Quick Start
 
@@ -24,30 +22,29 @@ Open `http://localhost:5173`.
 
 ### Workflow
 
-1. Run `dart run glint_capture` in your Flutter app (or capture via Bridge)
-2. Import the output folder into Glint Web
-3. Pick a curated template
-4. Customize text, background, frames on the canvas
-5. Export all screenshots as ZIP
-6. Scan QR with Glint View to preview
+1. Capture with [Glint Capture](../Glint-Capture) or [Glint Bridge](../Glint-Bridge)
+2. Import the folder (or drop PNGs) in **Assets**
+3. Pick a template in **Templates** (loads a frame pack)
+4. Edit frames on the board; manage layers in **Frames**
+5. **Export** → Preview → ZIP, then Copy for Glint View
 
 ## Tech Stack
 
-- React 19 + Vite
-- TailwindCSS 4
-- Fabric.js 7 (canvas + template rendering)
-- JSZip (batch exports)
-- qrcode (session QR for Glint View)
+- React 19 + Vite + Tailwind CSS 4
+- Fabric.js 7 (per-frame canvases)
+- JSZip + qrcode
 
 ## Templates
 
-Templates live in `public/templates/` as JSON definitions. Each template defines layers (`background`, `headline`, `device`, `bullets`, …). The `device` layer composites a screenshot inside a frame SVG.
+JSON packs in `public/templates/`. Device layers composite screenshots inside SVG bezels under `public/frames/`.
 
 ## Integration
 
-- **Glint Capture:** Import `build/glint_screenshots/` folder
-- **Glint Bridge:** WebSocket at `ws://localhost:7700` for live capture
-- **Glint View:** QR code or paste session JSON for preview
+| Tool | How |
+|------|-----|
+| **Capture** | Import output folder (`session.json` + PNGs) |
+| **Bridge** | `ws://127.0.0.1:7700` + pairing token; captures arrive as data URLs |
+| **View** | Export → Copy for Glint View (full screenshots). QR = metadata only |
 
 ## License
 
