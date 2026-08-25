@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#12151A",
     "textColor": "#FFFFFF",
-    "frame": "pixel7",
+    "frame": "pixel9",
     "dual": true,
     "art": [
       {
@@ -67,7 +67,7 @@
     },
     {
       "type": "device",
-      "frame": "pixel7",
+      "frame": "pixel9",
       "slot": 0,
       "scale": 0.42,
       "marginLeft": 70,
@@ -76,7 +76,7 @@
     },
     {
       "type": "device",
-      "frame": "galaxy-s23",
+      "frame": "galaxy-s24",
       "slot": 1,
       "scale": 0.42,
       "marginLeft": 530,

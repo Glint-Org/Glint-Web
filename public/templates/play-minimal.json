@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#F4EFE6",
     "textColor": "#1A1A1A",
-    "frame": "pixel7",
+    "frame": "pixel9",
     "art": [
       {
         "kind": "blob",
@@ -66,7 +66,7 @@
     },
     {
       "type": "device",
-      "frame": "pixel7",
+      "frame": "pixel9",
       "slot": 0,
       "scale": 0.62,
       "position": "center",

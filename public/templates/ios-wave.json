@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#FF7A59",
     "textColor": "#FFFFFF",
-    "frame": "iphone15",
+    "frame": "iphone16-pro-max",
     "art": [
       {
         "kind": "arch",
@@ -57,7 +57,7 @@
     },
     {
       "type": "device",
-      "frame": "iphone15",
+      "frame": "iphone16-pro-max",
       "slot": 0,
       "scale": 0.62,
       "position": "center",

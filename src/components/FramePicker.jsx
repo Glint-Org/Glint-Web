@@ -3,14 +3,12 @@ import { Smartphone, Tablet, Image, Minus } from 'lucide-react';
 
 const BUILTIN_FRAMES = [
   { id: null, label: 'No Frame', Icon: Minus },
-  { id: 'generic', label: 'Generic', Icon: Smartphone },
-  { id: 'pixel7', label: 'Pixel 7', Icon: Smartphone },
-  { id: 'galaxy-s23', label: 'Galaxy S23', Icon: Smartphone },
-  { id: 'samsung-m12', label: 'Samsung M12', Icon: Smartphone },
-  { id: 'iphone15', label: 'iPhone 15', Icon: Smartphone },
-  { id: 'iphone14-pro', label: 'iPhone 14 Pro', Icon: Smartphone },
-  { id: 'ipad-pro', label: 'iPad Pro', Icon: Tablet },
-  { id: 'ipad-10', label: 'iPad 10', Icon: Tablet },
+  { id: 'pixel9', label: 'Pixel 9', Icon: Smartphone },
+  { id: 'galaxy-s24', label: 'Galaxy S24', Icon: Smartphone },
+  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', Icon: Smartphone },
+  { id: 'iphone16-pro', label: 'iPhone 16 Pro', Icon: Smartphone },
+  { id: 'ipad-pro-13', label: 'iPad Pro 13"', Icon: Tablet },
+  { id: 'ipad-pro', label: 'iPad Pro 11"', Icon: Tablet },
 ];
 
 export default function FramePicker({ selected, onChange }) {

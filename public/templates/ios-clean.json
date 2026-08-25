@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#E8F6F1",
     "textColor": "#12352C",
-    "frame": "iphone15",
+    "frame": "iphone16-pro-max",
     "art": [
       {
         "kind": "blob",
@@ -66,7 +66,7 @@
     },
     {
       "type": "device",
-      "frame": "iphone15",
+      "frame": "iphone16-pro-max",
       "slot": 0,
       "scale": 0.62,
       "position": "center",

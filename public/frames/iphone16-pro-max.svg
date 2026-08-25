@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 932" width="430" height="932">
+  <defs>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#000" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+  <path fill-rule="evenodd" filter="url(#shadow)" fill="#1C1C1E" d="M62,0 H368 A62,62 0 0 1 430,62 V870 A62,62 0 0 1 368,932 H62 A62,62 0 0 1 0,870 V62 A62,62 0 0 1 62,0 Z M64,14 H366 A48,48 0 0 1 414,62 V870 A48,48 0 0 1 366,918 H64 A48,48 0 0 1 16,870 V62 A48,48 0 0 1 64,14 Z"/>
+  <rect x="138" y="22" width="154" height="36" rx="18" fill="#1C1C1E"/>
+</svg>

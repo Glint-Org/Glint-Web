@@ -215,7 +215,7 @@ export function applyDeviceTransformLocks(group) {
  */
 export async function replaceDeviceScreenshot(group, screenshotUrl) {
   if (!group || group.glintRole !== 'framed-screenshot' || !screenshotUrl) return false;
-  const frameId = group.glintFrameId || 'pixel7';
+  const frameId = group.glintFrameId || 'pixel9';
   const baseScale = group.glintBaseScale ?? 0.55;
   const { insetL, insetT, screenW, screenH, rx } = computeFrameLayout(frameId, baseScale);
   const newScreen = await buildScreenBitmap(screenshotUrl, screenW, screenH, rx);

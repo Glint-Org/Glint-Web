@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#0B0D10",
     "textColor": "#F5D06F",
-    "frame": "iphone14-pro",
+    "frame": "iphone16-pro",
     "art": [
       {
         "kind": "ring",
@@ -75,7 +75,7 @@
     },
     {
       "type": "device",
-      "frame": "iphone14-pro",
+      "frame": "iphone16-pro",
       "slot": 0,
       "scale": 0.62,
       "position": "center",

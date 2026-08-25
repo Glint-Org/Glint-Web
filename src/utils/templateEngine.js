@@ -272,7 +272,7 @@ function expandToFiveSlides(template) {
   const bgLayer = baseLayers.find((l) => l.type === 'background');
   const accent = bgLayer?.color || template.preview?.bg || '#611AB4';
   const deviceLayer = baseLayers.find((l) => l.type === 'device' || l.type === 'screenshot');
-  const frame = deviceLayer?.frame || template.preview?.frame || 'pixel7';
+  const frame = deviceLayer?.frame || template.preview?.frame || 'pixel9';
   const graphics = baseLayers.filter((l) => l.type === 'graphic' || l.type === 'shape');
   const headlines =
     template.preview?.headlines?.length === 5
@@ -522,7 +522,7 @@ async function paintDesignContents(
       await addDeviceLayer(
         canvas,
         screenshotUrl,
-        { frame: 'pixel7', scale: MIN_DEVICE_COVERAGE, position: 'center', marginTop: Math.round(canvasHeight * 0.18), slot: 0 },
+        { frame: 'pixel9', scale: MIN_DEVICE_COVERAGE, position: 'center', marginTop: Math.round(canvasHeight * 0.18), slot: 0 },
         canvasWidth,
         canvasHeight,
         editable,

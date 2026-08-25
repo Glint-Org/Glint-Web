@@ -1,15 +1,14 @@
 import { Smartphone, Tablet, Minus } from 'lucide-react';
 
+/** Curated frames only — most-used Play / App Store devices. */
 export const FRAME_OPTIONS = [
   { id: null, label: 'None', icon: Minus },
-  { id: 'pixel7', label: 'Pixel 7', icon: Smartphone },
-  { id: 'galaxy-s23', label: 'Galaxy S23', icon: Smartphone },
-  { id: 'iphone15', label: 'iPhone 15', icon: Smartphone },
-  { id: 'iphone14-pro', label: 'iPhone 14 Pro', icon: Smartphone },
-  { id: 'samsung-m12', label: 'Samsung M12', icon: Smartphone },
-  { id: 'generic', label: 'Android', icon: Smartphone },
-  { id: 'ipad-pro', label: 'iPad Pro', icon: Tablet },
-  { id: 'ipad-10', label: 'iPad 10', icon: Tablet },
+  { id: 'pixel9', label: 'Pixel 9', icon: Smartphone },
+  { id: 'galaxy-s24', label: 'Galaxy S24', icon: Smartphone },
+  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', icon: Smartphone },
+  { id: 'iphone16-pro', label: 'iPhone 16 Pro', icon: Smartphone },
+  { id: 'ipad-pro-13', label: 'iPad Pro 13"', icon: Tablet },
+  { id: 'ipad-pro', label: 'iPad Pro 11"', icon: Tablet },
 ];
 
 export default function FrameSelector({ selected, onChange, compact = false }) {
@@ -44,6 +43,7 @@ export default function FrameSelector({ selected, onChange, compact = false }) {
           return (
             <button
               key={f.id ?? 'none'}
+              type="button"
               onClick={() => onChange(f.id)}
               title={f.label}
               className={`px-1.5 py-2 rounded-lg text-[10px] border transition-all text-center leading-tight ${

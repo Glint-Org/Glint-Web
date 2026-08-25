@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#D6E8F5",
     "textColor": "#0F2744",
-    "frame": "ipad-pro",
+    "frame": "ipad-pro-13",
     "tablet": true,
     "art": [
       {
@@ -67,7 +67,7 @@
     },
     {
       "type": "device",
-      "frame": "ipad-pro",
+      "frame": "ipad-pro-13",
       "slot": 0,
       "scale": 0.68,
       "position": "center",

@@ -10,7 +10,7 @@
   "preview": {
     "bg": "#7C1D6F",
     "textColor": "#FFFFFF",
-    "frame": "pixel7",
+    "frame": "pixel9",
     "art": [
       {
         "kind": "wave",
@@ -66,7 +66,7 @@
     },
     {
       "type": "device",
-      "frame": "pixel7",
+      "frame": "pixel9",
       "slot": 0,
       "scale": 0.62,
       "position": "center",

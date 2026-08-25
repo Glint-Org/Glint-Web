@@ -1,22 +1,22 @@
-/** Screen insets relative to each frame SVG viewBox (bezel thickness → screen hole). */
+/** Screen insets for curated device frames only (`public/frames/*.svg`). */
 export const FRAME_INSETS = {
-  // Matched to evenodd inner path in public/frames/*.svg
-  iphone15: { top: 12, right: 12, bottom: 12, left: 12, rx: 44, width: 390, height: 844 },
-  'iphone14-pro': { top: 12, right: 12, bottom: 12, left: 12, rx: 44, width: 393, height: 852 },
-  pixel7: { top: 10, right: 10, bottom: 10, left: 10, rx: 28, width: 412, height: 915 },
-  'galaxy-s23': { top: 10, right: 10, bottom: 10, left: 10, rx: 32, width: 360, height: 780 },
-  'samsung-m12': { top: 10, right: 10, bottom: 10, left: 10, rx: 20, width: 360, height: 800 },
+  pixel9: { top: 12, right: 12, bottom: 12, left: 12, rx: 26, width: 412, height: 915 },
+  'galaxy-s24': { top: 12, right: 12, bottom: 12, left: 12, rx: 30, width: 360, height: 780 },
+  'iphone16-pro': { top: 12, right: 12, bottom: 12, left: 12, rx: 44, width: 393, height: 852 },
+  'iphone16-pro-max': { top: 14, right: 16, bottom: 14, left: 16, rx: 48, width: 430, height: 932 },
+  'ipad-pro-13': { top: 30, right: 30, bottom: 30, left: 30, rx: 18, width: 1024, height: 1366 },
   'ipad-pro': { top: 28, right: 28, bottom: 28, left: 28, rx: 16, width: 834, height: 1194 },
-  'ipad-10': { top: 24, right: 24, bottom: 24, left: 24, rx: 12, width: 820, height: 1180 },
-  generic: { top: 12, right: 12, bottom: 12, left: 12, rx: 30, width: 390, height: 844 },
 };
+
+/** Fallback when an unknown frame id is requested. */
+const DEFAULT_FRAME = 'pixel9';
 
 /** Minimum device size as a fraction of the store frame (canvas). */
 export const MIN_DEVICE_COVERAGE = 0.6;
 export const MAX_DEVICE_COVERAGE = 0.92;
 
 export function getFrameMeta(frameId) {
-  return FRAME_INSETS[frameId] || FRAME_INSETS.generic;
+  return FRAME_INSETS[frameId] || FRAME_INSETS[DEFAULT_FRAME];
 }
 
 /**
