@@ -1,0 +1,279 @@
+{
+  "id": "warm-glow-tablet",
+  "familyId": "warm-glow",
+  "name": "Warm Glow",
+  "description": "Solid warm field, soft blob, glow ring, centered device (tablet)",
+  "store": "ios-tablet",
+  "canvas": {
+    "width": 2048,
+    "height": 2732
+  },
+  "preview": {
+    "bg": "#C45C3E",
+    "textColor": "#FFFFFF",
+    "frame": "ipad-pro-13",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#F5D0C0",
+        "x": "20%",
+        "y": "48%",
+        "w": "70%",
+        "h": "40%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FFFFFF",
+        "x": "62%",
+        "y": "12%",
+        "w": "18%",
+        "h": "10%"
+      }
+    ],
+    "headlines": [
+      "Ask anything",
+      "Fast accurate answers",
+      "Write think explore",
+      "Chat that feels natural",
+      "Switch modes freely"
+    ],
+    "tablet": true
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#C45C3E"
+    }
+  ],
+  "slides": [
+    {
+      "id": "warm-glow-tablet-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 152,
+          "top": 228,
+          "width": 341,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 1555,
+          "top": 398,
+          "width": 265,
+          "fill": "#FFE8DC",
+          "fill2": "#FFFFFF",
+          "fill3": "#F5D0C0",
+          "angle": 25
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 379,
+          "top": 1565,
+          "width": 1289,
+          "fill": "#E8A090",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFFFFF",
+          "opacity": 0.55,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "center",
+          "fontSize": 119,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Ask anything",
+          "marginTop": 740
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 550,
+          "top": 1025,
+          "width": 948,
+          "height": 102,
+          "rx": 68,
+          "fill": "#FFFFFF",
+          "opacity": 0.18
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-tablet-f2",
+      "name": "Feature",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "glow-ring.svg",
+          "left": 417,
+          "top": 882,
+          "width": 1214,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#E8A090",
+          "opacity": 0.7,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 86,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Fast accurate answers",
+          "marginTop": 171
+        },
+        {
+          "type": "device",
+          "frame": "ipad-pro-13",
+          "slot": 0,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 598,
+          "angle": -6
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-tablet-f3",
+      "name": "Device",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#B85035"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 265,
+          "top": 1110,
+          "width": 1517,
+          "fill": "#F5D0C0",
+          "fill2": "#FFFFFF",
+          "fill3": "#E8A090",
+          "opacity": 0.5,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 86,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Write think explore",
+          "marginTop": 171
+        },
+        {
+          "type": "device",
+          "frame": "ipad-pro-13",
+          "slot": 1,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 569
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-tablet-f4",
+      "name": "Chat",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "curve-sweep.svg",
+          "left": 759,
+          "top": -28,
+          "width": 1327,
+          "fill": "#A84830",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "opacity": 0.45,
+          "sendToBack": true
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 76,
+          "top": 285,
+          "width": 303,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 86,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Chat that feels natural",
+          "marginTop": 171
+        },
+        {
+          "type": "device",
+          "frame": "ipad-pro-13",
+          "slot": 2,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 569
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-tablet-f5",
+      "name": "Modes",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#A84830"
+        },
+        {
+          "type": "graphic",
+          "src": "wave-cap.svg",
+          "left": 0,
+          "top": 2106,
+          "width": 2048,
+          "fill": "#C45C3E",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 86,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Switch modes freely",
+          "marginTop": 171
+        },
+        {
+          "type": "device",
+          "frame": "ipad-pro-13",
+          "slot": 3,
+          "scale": 0.62,
+          "position": "center",
+          "marginTop": 512
+        }
+      ]
+    }
+  ]
+}

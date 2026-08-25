@@ -1,0 +1,278 @@
+{
+  "id": "warm-glow-play",
+  "familyId": "warm-glow",
+  "name": "Warm Glow",
+  "description": "Solid warm field, soft blob, glow ring, centered device (play)",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#C45C3E",
+    "textColor": "#FFFFFF",
+    "frame": "pixel9",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#F5D0C0",
+        "x": "20%",
+        "y": "48%",
+        "w": "70%",
+        "h": "40%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FFFFFF",
+        "x": "62%",
+        "y": "12%",
+        "w": "18%",
+        "h": "10%"
+      }
+    ],
+    "headlines": [
+      "Ask anything",
+      "Fast accurate answers",
+      "Write think explore",
+      "Chat that feels natural",
+      "Switch modes freely"
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#C45C3E"
+    }
+  ],
+  "slides": [
+    {
+      "id": "warm-glow-play-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 80,
+          "top": 160,
+          "width": 180,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 820,
+          "top": 280,
+          "width": 140,
+          "fill": "#FFE8DC",
+          "fill2": "#FFFFFF",
+          "fill3": "#F5D0C0",
+          "angle": 25
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 200,
+          "top": 1100,
+          "width": 680,
+          "fill": "#E8A090",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFFFFF",
+          "opacity": 0.55,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "center",
+          "fontSize": 72,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Ask anything",
+          "marginTop": 520
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 290,
+          "top": 720,
+          "width": 500,
+          "height": 72,
+          "rx": 36,
+          "fill": "#FFFFFF",
+          "opacity": 0.18
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-play-f2",
+      "name": "Feature",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "glow-ring.svg",
+          "left": 220,
+          "top": 620,
+          "width": 640,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#E8A090",
+          "opacity": 0.7,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Fast accurate answers",
+          "marginTop": 120
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 0,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 420,
+          "angle": -6
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-play-f3",
+      "name": "Device",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#B85035"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 140,
+          "top": 780,
+          "width": 800,
+          "fill": "#F5D0C0",
+          "fill2": "#FFFFFF",
+          "fill3": "#E8A090",
+          "opacity": 0.5,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Write think explore",
+          "marginTop": 120
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 1,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 400
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-play-f4",
+      "name": "Chat",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "curve-sweep.svg",
+          "left": 400,
+          "top": -20,
+          "width": 700,
+          "fill": "#A84830",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "opacity": 0.45,
+          "sendToBack": true
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 40,
+          "top": 200,
+          "width": 160,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Chat that feels natural",
+          "marginTop": 120
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 2,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 400
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-play-f5",
+      "name": "Modes",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#A84830"
+        },
+        {
+          "type": "graphic",
+          "src": "wave-cap.svg",
+          "left": 0,
+          "top": 1480,
+          "width": 1080,
+          "fill": "#C45C3E",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Switch modes freely",
+          "marginTop": 120
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 3,
+          "scale": 0.62,
+          "position": "center",
+          "marginTop": 360
+        }
+      ]
+    }
+  ]
+}

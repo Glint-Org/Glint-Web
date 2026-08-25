@@ -25,6 +25,18 @@ export function getTheme(themeId, themes) {
 
 /** Curated store-only templates - simple, premium, few. */
 export const TEMPLATE_IDS = [
+  // Pixel-matched Figma packs
+  'blink-play',
+  'blink-ios',
+  'blink-tablet',
+  // New families (play / ios / tablet variants)
+  'warm-glow-play',
+  'warm-glow-ios',
+  'warm-glow-tablet',
+  'mint-tags-play',
+  'mint-tags-ios',
+  'mint-tags-tablet',
+  // Legacy curated packs
   'play-hero',
   'play-pop',
   'play-feature',

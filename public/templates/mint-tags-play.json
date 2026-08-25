@@ -1,0 +1,320 @@
+{
+  "id": "mint-tags-play",
+  "familyId": "mint-tags",
+  "name": "Mint Tags",
+  "description": "Color bands, pill tags, centered device (play)",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "preview": {
+    "bg": "#0B3D2E",
+    "textColor": "#FFFFFF",
+    "frame": "pixel9",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#B8E0D2",
+        "x": "0%",
+        "y": "70%",
+        "w": "100%",
+        "h": "40%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FFFFFF",
+        "x": "10%",
+        "y": "28%",
+        "w": "28%",
+        "h": "6%"
+      }
+    ],
+    "headlines": [
+      "Monitor your daily intake",
+      "Stay healthy simply",
+      "Create healthy routines",
+      "Achieve your goals",
+      "Improve your habits"
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#0B3D2E"
+    }
+  ],
+  "slides": [
+    {
+      "id": "mint-tags-play-f1",
+      "name": "Focus",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B3D2E"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 54,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Monitor your daily intake",
+          "marginTop": 100
+        },
+        {
+          "type": "badge",
+          "text": "Focus",
+          "left": 72,
+          "top": 320,
+          "background": "#FFFFFF",
+          "color": "#0B3D2E",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Goals",
+          "left": 250,
+          "top": 320,
+          "background": "#FFFFFF",
+          "color": "#0B3D2E",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Habits",
+          "left": 430,
+          "top": 320,
+          "background": "#FFFFFF",
+          "color": "#0B3D2E",
+          "fontSize": 22
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 0,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 460
+        }
+      ]
+    },
+    {
+      "id": "mint-tags-play-f2",
+      "name": "Brand",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#145C45"
+        },
+        {
+          "type": "graphic",
+          "src": "curve-sweep.svg",
+          "left": -40,
+          "top": 0,
+          "width": 640,
+          "fill": "#0B3D2E",
+          "fill2": "#1A7A5C",
+          "fill3": "#B8E0D2",
+          "opacity": 0.5,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 64,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Stay healthy simply",
+          "marginTop": 140
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 1,
+          "scale": 0.56,
+          "position": "center",
+          "marginTop": 480,
+          "angle": 8
+        }
+      ]
+    },
+    {
+      "id": "mint-tags-play-f3",
+      "name": "Routines",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C8EDE0"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "800",
+          "color": "#0B3D2E",
+          "placeholder": "Create healthy routines",
+          "marginTop": 100
+        },
+        {
+          "type": "badge",
+          "text": "Active",
+          "left": 72,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Energy",
+          "left": 260,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Fitness",
+          "left": 460,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 2,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 460
+        }
+      ]
+    },
+    {
+      "id": "mint-tags-play-f4",
+      "name": "Goals",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#A8D9C8"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 480,
+          "top": 1400,
+          "width": 520,
+          "fill": "#0B3D2E",
+          "fill2": "#145C45",
+          "fill3": "#FFFFFF",
+          "opacity": 0.2,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "800",
+          "color": "#0B3D2E",
+          "placeholder": "Achieve your goals",
+          "marginTop": 100
+        },
+        {
+          "type": "badge",
+          "text": "Train",
+          "left": 72,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Health",
+          "left": 250,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Thrive",
+          "left": 450,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 3,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 460
+        }
+      ]
+    },
+    {
+      "id": "mint-tags-play-f5",
+      "name": "Habits",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#D8F2E8"
+        },
+        {
+          "type": "graphic",
+          "src": "wave-cap.svg",
+          "left": 0,
+          "top": 1520,
+          "width": 1080,
+          "fill": "#0B3D2E",
+          "fill2": "#145C45",
+          "fill3": "#A8D9C8",
+          "opacity": 0.35,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "800",
+          "color": "#0B3D2E",
+          "placeholder": "Improve your habits",
+          "marginTop": 100
+        },
+        {
+          "type": "badge",
+          "text": "Strive",
+          "left": 72,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "badge",
+          "text": "Evolve",
+          "left": 270,
+          "top": 320,
+          "background": "#0B3D2E",
+          "color": "#FFFFFF",
+          "fontSize": 22
+        },
+        {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 4,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 460
+        }
+      ]
+    }
+  ]
+}

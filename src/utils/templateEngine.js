@@ -20,7 +20,8 @@ function resolvePosition(position, canvasW, canvasH, objW, objH, layer = {}) {
   const marginTop = layer.marginTop ?? 0;
   const marginLeft = layer.marginLeft;
 
-  if (marginLeft != null && !position) {
+  // Explicit x/y from Figma (Blink/BoxLock pixel layouts).
+  if (marginLeft != null && (position == null || position === 'absolute')) {
     return { left: marginLeft, top: marginTop };
   }
 
@@ -147,6 +148,7 @@ async function addDeviceLayer(canvas, screenshotUrl, layer, canvasW, canvasH, ed
       glintSlide: layer.slideIndex ?? 0,
       glintCoverage: coverage,
       glintScreenshotUrl: screenshotUrl,
+      ...(layer.angle != null ? { angle: layer.angle } : {}),
     });
   }
   return group;
@@ -182,29 +184,37 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, origi
 
 function addBadgeLayer(canvas, layer, canvasW, editable, originX = 0) {
   const text = layer.text ?? 'NEW';
-  const padding = 16;
+  const paddingX = layer.paddingX ?? 20;
+  const paddingY = layer.paddingY ?? 12;
   const fb = new Text(text, {
-    fontSize: 20,
-    fontFamily: 'Inter, sans-serif',
-    fontWeight: 'bold',
+    fontSize: layer.fontSize ?? 20,
+    fontFamily: `${layer.fontFamily || 'Inter'}, sans-serif`,
+    fontWeight: layer.fontWeight ?? 'bold',
     fill: layer.color ?? '#ffffff',
     evented: editable,
     selectable: editable,
+    glintRole: 'text',
   });
 
   const bg = new Rect({
-    width: fb.width + padding * 2,
-    height: fb.height + padding,
+    width: fb.width + paddingX * 2,
+    height: fb.height + paddingY * 2,
     fill: layer.background ?? '#ff4757',
-    rx: 8,
-    ry: 8,
+    rx: layer.rx ?? 999,
+    ry: layer.rx ?? 999,
     evented: editable,
     selectable: editable,
+    glintRole: 'graphic',
+    glintShape: 'rect',
   });
 
-  const groupLeft = canvasW - bg.width - 60 + originX;
-  bg.set({ left: groupLeft, top: 60 });
-  fb.set({ left: groupLeft + padding, top: 60 + padding / 2 });
+  const left =
+    layer.left != null
+      ? layer.left + originX
+      : canvasW - bg.width - (layer.marginRight ?? 60) + originX;
+  const top = layer.top ?? layer.marginTop ?? 60;
+  bg.set({ left, top });
+  fb.set({ left: left + paddingX, top: top + paddingY });
   canvas.add(bg, fb);
 }
 
@@ -521,6 +531,13 @@ async function paintDesignContents(
   { canvasWidth, canvasHeight, themes, metadata, editable },
 ) {
   canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+  {
+    const cssW = canvas.lowerCanvasEl?.clientWidth || parseFloat(canvas.lowerCanvasEl?.style?.width) || 0;
+    const cssH = canvas.lowerCanvasEl?.clientHeight || parseFloat(canvas.lowerCanvasEl?.style?.height) || 0;
+    if (cssW > 0 && cssH > 0) {
+      canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
+    }
+  }
 
   if (!design?.layers?.length) {
     setBackground(canvas, 'solid', '#1C1C1E');
@@ -592,7 +609,22 @@ export async function applyDesignToFrame(
     const prevRender = canvas.renderOnAddRemove;
     canvas.renderOnAddRemove = false;
     canvas.clear();
-    canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    // Preserve CSS display size — setDimensions alone resets to full pixel size
+    // and makes frames unequal until the next board re-fit.
+    {
+      const cssW = canvas.lowerCanvasEl?.clientWidth || parseFloat(canvas.lowerCanvasEl?.style?.width) || 0;
+      const cssH = canvas.lowerCanvasEl?.clientHeight || parseFloat(canvas.lowerCanvasEl?.style?.height) || 0;
+      canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+      if (cssW > 0 && cssH > 0) {
+        canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
+        [canvas.lowerCanvasEl, canvas.upperCanvasEl, canvas.wrapperEl, canvas.container]
+          .filter(Boolean)
+          .forEach((el) => {
+            el.style.width = `${cssW}px`;
+            el.style.height = `${cssH}px`;
+          });
+      }
+    }
     canvas.backgroundColor = draft.backgroundColor;
     for (const cloned of clones) canvas.add(cloned);
     canvas.renderOnAddRemove = prevRender;

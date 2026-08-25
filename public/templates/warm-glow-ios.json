@@ -1,0 +1,278 @@
+{
+  "id": "warm-glow-ios",
+  "familyId": "warm-glow",
+  "name": "Warm Glow",
+  "description": "Solid warm field, soft blob, glow ring, centered device (ios)",
+  "store": "ios",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "preview": {
+    "bg": "#C45C3E",
+    "textColor": "#FFFFFF",
+    "frame": "iphone16-pro-max",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#F5D0C0",
+        "x": "20%",
+        "y": "48%",
+        "w": "70%",
+        "h": "40%"
+      },
+      {
+        "kind": "circle",
+        "color": "#FFFFFF",
+        "x": "62%",
+        "y": "12%",
+        "w": "18%",
+        "h": "10%"
+      }
+    ],
+    "headlines": [
+      "Ask anything",
+      "Fast accurate answers",
+      "Write think explore",
+      "Chat that feels natural",
+      "Switch modes freely"
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#C45C3E"
+    }
+  ],
+  "slides": [
+    {
+      "id": "warm-glow-ios-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 96,
+          "top": 233,
+          "width": 215,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 979,
+          "top": 408,
+          "width": 167,
+          "fill": "#FFE8DC",
+          "fill2": "#FFFFFF",
+          "fill3": "#F5D0C0",
+          "angle": 25
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 239,
+          "top": 1602,
+          "width": 812,
+          "fill": "#E8A090",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFFFFF",
+          "opacity": 0.55,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "center",
+          "fontSize": 95,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Ask anything",
+          "marginTop": 757
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 346,
+          "top": 1049,
+          "width": 597,
+          "height": 105,
+          "rx": 43,
+          "fill": "#FFFFFF",
+          "opacity": 0.18
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-ios-f2",
+      "name": "Feature",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "glow-ring.svg",
+          "left": 263,
+          "top": 903,
+          "width": 764,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#E8A090",
+          "opacity": 0.7,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 69,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Fast accurate answers",
+          "marginTop": 175
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 0,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 612,
+          "angle": -6
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-ios-f3",
+      "name": "Device",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#B85035"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 167,
+          "top": 1136,
+          "width": 956,
+          "fill": "#F5D0C0",
+          "fill2": "#FFFFFF",
+          "fill3": "#E8A090",
+          "opacity": 0.5,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 69,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Write think explore",
+          "marginTop": 175
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 1,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 583
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-ios-f4",
+      "name": "Chat",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#C45C3E"
+        },
+        {
+          "type": "graphic",
+          "src": "curve-sweep.svg",
+          "left": 478,
+          "top": -29,
+          "width": 836,
+          "fill": "#A84830",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "opacity": 0.45,
+          "sendToBack": true
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 48,
+          "top": 291,
+          "width": 191,
+          "fill": "#FFFFFF",
+          "fill2": "#F5D0C0",
+          "fill3": "#FFE8DC"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 69,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Chat that feels natural",
+          "marginTop": 175
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 2,
+          "scale": 0.6,
+          "position": "center",
+          "marginTop": 583
+        }
+      ]
+    },
+    {
+      "id": "warm-glow-ios-f5",
+      "name": "Modes",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#A84830"
+        },
+        {
+          "type": "graphic",
+          "src": "wave-cap.svg",
+          "left": 0,
+          "top": 2155,
+          "width": 1290,
+          "fill": "#C45C3E",
+          "fill2": "#E8A090",
+          "fill3": "#F5D0C0",
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 69,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "Switch modes freely",
+          "marginTop": 175
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 3,
+          "scale": 0.62,
+          "position": "center",
+          "marginTop": 524
+        }
+      ]
+    }
+  ]
+}
