@@ -15,6 +15,7 @@ export default function FrameExport({
   themes = {},
   canvasWidth = 1080,
   canvasHeight = 1920,
+  onPreviewsReady,
 }) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState('');
@@ -23,16 +24,12 @@ export default function FrameExport({
   const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
 
   const renderFrames = async () => {
-    // Always re-render at full store size so viewport zoom on the board
-    // cannot shrink exported PNGs. Live edits to text/colors are still on
-    // the Fabric objects - for now designs are re-applied from frame state.
     const results = [];
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
       const live = getLiveCanvases?.()?.[i];
       if (live) {
         try {
-          // Temporarily reset viewport for full-res export
           const vpt = live.viewportTransform?.slice?.() || [1, 0, 0, 1, 0, 0];
           live.setViewportTransform([1, 0, 0, 1, 0, 0]);
           const url = live.toDataURL({ format: 'png', multiplier: 1 });
@@ -41,7 +38,7 @@ export default function FrameExport({
           results.push(url);
           continue;
         } catch {
-          // fall through to offscreen render
+          // fall through
         }
       }
       const el = document.createElement('canvas');
@@ -61,13 +58,18 @@ export default function FrameExport({
     return results;
   };
 
+  const publishPreviews = (results) => {
+    setPreviews(results);
+    onPreviewsReady?.(results);
+  };
+
   const handlePreview = async () => {
     if (!frames.length) return;
     setProcessing(true);
     setProgress('Rendering frames...');
     try {
       const results = await renderFrames();
-      setPreviews(results);
+      publishPreviews(results);
       setProgress(`Rendered ${results.length} frame(s)`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);
@@ -84,7 +86,7 @@ export default function FrameExport({
       if (!results.length) {
         setProgress('Rendering frames...');
         results = await renderFrames();
-        setPreviews(results);
+        publishPreviews(results);
       }
       const prefix = preset.filename ?? 'screen';
       const filenames = results.map((_, i) => `${prefix}_${i + 1}.png`);

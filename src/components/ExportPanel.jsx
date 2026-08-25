@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import FrameExport from './FrameExport';
 import QRExporter from './QRExporter';
 import ExportManager from './ExportManager';
 
 /**
- * Export panel for the left design sidebar (metadata + ZIP).
+ * Export panel for the left design sidebar (metadata + ZIP + View handoff).
  */
 export default function ExportPanel({
   frames,
@@ -27,6 +28,8 @@ export default function ExportPanel({
   screenshotStyle,
   textOverlay,
 }) {
+  const [exportedUrls, setExportedUrls] = useState([]);
+
   return (
     <div className="space-y-5">
       <div className="space-y-1.5">
@@ -72,6 +75,7 @@ export default function ExportPanel({
         themes={themes}
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
+        onPreviewsReady={setExportedUrls}
       />
 
       {!template && activeCanvas && (
@@ -87,7 +91,15 @@ export default function ExportPanel({
         />
       )}
 
-      <QRExporter session={session ?? { app: appName, tagline, store: exportPreset }} />
+      <QRExporter
+        session={{
+          ...(session ?? {}),
+          app: appName || session?.app || 'My App',
+          tagline: tagline ?? session?.tagline ?? '',
+          store: exportPreset,
+        }}
+        exportedUrls={exportedUrls}
+      />
     </div>
   );
 }
