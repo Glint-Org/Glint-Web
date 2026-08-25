@@ -74,6 +74,13 @@ export async function addGraphicLayer(canvas, layer = {}, opts = {}) {
     glintRole: 'graphic',
     glintGraphic: file,
     glintFills: fills,
+    borderColor: '#F5D06F',
+    cornerColor: '#F5D06F',
+    cornerStrokeColor: '#1C1C1E',
+    cornerStyle: 'circle',
+    transparentCorners: false,
+    borderScaleFactor: 2.5,
+    padding: 4,
   });
 
   canvas.add(group);
