@@ -15,7 +15,48 @@ export function createCanvas(container, width = 1080, height = 1920) {
     preserveObjectStacking: true,
     selection: true,
     uniformScaling: true,
+    selectionColor: 'rgba(245, 208, 111, 0.12)',
+    selectionBorderColor: '#F5D06F',
+    selectionLineWidth: 2,
   });
+}
+
+/** Accent selection chrome so selected canvas layers are obvious. */
+export function applySelectionStyle(obj) {
+  if (!obj) return obj;
+  obj.set({
+    borderColor: '#F5D06F',
+    cornerColor: '#F5D06F',
+    cornerStrokeColor: '#1C1C1E',
+    cornerStyle: 'circle',
+    transparentCorners: false,
+    borderScaleFactor: 2.5,
+    padding: 4,
+  });
+  return obj;
+}
+
+/** Custom props Fabric clone drops unless listed. */
+export const GLINT_CLONE_PROPS = [
+  'glintRole',
+  'glintFrameId',
+  'glintBaseScale',
+  'glintCoverage',
+  'glintScreenshotUrl',
+  'glintSlot',
+  'glintSlide',
+  'glintFills',
+  'glintGraphic',
+  'glintShape',
+];
+
+/** Copy Glint metadata after Fabric clone (clone alone drops custom fields). */
+export function copyGlintProps(from, to) {
+  if (!from || !to) return to;
+  for (const key of GLINT_CLONE_PROPS) {
+    if (from[key] !== undefined) to[key] = from[key];
+  }
+  return to;
 }
 
 export function setBackground(canvas, type, value) {
@@ -179,6 +220,7 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
  */
 export function applyDeviceTransformLocks(group) {
   if (!group) return group;
+  applySelectionStyle(group);
   group.set({
     lockSkewingX: true,
     lockSkewingY: true,
@@ -239,9 +281,74 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
     group.moveObjectTo?.(newScreen, 0);
   }
 
-  group.set({ dirty: true });
+  group.set({ dirty: true, glintScreenshotUrl: screenshotUrl });
   group.setCoords?.();
   group.canvas?.requestRenderAll?.();
+  return true;
+}
+
+/**
+ * Swap the device bezel while keeping the screenshot (cover-filled into the new hole).
+ * @param {object} group - framed-screenshot group
+ * @param {string} nextFrameId - e.g. pixel9 / iphone16-pro-max
+ * @param {string} [screenshotUrlOverride] - prefer frame.screenshotUrl from editor state
+ */
+export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverride) {
+  if (!group || group.glintRole !== 'framed-screenshot' || !nextFrameId) return false;
+  if (group.glintFrameId === nextFrameId && !screenshotUrlOverride) return true;
+
+  const canvas = group.canvas;
+  if (!canvas) return false;
+
+  const screenshotUrl = screenshotUrlOverride || group.glintScreenshotUrl;
+  if (!screenshotUrl) return false;
+
+  const canvasW = canvas.getWidth?.() || 1080;
+  const canvasH = canvas.getHeight?.() || 1920;
+  const selectable = group.selectable !== false;
+  const slot = group.glintSlot;
+  const slide = group.glintSlide;
+  const angle = group.angle || 0;
+
+  // Keep visual center; recompute scale for the new bezel aspect (cover-fit screen hole).
+  const center = typeof group.getCenterPoint === 'function'
+    ? group.getCenterPoint()
+    : { x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
+        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2 };
+
+  const coverage = Math.max(
+    MIN_DEVICE_COVERAGE,
+    group.glintCoverage || MIN_DEVICE_COVERAGE,
+  );
+  const baseScale = resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
+  const meta = getFrameMeta(nextFrameId);
+  const frameW = meta.width * baseScale;
+  const frameH = meta.height * baseScale;
+  const left = center.x - frameW / 2;
+  const top = center.y - frameH / 2;
+
+  const next = await addFramedScreenshot(canvas, screenshotUrl, nextFrameId, {
+    scale: baseScale,
+    left,
+    top,
+    selectable,
+    coverage,
+  });
+  if (!next) return false;
+
+  next.set({
+    angle,
+    glintSlot: slot,
+    glintSlide: slide,
+    glintCoverage: coverage,
+    glintScreenshotUrl: screenshotUrl,
+  });
+  applyDeviceTransformLocks(next);
+  next.setCoords?.();
+
+  canvas.remove(group);
+  group.dispose?.();
+  canvas.requestRenderAll();
   return true;
 }
 
@@ -255,6 +362,7 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
   const { frameW, frameH, insetL, insetT, screenW, screenH, rx } = computeFrameLayout(frameId, targetScale);
   const meta = getFrameMeta(frameId);
 
+  // Cover-fit any resolution into the device screen hole.
   const screenImg = await buildScreenBitmap(screenshotUrl, screenW, screenH, rx);
   screenImg.set({
     left: insetL,
@@ -287,6 +395,8 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     glintRole: 'framed-screenshot',
     glintFrameId: frameId,
     glintBaseScale: targetScale,
+    glintCoverage: opts.coverage ?? MIN_DEVICE_COVERAGE,
+    glintScreenshotUrl: screenshotUrl,
   });
 
   applyDeviceTransformLocks(group);
@@ -312,6 +422,7 @@ export function addTextOverlay(canvas, text, opts = {}) {
     glintRole: 'text',
     ...opts,
   });
+  applySelectionStyle(fb);
   canvas.add(fb);
   canvas.setActiveObject(fb);
   canvas.requestRenderAll();

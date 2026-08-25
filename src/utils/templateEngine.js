@@ -1,5 +1,5 @@
 import { FabricImage, Rect, Text, loadSVGFromString, util } from 'fabric';
-import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks } from './canvasEngine';
+import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS } from './canvasEngine';
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
@@ -139,9 +139,15 @@ async function addDeviceLayer(canvas, screenshotUrl, layer, canvasW, canvasH, ed
     left: pos.left + originX,
     top: pos.top,
     selectable: editable,
+    coverage,
   });
   if (group) {
-    group.set({ glintSlot: layer.slot ?? 0, glintSlide: layer.slideIndex ?? 0 });
+    group.set({
+      glintSlot: layer.slot ?? 0,
+      glintSlide: layer.slideIndex ?? 0,
+      glintCoverage: coverage,
+      glintScreenshotUrl: screenshotUrl,
+    });
   }
   return group;
 }
@@ -572,9 +578,14 @@ export async function applyDesignToFrame(
     if (signal?.aborted) return;
 
     const clones = [];
-    for (const obj of draft.getObjects()) {
+    const draftObjects = draft.getObjects();
+    for (let i = 0; i < draftObjects.length; i++) {
       if (signal?.aborted) return;
-      clones.push(await obj.clone());
+      const src = draftObjects[i];
+      // Fabric clone drops custom glint* fields unless listed — then copy again to be safe.
+      const cloned = await src.clone(GLINT_CLONE_PROPS);
+      copyGlintProps(src, cloned);
+      clones.push(cloned);
     }
     if (signal?.aborted) return;
 
@@ -603,6 +614,7 @@ export function setFrameEditable(canvas, editable) {
       applyDeviceTransformLocks(obj);
     } else {
       obj.set({ selectable: editable, evented: editable });
+      applySelectionStyle(obj);
     }
   });
   if (!editable) canvas.discardActiveObject?.();
