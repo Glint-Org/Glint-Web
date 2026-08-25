@@ -30,7 +30,7 @@ export default function FrameBoard({
   return (
     <div className="h-full w-full overflow-auto frame-board-scroll">
       <div
-        className="flex items-end gap-6 py-10 min-h-full transition-[padding] duration-200 ease-out"
+        className="flex items-center gap-6 py-10 min-h-full transition-[padding] duration-200 ease-out"
         style={{
           width: 'max-content',
           margin: '0 auto',
@@ -89,9 +89,9 @@ export default function FrameBoard({
               </div>
 
               <div
-                className={`relative overflow-hidden rounded-md bg-glint-surface transition-all duration-150 ${
+                className={`relative overflow-hidden rounded-md bg-glint-surface transition-[box-shadow,opacity,ring] duration-150 ${
                   selected
-                    ? 'ring-2 ring-glint-accent shadow-lg shadow-glint-accent/25 scale-[1.01]'
+                    ? 'ring-2 ring-glint-accent shadow-lg shadow-glint-accent/25'
                     : 'ring-1 ring-glint-border shadow-xl opacity-90 hover:opacity-100'
                 }`}
               >

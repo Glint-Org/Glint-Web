@@ -3,8 +3,8 @@ import { createCanvas } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 
 function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
-  const cssW = Math.round(canvasWidth * scale);
-  const cssH = Math.round(canvasHeight * scale);
+  const cssW = Math.max(1, Math.round(canvasWidth * scale));
+  const cssH = Math.max(1, Math.round(canvasHeight * scale));
   if (typeof canvas.setDimensions === 'function') {
     canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
     canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
@@ -13,6 +13,8 @@ function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
   els.forEach((el) => {
     el.style.width = `${cssW}px`;
     el.style.height = `${cssH}px`;
+    el.style.maxWidth = `${cssW}px`;
+    el.style.maxHeight = `${cssH}px`;
   });
   canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
   canvas.calcOffset?.();
@@ -32,6 +34,7 @@ function findDeviceTarget(target) {
 /**
  * One Fabric canvas for a single Frame artboard.
  * Backing store = full store size; CSS display scaled for the board.
+ * All frames share the same displayScale so board sizes stay uniform.
  */
 export default function FrameCanvas({
   frameId,
@@ -47,23 +50,28 @@ export default function FrameCanvas({
   paintKey,
 }) {
   const elRef = useRef(null);
+  const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const themesRef = useRef(themes);
   const editableRef = useRef(editable);
   const menuRef = useRef(onDeviceContextMenu);
   const screenshotRef = useRef(screenshotUrl);
+  const scaleRef = useRef(Math.max(0.05, displayScale));
   const scale = Math.max(0.05, displayScale);
+  scaleRef.current = scale;
   themesRef.current = themes;
   editableRef.current = editable;
   menuRef.current = onDeviceContextMenu;
   screenshotRef.current = screenshotUrl;
 
   const themesReady = Object.keys(themes).length > 0 ? 1 : 0;
+  const cssW = Math.max(1, Math.round(canvasWidth * scale));
+  const cssH = Math.max(1, Math.round(canvasHeight * scale));
 
   useEffect(() => {
     if (!elRef.current) return;
     const c = createCanvas(elRef.current, canvasWidth, canvasHeight);
-    applyDisplayScale(c, canvasWidth, canvasHeight, scale);
+    applyDisplayScale(c, canvasWidth, canvasHeight, scaleRef.current);
     setFrameEditable(c, editableRef.current);
     canvasRef.current = c;
     onCanvasReady?.(frameId, c);
@@ -86,7 +94,6 @@ export default function FrameCanvas({
     };
 
     const blockBrowserMenu = (e) => {
-      // Only block when over a device; let other UI keep default menu.
       const target = c.findTarget?.(e, false);
       if (findDeviceTarget(target)) e.preventDefault();
     };
@@ -128,12 +135,20 @@ export default function FrameCanvas({
         signal: ac.signal,
       });
       if (ac.signal.aborted) return;
-      applyDisplayScale(canvas, canvasWidth, canvasHeight, scale);
+      // Always use latest board zoom — paint can finish after a re-fit.
+      applyDisplayScale(canvas, canvasWidth, canvasHeight, scaleRef.current);
       setFrameEditable(canvas, editableRef.current);
     })();
     return () => ac.abort();
-    // screenshotUrl is applied on design paint; later swaps use replaceDeviceScreenshot in-place.
   }, [design, canvasWidth, canvasHeight, paintKey, themesReady]);
 
-  return <canvas ref={elRef} className="block rounded-sm" />;
+  return (
+    <div
+      ref={wrapRef}
+      className="relative overflow-hidden rounded-sm"
+      style={{ width: cssW, height: cssH }}
+    >
+      <canvas ref={elRef} className="block" />
+    </div>
+  );
 }

@@ -269,10 +269,20 @@ export default function Editor() {
     setZoom(recomputeFitZoom());
   };
 
-  // Re-fit when sidebars / frame pack / export size change
+  // Re-fit when sidebars / frame pack / export size change (after layout paints)
   useEffect(() => {
     userZoomRef.current = false;
-    setZoom(recomputeFitZoom());
+    let cancelled = false;
+    const run = () => {
+      if (cancelled) return;
+      setZoom(recomputeFitZoom());
+    };
+    run();
+    const raf = requestAnimationFrame(() => requestAnimationFrame(run));
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
   }, [recomputeFitZoom]);
 
   // Keep fit updated on window/board resize (respect manual zoom)
