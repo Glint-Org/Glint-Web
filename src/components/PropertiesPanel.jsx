@@ -40,6 +40,27 @@ function ColorField({ label, value, onChange }) {
   return <ColorPicker label={label} value={value} onChange={onChange} />;
 }
 
+function RangeRow({ label, value, min, max, suffix = '', onChange }) {
+  return (
+    <label className="space-y-1 block">
+      <span className="text-[10px] text-glint-text-tertiary">{label}</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="flex-1 accent-glint-accent"
+        />
+        <span className="text-[11px] tabular-nums w-10 text-right text-glint-text-secondary">
+          {value}{suffix}
+        </span>
+      </div>
+    </label>
+  );
+}
+
 /**
  * Right sidebar — tabbed Design tools (Device / Graphics / Colors / Design).
  */
@@ -56,7 +77,6 @@ export default function PropertiesPanel({
   onFontFamilyChange,
   onAddText,
   onDelete,
-  templateActive = false,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -85,6 +105,8 @@ export default function PropertiesPanel({
       if (role === 'framed-screenshot' && obj.glintFrameId) {
         onFrameHighlight?.(obj.glintFrameId);
         setRightTab('device');
+      } else if (role === 'screenshot') {
+        setRightTab('design');
       } else if (role === 'graphic') {
         setRightTab('graphics');
       } else if (isText) {
@@ -131,7 +153,6 @@ export default function PropertiesPanel({
   const isDevice = selection?.obj?.glintRole === 'framed-screenshot';
   const graphicFills = selection?.obj?.glintFills || { a: '#FF6B4A', b: '#FFD166', c: '#FFFFFF' };
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
-  const showScreenshotStyle = !frame && !templateActive;
 
   const handleInsertGraphic = async (src) => {
     if (!canvas) return;
@@ -158,6 +179,8 @@ export default function PropertiesPanel({
     canvas.requestRenderAll();
   };
 
+  const patchStyle = (patch) => onScreenshotStyleChange?.(patch);
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex border-b border-glint-border shrink-0">
@@ -183,52 +206,9 @@ export default function PropertiesPanel({
             <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
               {isDevice
                 ? 'Selected device on canvas — pick a bezel to replace it.'
-                : 'Pick a device bezel. Applies to the active artboard.'}
+                : 'Pick a device bezel for every shot on the board, or None to remove bezels.'}
             </p>
             <FrameSelector selected={frame} onChange={onFrameChange} />
-            {showScreenshotStyle && (
-              <Section title="No-frame screenshot">
-                <div className="flex items-center gap-2 text-glint-text-secondary text-[10px] mb-1">
-                  <Square size={12} />
-                  <span>Style raw screenshot corners</span>
-                </div>
-                <label className="space-y-1 block">
-                  <span className="text-[10px] text-glint-text-tertiary">Corner radius</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={80}
-                      value={style.cornerRadius ?? 0}
-                      onChange={(e) => onScreenshotStyleChange?.({ cornerRadius: Number(e.target.value) })}
-                      className="flex-1 accent-glint-accent"
-                    />
-                    <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.cornerRadius ?? 0}</span>
-                  </div>
-                </label>
-                <label className="space-y-1 block">
-                  <span className="text-[10px] text-glint-text-tertiary">Border width</span>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={12}
-                      value={style.strokeWidth}
-                      onChange={(e) => onScreenshotStyleChange?.({ strokeWidth: Number(e.target.value) })}
-                      className="flex-1 accent-glint-accent"
-                    />
-                    <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.strokeWidth}px</span>
-                  </div>
-                </label>
-                {style.strokeWidth > 0 && (
-                  <ColorField
-                    label="Border color"
-                    value={style.strokeColor}
-                    onChange={(v) => onScreenshotStyleChange?.({ strokeColor: v })}
-                  />
-                )}
-              </Section>
-            )}
           </>
         )}
 
@@ -265,6 +245,97 @@ export default function PropertiesPanel({
 
         {rightTab === 'design' && (
           <>
+            <Section title="Screenshot chrome">
+              <p className="text-[10px] text-glint-text-tertiary leading-relaxed -mt-1">
+                Shadow works on device frames and bare shots. Radius and border shape bare screenshots (Device → None).
+              </p>
+
+              <div className="flex items-center gap-2 text-glint-text-secondary text-[10px]">
+                <Square size={12} />
+                <span>Custom frame</span>
+              </div>
+              <RangeRow
+                label="Corner radius"
+                value={style.cornerRadius ?? 0}
+                min={0}
+                max={80}
+                onChange={(v) => patchStyle({ cornerRadius: v })}
+              />
+              <RangeRow
+                label="Border width"
+                value={style.strokeWidth ?? 0}
+                min={0}
+                max={24}
+                suffix="px"
+                onChange={(v) => patchStyle({ strokeWidth: v })}
+              />
+              {(style.strokeWidth ?? 0) > 0 && (
+                <ColorField
+                  label="Border color"
+                  value={style.strokeColor}
+                  onChange={(v) => patchStyle({ strokeColor: v })}
+                />
+              )}
+
+              <label className="flex items-center justify-between gap-2 py-0.5">
+                <span className="text-[10px] text-glint-text-tertiary">Drop shadow</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!!style.shadowEnabled}
+                  onClick={() => patchStyle({ shadowEnabled: !style.shadowEnabled })}
+                  className={`relative w-9 h-5 rounded-full transition-colors ${
+                    style.shadowEnabled ? 'bg-glint-accent' : 'bg-glint-border'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                      style.shadowEnabled ? 'translate-x-4' : ''
+                    }`}
+                  />
+                </button>
+              </label>
+
+              {style.shadowEnabled && (
+                <>
+                  <RangeRow
+                    label="Blur"
+                    value={style.shadowBlur ?? 0}
+                    min={0}
+                    max={80}
+                    onChange={(v) => patchStyle({ shadowBlur: v })}
+                  />
+                  <RangeRow
+                    label="Offset Y"
+                    value={style.shadowOffsetY ?? 0}
+                    min={0}
+                    max={60}
+                    onChange={(v) => patchStyle({ shadowOffsetY: v })}
+                  />
+                  <RangeRow
+                    label="Offset X"
+                    value={style.shadowOffsetX ?? 0}
+                    min={-40}
+                    max={40}
+                    onChange={(v) => patchStyle({ shadowOffsetX: v })}
+                  />
+                  <RangeRow
+                    label="Opacity"
+                    value={Math.round((style.shadowOpacity ?? 0.4) * 100)}
+                    min={5}
+                    max={90}
+                    suffix="%"
+                    onChange={(v) => patchStyle({ shadowOpacity: v / 100 })}
+                  />
+                  <ColorField
+                    label="Shadow color"
+                    value={style.shadowColor || '#000000'}
+                    onChange={(v) => patchStyle({ shadowColor: v })}
+                  />
+                </>
+              )}
+            </Section>
+
             <Section title="Insert">
               <div className="flex gap-1.5">
                 <button

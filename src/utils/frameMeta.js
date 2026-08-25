@@ -136,12 +136,19 @@ export function resolveDeviceScale(
   return Math.min((canvasW * fraction) / meta.width, (canvasH * fraction) / meta.height);
 }
 
-/** Default screenshot styling when no device frame is used. */
+/** Default chrome for screenshots (no bezel) and drop shadow (any device). */
 export const DEFAULT_SCREENSHOT_STYLE = {
-  cornerRadius: 24,
+  cornerRadius: 28,
   strokeWidth: 0,
   strokeColor: '#FFFFFF',
   scale: 0.58,
+  /** Drop shadow — works on framed devices and bare screenshots. */
+  shadowEnabled: true,
+  shadowBlur: 36,
+  shadowOffsetX: 0,
+  shadowOffsetY: 22,
+  shadowOpacity: 0.4,
+  shadowColor: '#000000',
 };
 
 export function computeFrameLayout(frameId, targetScale) {

@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, Gradient, Text, Rect, Group, loadSVGFromString, util } from 'fabric';
+import { Canvas, FabricImage, Gradient, Text, Rect, Group, Shadow, LayoutManager, FixedLayout, loadSVGFromString, util } from 'fabric';
 import {
   getFrameMeta,
   computeFrameLayout,
@@ -6,6 +6,34 @@ import {
   MIN_DEVICE_COVERAGE,
   DEFAULT_SCREENSHOT_STYLE,
 } from './frameMeta';
+
+/** Build a Fabric Shadow from screenshot chrome style (or null when off). */
+export function buildChromeShadow(style = {}) {
+  const s = { ...DEFAULT_SCREENSHOT_STYLE, ...style };
+  if (!s.shadowEnabled || !(s.shadowBlur > 0)) return null;
+  const opacity = Math.min(1, Math.max(0, s.shadowOpacity ?? 0.4));
+  const hex = (s.shadowColor || '#000000').replace('#', '');
+  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex.padEnd(6, '0');
+  const r = parseInt(full.slice(0, 2), 16) || 0;
+  const g = parseInt(full.slice(2, 4), 16) || 0;
+  const b = parseInt(full.slice(4, 6), 16) || 0;
+  return new Shadow({
+    color: `rgba(${r},${g},${b},${opacity})`,
+    blur: s.shadowBlur,
+    offsetX: s.shadowOffsetX ?? 0,
+    offsetY: s.shadowOffsetY ?? 0,
+  });
+}
+
+export function applyChromeShadow(obj, style = {}) {
+  if (!obj) return obj;
+  const merged = { ...DEFAULT_SCREENSHOT_STYLE, ...(obj.glintChrome || {}), ...style };
+  obj.set('shadow', buildChromeShadow(merged));
+  obj.set({ glintChrome: merged });
+  obj.setCoords?.();
+  obj.canvas?.requestRenderAll?.();
+  return obj;
+}
 
 export function createCanvas(container, width = 1080, height = 1920) {
   return new Canvas(container, {
@@ -48,6 +76,9 @@ export const GLINT_CLONE_PROPS = [
   'glintFills',
   'glintGraphic',
   'glintShape',
+  'glintChrome',
+  'glintTargetW',
+  'glintTargetH',
 ];
 
 /** Copy Glint metadata after Fabric clone (clone alone drops custom fields). */
@@ -80,78 +111,319 @@ export function setSolidBackground(canvas, color) {
 }
 
 /**
- * Bare screenshot with optional corner radius and stroke (no device bezel).
+ * Cover-fit a screenshot into an exact screen-sized bitmap (white fill + clipped image).
+ * Guarantees the hole is fully opaque white where the shot doesn't cover, and the shot
+ * always completely fills the frame (object-fit: cover).
+ */
+async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
+  const w = Math.max(1, Math.round(screenW));
+  const h = Math.max(1, Math.round(screenH));
+  const r = Math.max(0, Math.min(rx || 0, w / 2, h / 2));
+
+  const src = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
+  const el = src.getElement?.() || src._element;
+  const iw = Math.max(1, el?.naturalWidth || el?.width || src.width || 1);
+  const ih = Math.max(1, el?.naturalHeight || el?.height || src.height || 1);
+  const cover = Math.max(w / iw, h / ih);
+  const dw = iw * cover;
+  const dh = ih * cover;
+  const dx = (w - dw) / 2;
+  const dy = (h - dh) / 2;
+
+  const off = document.createElement('canvas');
+  off.width = w;
+  off.height = h;
+  const ctx = off.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Full white fill first (letterbox / pillarbox areas stay white).
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+
+  // Rounded clip, then cover-draw the screenshot.
+  ctx.save();
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(0, 0, w, h, r);
+  } else {
+    ctx.moveTo(r, 0);
+    ctx.arcTo(w, 0, w, h, r);
+    ctx.arcTo(w, h, 0, h, r);
+    ctx.arcTo(0, h, 0, 0, r);
+    ctx.arcTo(0, 0, w, 0, r);
+    ctx.closePath();
+  }
+  ctx.clip();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+  if (el) ctx.drawImage(el, dx, dy, dw, dh);
+  ctx.restore();
+
+  // Soft outer mask so corners stay transparent outside the round rect (for bare frames).
+  if (r > 0) {
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(0, 0, w, h, r);
+    } else {
+      ctx.moveTo(r, 0);
+      ctx.arcTo(w, 0, w, h, r);
+      ctx.arcTo(w, h, 0, h, r);
+      ctx.arcTo(0, h, 0, 0, r);
+      ctx.arcTo(0, 0, w, 0, r);
+      ctx.closePath();
+    }
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  const fitted = await FabricImage.fromURL(off.toDataURL('image/png'));
+  fitted.set({
+    left: 0,
+    top: 0,
+    originX: 'left',
+    originY: 'top',
+    scaleX: 1,
+    scaleY: 1,
+    selectable: false,
+    evented: false,
+  });
+  src.dispose?.();
+  return fitted;
+}
+
+/** Default phone aspect for bare (no-bezel) screenshot frames. */
+const BARE_SCREEN_ASPECT = 9 / 19.5;
+
+/**
+ * Bare screenshot: white-filled rounded frame + cover-fit shot + optional border stroke.
+ * Uses the same bitmap pipeline as device screens so imports always fill correctly.
  */
 export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...opts };
   const canvasW = canvas.getWidth();
   const canvasH = canvas.getHeight();
-  const targetW = canvasW * style.scale;
-  const targetH = canvasH * style.scale;
+  const aspect = opts.aspect ?? BARE_SCREEN_ASPECT;
 
-  const img = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
-  const cover = Math.max(targetW / (img.width || 1), targetH / (img.height || 1));
+  let targetW = opts.targetW;
+  let targetH = opts.targetH;
+  if (!(targetW > 0) || !(targetH > 0)) {
+    targetH = canvasH * (style.scale ?? 0.58);
+    targetW = targetH * aspect;
+    if (targetW > canvasW * 0.92) {
+      targetW = canvasW * 0.92;
+      targetH = targetW / aspect;
+    }
+  }
+
   const left = opts.left ?? (canvasW - targetW) / 2;
-  const top = opts.top ?? canvasH * 0.18;
+  const top = opts.top ?? canvasH * 0.14;
+  const rx = Math.max(0, Math.min(style.cornerRadius ?? 0, targetW / 2, targetH / 2));
 
-  img.set({
-    scaleX: cover,
-    scaleY: cover,
-    left: left + targetW / 2,
-    top: top + targetH / 2,
-    originX: 'center',
-    originY: 'center',
+  // White fill + cover-fit screenshot (exact frame size).
+  const screenImg = await buildScreenBitmap(screenshotUrl, targetW, targetH, rx);
+  screenImg.set({ left: 0, top: 0, originX: 'left', originY: 'top' });
+
+  const strokeW = Math.max(0, style.strokeWidth ?? 0);
+  // Always attach a border ring — invisible when width is 0 — so the frame edge stays defined.
+  const border = new Rect({
+    left: 0,
+    top: 0,
+    width: targetW,
+    height: targetH,
+    rx,
+    ry: rx,
+    fill: 'transparent',
+    stroke: strokeW > 0 ? (style.strokeColor || '#FFFFFF') : 'rgba(0,0,0,0)',
+    strokeWidth: strokeW,
+    strokeUniform: true,
+    originX: 'left',
+    originY: 'top',
     selectable: false,
     evented: false,
   });
 
-  if (style.cornerRadius > 0) {
-    img.set({
-      clipPath: new Rect({
-        width: targetW,
-        height: targetH,
-        rx: style.cornerRadius,
-        ry: style.cornerRadius,
-        originX: 'center',
-        originY: 'center',
-      }),
-    });
-  }
-
-  const items = [img];
-
-  if (style.strokeWidth > 0) {
-    const border = new Rect({
-      width: targetW,
-      height: targetH,
-      rx: style.cornerRadius,
-      ry: style.cornerRadius,
-      fill: 'transparent',
-      stroke: style.strokeColor,
-      strokeWidth: style.strokeWidth,
-      left: left + targetW / 2,
-      top: top + targetH / 2,
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-      evented: false,
-    });
-    items.unshift(border);
-  }
-
-  const group = new Group(items, {
+  const group = new Group([screenImg, border], {
     left,
     top,
     originX: 'left',
     originY: 'top',
     selectable: opts.selectable !== false,
     evented: opts.selectable !== false,
+    subTargetCheck: false,
+    objectCaching: true,
+    layoutManager: new LayoutManager(new FixedLayout()),
     glintRole: 'screenshot',
+    glintScreenshotUrl: screenshotUrl,
+    glintChrome: style,
+    glintTargetW: targetW,
+    glintTargetH: targetH,
   });
+
+  applyChromeShadow(group, style);
+  applyDeviceTransformLocks(group);
 
   canvas.add(group);
   canvas.requestRenderAll();
   return group;
+}
+
+/**
+ * Strip a device bezel → styled screenshot at the same center (keeps shot + chrome).
+ * Target size matches the previous screen hole so the shot still fills the frame.
+ */
+export async function stripDeviceFrame(group, style = {}) {
+  if (!group || group.glintRole !== 'framed-screenshot') return false;
+  const canvas = group.canvas;
+  const screenshotUrl = group.glintScreenshotUrl;
+  if (!canvas || !screenshotUrl) return false;
+
+  const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...(group.glintChrome || {}), ...style };
+  const center = typeof group.getCenterPoint === 'function'
+    ? group.getCenterPoint()
+    : {
+        x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
+        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2,
+      };
+  const angle = group.angle || 0;
+  const slot = group.glintSlot;
+  const slide = group.glintSlide;
+  const selectable = group.selectable !== false;
+  const uniform = Math.max(Math.abs(group.scaleX || 1), Math.abs(group.scaleY || 1));
+
+  const frameId = group.glintFrameId || 'pixel9';
+  const baseScale = group.glintBaseScale ?? 0.55;
+  const { screenW, screenH } = computeFrameLayout(frameId, baseScale);
+  const targetW = screenW * uniform;
+  const targetH = screenH * uniform;
+  const left = center.x - targetW / 2;
+  const top = center.y - targetH / 2;
+
+  const next = await addStyledScreenshot(canvas, screenshotUrl, {
+    ...chrome,
+    targetW,
+    targetH,
+    aspect: targetW / targetH,
+    left,
+    top,
+    selectable,
+  });
+  if (!next) return false;
+
+  next.set({
+    angle,
+    glintSlot: slot,
+    glintSlide: slide,
+    glintScreenshotUrl: screenshotUrl,
+  });
+  applyDeviceTransformLocks(next);
+  next.setCoords?.();
+
+  canvas.remove(group);
+  group.dispose?.();
+  canvas.requestRenderAll();
+  return true;
+}
+
+/**
+ * Update bare-screenshot border stroke in place (no bitmap rebuild).
+ */
+function applyBareBorderStroke(group, chrome) {
+  const kids = group.getObjects?.() || [];
+  const border = kids.find((o) => o.type === 'rect') || kids[1];
+  if (!border || typeof border.set !== 'function') return false;
+  const strokeW = Math.max(0, chrome.strokeWidth ?? 0);
+  const tw = group.glintTargetW || group.width || 0;
+  const th = group.glintTargetH || group.height || 0;
+  const rx = Math.max(0, Math.min(chrome.cornerRadius ?? 0, tw / 2, th / 2));
+  border.set({
+    strokeWidth: strokeW,
+    stroke: strokeW > 0 ? (chrome.strokeColor || '#FFFFFF') : 'rgba(0,0,0,0)',
+    rx,
+    ry: rx,
+    dirty: true,
+  });
+  group.set({ dirty: true, glintChrome: chrome });
+  border.setCoords?.();
+  return true;
+}
+
+/**
+ * Apply screenshot chrome. Cheap path for shadow/stroke; rebuild only when radius
+ * (or forceRebuild) requires a new cover-fill bitmap.
+ */
+export async function restyleScreenshot(group, style = {}, opts = {}) {
+  if (!group) return false;
+
+  if (group.glintRole === 'framed-screenshot') {
+    applyChromeShadow(group, style);
+    return true;
+  }
+  if (group.glintRole !== 'screenshot') return false;
+
+  const prev = group.glintChrome || {};
+  const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...prev, ...style };
+  const radiusChanged =
+    (chrome.cornerRadius ?? 0) !== (prev.cornerRadius ?? DEFAULT_SCREENSHOT_STYLE.cornerRadius);
+  const needsBitmapRebuild = opts.forceRebuild || radiusChanged;
+
+  if (!needsBitmapRebuild) {
+    applyBareBorderStroke(group, chrome);
+    applyChromeShadow(group, chrome);
+    group.canvas?.requestRenderAll?.();
+    return true;
+  }
+
+  const canvas = group.canvas;
+  const screenshotUrl = opts.screenshotUrl || group.glintScreenshotUrl;
+  if (!canvas || !screenshotUrl) {
+    applyBareBorderStroke(group, chrome);
+    applyChromeShadow(group, chrome);
+    return false;
+  }
+
+  const center = typeof group.getCenterPoint === 'function'
+    ? group.getCenterPoint()
+    : {
+        x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
+        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2,
+      };
+  const angle = group.angle || 0;
+  const slot = group.glintSlot;
+  const slide = group.glintSlide;
+  const selectable = group.selectable !== false;
+  const uniform = Math.max(Math.abs(group.scaleX || 1), Math.abs(group.scaleY || 1));
+  const targetW = (group.glintTargetW || group.width || 1) * uniform;
+  const targetH = (group.glintTargetH || group.height || 1) * uniform;
+  const left = center.x - targetW / 2;
+  const top = center.y - targetH / 2;
+
+  const next = await addStyledScreenshot(canvas, screenshotUrl, {
+    ...chrome,
+    targetW,
+    targetH,
+    aspect: targetW / Math.max(1, targetH),
+    left,
+    top,
+    selectable,
+  });
+  if (!next) return false;
+
+  next.set({
+    angle,
+    glintSlot: slot,
+    glintSlide: slide,
+    glintScreenshotUrl: screenshotUrl,
+  });
+  applyDeviceTransformLocks(next);
+  next.setCoords?.();
+
+  canvas.remove(group);
+  group.dispose?.();
+  canvas.requestRenderAll();
+  return true;
 }
 
 /** Load a curated bezel as a Fabric object (PNG image or SVG group). */
@@ -171,52 +443,54 @@ export async function loadFrameBezel(frameId) {
   return FabricImage.fromURL(src, { crossOrigin: 'anonymous' });
 }
 
-/** @deprecated Prefer loadFrameBezel — kept for callers that need raw SVG text. */
-export async function loadFrameSvg(frameId) {
-  const res = await fetch(`/frames/${frameId}.svg`);
-  if (!res.ok) throw new Error(`Frame not found: ${frameId}`);
-  return res.text();
-}
-
 /**
- * Cover-fit a screenshot into an exact screen-sized bitmap (white + clipped image).
- * Avoids Fabric clipPath/group bbox leaks that paint past the bezel.
+ * Composite screenshot + bezel into one native-resolution bitmap, then scale.
+ * Avoids Fabric Group layout drift that misaligns the shot inside the hole.
  */
-async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
-  const w = Math.max(1, Math.round(screenW));
-  const h = Math.max(1, Math.round(screenH));
-  const r = Math.max(0, Math.min(rx, w / 2, h / 2));
+async function buildFramedDeviceBitmap(screenshotUrl, frameId) {
+  const meta = getFrameMeta(frameId);
+  const W = meta.width;
+  const H = meta.height;
+  const screenW = W - meta.left - meta.right;
+  const screenH = H - meta.top - meta.bottom;
 
-  const src = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
-  const el = src.getElement?.() || src._element;
-  const iw = el?.naturalWidth || el?.width || src.width || 1;
-  const ih = el?.naturalHeight || el?.height || src.height || 1;
-  const cover = Math.max(w / iw, h / ih);
-  const dw = iw * cover;
-  const dh = ih * cover;
-  const dx = (w - dw) / 2;
-  const dy = (h - dh) / 2;
+  // Sharp rect fill — the bezel PNG/SVG masks the rounded hole on top.
+  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0);
+  const screenEl = screen.getElement?.() || screen._element;
+
+  const bezel = await loadFrameBezel(frameId);
+  let bezelEl = null;
+  if (bezel.getElement) {
+    bezelEl = bezel.getElement();
+  } else if (bezel._element) {
+    bezelEl = bezel._element;
+  } else if (typeof bezel.toCanvasElement === 'function') {
+    bezelEl = bezel.toCanvasElement(1);
+  }
 
   const off = document.createElement('canvas');
-  off.width = w;
-  off.height = h;
+  off.width = W;
+  off.height = H;
   const ctx = off.getContext('2d');
-  // Rounded screen hole
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(0, 0, w, h, r);
-  } else {
-    ctx.moveTo(r, 0);
-    ctx.arcTo(w, 0, w, h, r);
-    ctx.arcTo(w, h, 0, h, r);
-    ctx.arcTo(0, h, 0, 0, r);
-    ctx.arcTo(0, 0, w, 0, r);
-    ctx.closePath();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  // Screen slightly inset so anti-aliased bezel edges never leak the shot outside the hole.
+  const bleed = 2;
+  if (screenEl) {
+    ctx.drawImage(
+      screenEl,
+      meta.left + bleed,
+      meta.top + bleed,
+      Math.max(1, screenW - bleed * 2),
+      Math.max(1, screenH - bleed * 2),
+    );
   }
-  ctx.clip();
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, w, h);
-  if (el) ctx.drawImage(el, dx, dy, dw, dh);
+  if (bezelEl) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(bezelEl, 0, 0, W, H);
+    ctx.imageSmoothingEnabled = true;
+  }
 
   const fitted = await FabricImage.fromURL(off.toDataURL('image/png'));
   fitted.set({
@@ -229,7 +503,16 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
     selectable: false,
     evented: false,
   });
+  screen.dispose?.();
+  bezel.dispose?.();
   return fitted;
+}
+
+/** @deprecated Prefer loadFrameBezel — kept for callers that need raw SVG text. */
+export async function loadFrameSvg(frameId) {
+  const res = await fetch(`/frames/${frameId}.svg`);
+  if (!res.ok) throw new Error(`Frame not found: ${frameId}`);
+  return res.text();
 }
 
 /**
@@ -271,55 +554,120 @@ export function applyDeviceTransformLocks(group) {
 }
 
 /**
+ * Geometric center from left/top/size — ignores shadow blur that can skew getCenterPoint.
+ */
+function getGroupGeoCenter(group) {
+  const sx = Math.abs(group.scaleX || 1);
+  const sy = Math.abs(group.scaleY || 1);
+  const w = (group.width || 0) * sx;
+  const h = (group.height || 0) * sy;
+  return {
+    x: (group.left || 0) + w / 2,
+    y: (group.top || 0) + h / 2,
+    sx,
+    sy,
+    w,
+    h,
+  };
+}
+
+/**
+ * Place group so its geometric center sits on (cx, cy).
+ */
+function placeGroupAtCenter(group, cx, cy) {
+  if (!group) return;
+  const sx = Math.abs(group.scaleX || 1);
+  const sy = Math.abs(group.scaleY || 1);
+  const w = (group.width || 0) * sx;
+  const h = (group.height || 0) * sy;
+  group.set({
+    left: cx - w / 2,
+    top: cy - h / 2,
+    originX: 'left',
+    originY: 'top',
+  });
+  group.setCoords?.();
+}
+
+/**
  * Swap the screenshot inside a framed device without resetting position/rotation/size.
+ * Rebuilds the whole device group — Fabric 7 layout breaks if we surgically swap children.
  */
 export async function replaceDeviceScreenshot(group, screenshotUrl) {
   if (!group || group.glintRole !== 'framed-screenshot' || !screenshotUrl) return false;
   const frameId = group.glintFrameId || 'pixel9';
-  const baseScale = group.glintBaseScale ?? 0.55;
-  const { insetL, insetT, screenW, screenH, rx } = computeFrameLayout(frameId, baseScale);
-  const newScreen = await buildScreenBitmap(screenshotUrl, screenW, screenH, rx);
-  newScreen.set({
-    left: insetL,
-    top: insetT,
-    selectable: false,
-    evented: false,
+  const canvas = group.canvas;
+  if (!canvas) return false;
+
+  const { x: cx, y: cy, sx, sy } = getGroupGeoCenter(group);
+  const uniform = Math.max(sx, sy);
+  const angle = group.angle || 0;
+  const selectable = group.selectable !== false;
+  const slot = group.glintSlot;
+  const slide = group.glintSlide;
+  const coverage = group.glintCoverage || MIN_DEVICE_COVERAGE;
+  const baseScale = group.glintBaseScale
+    ?? resolveDeviceScale(frameId, canvas.getWidth?.() || 1080, canvas.getHeight?.() || 1920, coverage);
+  const chrome = group.glintChrome || DEFAULT_SCREENSHOT_STYLE;
+
+  const next = await addFramedScreenshot(canvas, screenshotUrl, frameId, {
+    scale: baseScale,
+    left: 0,
+    top: 0,
+    selectable,
+    coverage,
+    chrome,
   });
+  if (!next) return false;
 
-  const kids = group.getObjects?.() || [];
-  const oldScreen = kids[0];
-  if (oldScreen) {
-    group.remove(oldScreen);
-    oldScreen.dispose?.();
-  }
-  if (typeof group.insertAt === 'function') {
-    group.insertAt(0, newScreen);
-  } else {
-    group.add(newScreen);
-    group.moveObjectTo?.(newScreen, 0);
-  }
+  next.set({
+    angle,
+    scaleX: uniform,
+    scaleY: uniform,
+    glintSlot: slot,
+    glintSlide: slide,
+    glintCoverage: coverage,
+    glintScreenshotUrl: screenshotUrl,
+  });
+  placeGroupAtCenter(next, cx, cy);
+  applyDeviceTransformLocks(next);
 
-  group.set({ dirty: true, glintScreenshotUrl: screenshotUrl });
-  group.setCoords?.();
-  group.canvas?.requestRenderAll?.();
+  canvas.remove(group);
+  group.dispose?.();
+  canvas.requestRenderAll();
   return true;
 }
 
 /**
  * Swap the device bezel while keeping the screenshot (cover-filled into the new hole).
- * @param {object} group - framed-screenshot group
- * @param {string} nextFrameId - e.g. pixel9 / iphone16-pro-max
- * @param {string} [screenshotUrlOverride] - prefer frame.screenshotUrl from editor state
+ * Also accepts a bare `screenshot` group and wraps it in a bezel.
  */
-export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverride) {
-  if (!group || group.glintRole !== 'framed-screenshot' || !nextFrameId) return false;
-  if (group.glintFrameId === nextFrameId && !screenshotUrlOverride) return true;
+export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverride, styleOverride) {
+  if (!group || !nextFrameId) return false;
+  const role = group.glintRole;
+  if (role !== 'framed-screenshot' && role !== 'screenshot') return false;
+
+  const screenshotUrl = screenshotUrlOverride || group.glintScreenshotUrl;
+  if (!screenshotUrl) return false;
+
+  // Same bezel + same shot → skip rebuild (stops top-right drift on repeated clicks).
+  if (
+    role === 'framed-screenshot'
+    && group.glintFrameId === nextFrameId
+    && screenshotUrl === group.glintScreenshotUrl
+  ) {
+    if (styleOverride) applyChromeShadow(group, styleOverride);
+    return true;
+  }
 
   const canvas = group.canvas;
   if (!canvas) return false;
 
-  const screenshotUrl = screenshotUrlOverride || group.glintScreenshotUrl;
-  if (!screenshotUrl) return false;
+  const chrome = {
+    ...DEFAULT_SCREENSHOT_STYLE,
+    ...(group.glintChrome || {}),
+    ...(styleOverride || {}),
+  };
 
   const canvasW = canvas.getWidth?.() || 1080;
   const canvasH = canvas.getHeight?.() || 1920;
@@ -327,30 +675,51 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
   const slot = group.glintSlot;
   const slide = group.glintSlide;
   const angle = group.angle || 0;
-
-  // Keep visual center; recompute scale for the new bezel aspect (cover-fit screen hole).
-  const center = typeof group.getCenterPoint === 'function'
-    ? group.getCenterPoint()
-    : { x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
-        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2 };
+  const { x: cx, y: cy, sx, sy } = getGroupGeoCenter(group);
 
   const coverage = Math.max(
     MIN_DEVICE_COVERAGE,
     group.glintCoverage || MIN_DEVICE_COVERAGE,
   );
-  const baseScale = resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
-  const meta = getFrameMeta(nextFrameId);
-  const frameW = meta.width * baseScale;
-  const frameH = meta.height * baseScale;
-  const left = center.x - frameW / 2;
-  const top = center.y - frameH / 2;
 
+  // Same bezel, new shot — keep exact transform, only rebake pixels.
+  if (role === 'framed-screenshot' && group.glintFrameId === nextFrameId) {
+    const baseScale = group.glintBaseScale
+      ?? resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
+    const next = await addFramedScreenshot(canvas, screenshotUrl, nextFrameId, {
+      scale: baseScale,
+      left: 0,
+      top: 0,
+      selectable,
+      coverage,
+      chrome,
+    });
+    if (!next) return false;
+    next.set({
+      angle,
+      scaleX: sx,
+      scaleY: sy,
+      glintSlot: slot,
+      glintSlide: slide,
+      glintCoverage: coverage,
+      glintScreenshotUrl: screenshotUrl,
+    });
+    placeGroupAtCenter(next, cx, cy);
+    applyDeviceTransformLocks(next);
+    canvas.remove(group);
+    group.dispose?.();
+    canvas.requestRenderAll();
+    return true;
+  }
+
+  const baseScale = resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
   const next = await addFramedScreenshot(canvas, screenshotUrl, nextFrameId, {
     scale: baseScale,
-    left,
-    top,
+    left: 0,
+    top: 0,
     selectable,
     coverage,
+    chrome,
   });
   if (!next) return false;
 
@@ -361,8 +730,8 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     glintCoverage: coverage,
     glintScreenshotUrl: screenshotUrl,
   });
+  placeGroupAtCenter(next, cx, cy);
   applyDeviceTransformLocks(next);
-  next.setCoords?.();
 
   canvas.remove(group);
   group.dispose?.();
@@ -372,27 +741,18 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
 
 /**
  * Composite screenshot inside device frame.
- * Screen content is a fixed-size bitmap fitted to the hole; bezel sits on top.
- * Moving the device never lets the image spill outside the frame.
+ * Screen + bezel are baked into one bitmap at native size, then scaled as a unit
+ * so the shot always cover-fills and stays aligned with the hole.
  */
 export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts = {}) {
   const targetScale = opts.scale ?? 0.55;
-  const { frameW, frameH, insetL, insetT, screenW, screenH, rx } = computeFrameLayout(frameId, targetScale);
+  const { frameW, frameH } = computeFrameLayout(frameId, targetScale);
   const meta = getFrameMeta(frameId);
 
-  // Cover-fit any resolution into the device screen hole.
-  const screenImg = await buildScreenBitmap(screenshotUrl, screenW, screenH, rx);
-  screenImg.set({
-    left: insetL,
-    top: insetT,
-  });
-
-  const frame = await loadFrameBezel(frameId);
-  const fw = frame.width || meta.width;
-  const fh = frame.height || meta.height;
-  frame.set({
-    scaleX: frameW / fw,
-    scaleY: frameH / fh,
+  const deviceImg = await buildFramedDeviceBitmap(screenshotUrl, frameId);
+  deviceImg.set({
+    scaleX: frameW / meta.width,
+    scaleY: frameH / meta.height,
     left: 0,
     top: 0,
     originX: 'left',
@@ -401,7 +761,7 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     evented: false,
   });
 
-  const group = new Group([screenImg, frame], {
+  const group = new Group([deviceImg], {
     left: opts.left ?? 0,
     top: opts.top ?? 0,
     originX: 'left',
@@ -410,14 +770,17 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     evented: opts.selectable !== false,
     subTargetCheck: false,
     objectCaching: true,
+    layoutManager: new LayoutManager(new FixedLayout()),
     glintRole: 'framed-screenshot',
     glintFrameId: frameId,
     glintBaseScale: targetScale,
     glintCoverage: opts.coverage ?? MIN_DEVICE_COVERAGE,
     glintScreenshotUrl: screenshotUrl,
+    glintChrome: opts.chrome || DEFAULT_SCREENSHOT_STYLE,
   });
 
   applyDeviceTransformLocks(group);
+  applyChromeShadow(group, opts.chrome || DEFAULT_SCREENSHOT_STYLE);
 
   canvas.add(group);
   canvas.requestRenderAll();

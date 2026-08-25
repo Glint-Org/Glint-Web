@@ -7,7 +7,6 @@ export const FRAME_OPTIONS = [
   { id: 'pixel9', label: 'Pixel 9' },
   { id: 'galaxy-s24', label: 'Galaxy' },
   { id: 'phone-3d', label: 'Phone Shadow' },
-  { id: 'simple-dark', label: 'Simple Dark' },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max' },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro' },
   { id: 'ipad-pro-13', label: 'iPad Pro 13"' },
@@ -60,7 +59,7 @@ export default function FrameSelector({ selected, onChange }) {
         })}
       </div>
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Click a bezel to replace every device on the board. Your screenshots stay and cover-fill the new screen.
+        Pick a bezel for every device on the board, or None to strip bezels. Use Design for shadow, radius, and border.
       </p>
     </div>
   );

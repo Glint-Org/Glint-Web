@@ -27,6 +27,8 @@ import {
   setBackground,
   replaceDeviceScreenshot,
   replaceDeviceFrame,
+  stripDeviceFrame,
+  restyleScreenshot,
 } from '../utils/canvasEngine';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
@@ -83,6 +85,11 @@ export default function Editor() {
   const [fitZoom, setFitZoom] = useState(16);
   const [deviceMenu, setDeviceMenu] = useState(null);
   const canvasMapRef = useRef({});
+  const framesRef = useRef(frames);
+  framesRef.current = frames;
+  const styleApplyTimerRef = useRef(0);
+  const styleApplyRafRef = useRef(0);
+  const styleApplyGenRef = useRef(0);
   const [activeCanvas, setActiveCanvas] = useState(null);
   const deviceFileRef = useRef(null);
   const boardRef = useRef(null);
@@ -95,6 +102,12 @@ export default function Editor() {
 
   useEffect(() => {
     loadThemePresets().then(setThemes);
+  }, []);
+
+  useEffect(() => () => {
+    if (styleApplyTimerRef.current) clearTimeout(styleApplyTimerRef.current);
+    if (styleApplyRafRef.current) cancelAnimationFrame(styleApplyRafRef.current);
+    styleApplyGenRef.current += 1;
   }, []);
 
   useEffect(() => {
@@ -131,9 +144,111 @@ export default function Editor() {
     if (activeCanvas && bg) setBackground(activeCanvas, bg.type, bg.value);
   };
 
-  const handleScreenshotStyleChange = (patch) => {
-    setScreenshotStyle((prev) => ({ ...prev, ...patch }));
-  };
+  const handleScreenshotStyleChange = useCallback((patch) => {
+    setScreenshotStyle((prev) => {
+      const next = { ...prev, ...patch };
+      // Debounce canvas work — slider ticks must not stack full-board restyles.
+      const radiusOnlyRebuild = Object.prototype.hasOwnProperty.call(patch, 'cornerRadius');
+      const delay = radiusOnlyRebuild ? 120 : 0;
+
+      if (styleApplyTimerRef.current) clearTimeout(styleApplyTimerRef.current);
+      const gen = ++styleApplyGenRef.current;
+
+      const apply = async () => {
+        if (gen !== styleApplyGenRef.current) return;
+        const board = framesRef.current;
+        for (const frame of board) {
+          if (gen !== styleApplyGenRef.current) return;
+          const canvas = canvasMapRef.current[frame.id];
+          if (!canvas) continue;
+          const targets = canvas
+            .getObjects()
+            .filter((o) => o.glintRole === 'framed-screenshot' || o.glintRole === 'screenshot');
+          for (const obj of [...targets]) {
+            if (gen !== styleApplyGenRef.current) return;
+            await restyleScreenshot(obj, next);
+          }
+        }
+      };
+
+      if (delay > 0) {
+        styleApplyTimerRef.current = setTimeout(apply, delay);
+      } else {
+        // Stroke / shadow: sync, cheap in-place updates — still coalesce via rAF.
+        if (styleApplyRafRef.current) cancelAnimationFrame(styleApplyRafRef.current);
+        styleApplyRafRef.current = requestAnimationFrame(() => {
+          styleApplyRafRef.current = 0;
+          apply();
+        });
+      }
+      return next;
+    });
+  }, []);
+
+  const handleDeviceFrameChange = useCallback(async (nextId) => {
+    setDeviceFrame(nextId);
+
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+      const canvas = canvasMapRef.current[frame.id];
+      if (!canvas) continue;
+
+      const shotUrl = frame.screenshotUrl;
+      const devices = canvas.getObjects().filter((o) => o.glintRole === 'framed-screenshot');
+      const bare = canvas.getObjects().filter((o) => o.glintRole === 'screenshot');
+
+      if (!nextId) {
+        // None — strip every bezel into a styled screenshot.
+        for (const device of [...devices]) {
+          if (!device.glintScreenshotUrl && shotUrl) {
+            device.set({ glintScreenshotUrl: shotUrl });
+          }
+          await stripDeviceFrame(device, screenshotStyle);
+        }
+        continue;
+      }
+
+      // Apply / swap bezel on framed devices.
+      for (const device of [...devices]) {
+        if (!device.glintScreenshotUrl && shotUrl) {
+          device.set({ glintScreenshotUrl: shotUrl });
+        }
+        const ok = await replaceDeviceFrame(
+          device,
+          nextId,
+          shotUrl || device.glintScreenshotUrl,
+          screenshotStyle,
+        );
+        if (!ok && shotUrl) {
+          device.set({ glintScreenshotUrl: shotUrl });
+          await replaceDeviceFrame(device, nextId, shotUrl, screenshotStyle);
+        }
+      }
+
+      // Wrap bare screenshots (after stripping None) back into a bezel.
+      for (const shot of [...bare]) {
+        if (!shot.glintScreenshotUrl && shotUrl) {
+          shot.set({ glintScreenshotUrl: shotUrl });
+        }
+        await replaceDeviceFrame(
+          shot,
+          nextId,
+          shotUrl || shot.glintScreenshotUrl,
+          screenshotStyle,
+        );
+      }
+    }
+
+    if (activeCanvas && nextId) {
+      const refreshed = activeCanvas
+        .getObjects()
+        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === nextId);
+      if (refreshed) {
+        activeCanvas.setActiveObject(refreshed);
+        activeCanvas.requestRenderAll();
+      }
+    }
+  }, [activeCanvas, frames, screenshotStyle]);
 
   const handleAddText = useCallback(() => {
     if (!activeCanvas) return;
@@ -148,45 +263,6 @@ export default function Editor() {
     if (!activeCanvas) return;
     deleteActiveObjects(activeCanvas);
   }, [activeCanvas]);
-
-  const handleDeviceFrameChange = useCallback(async (nextId) => {
-    setDeviceFrame(nextId);
-    if (!nextId) return;
-
-    // Replace every device bezel on the board; keep each frame's screenshot (cover-filled).
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
-      const canvas = canvasMapRef.current[frame.id];
-      if (!canvas) continue;
-
-      const devices = canvas
-        .getObjects()
-        .filter((o) => o.glintRole === 'framed-screenshot');
-      const shotUrl = frame.screenshotUrl;
-
-      for (const device of [...devices]) {
-        if (!device.glintScreenshotUrl && shotUrl) {
-          device.set({ glintScreenshotUrl: shotUrl });
-        }
-        const ok = await replaceDeviceFrame(device, nextId, shotUrl || device.glintScreenshotUrl);
-        if (!ok && shotUrl) {
-          // Fallback: force screenshot onto device then retry once.
-          device.set({ glintScreenshotUrl: shotUrl });
-          await replaceDeviceFrame(device, nextId, shotUrl);
-        }
-      }
-    }
-
-    if (activeCanvas && nextId) {
-      const refreshed = activeCanvas
-        .getObjects()
-        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === nextId);
-      if (refreshed) {
-        activeCanvas.setActiveObject(refreshed);
-        activeCanvas.requestRenderAll();
-      }
-    }
-  }, [activeCanvas, frames]);
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
@@ -207,14 +283,20 @@ export default function Editor() {
     const canvas = frame ? canvasMapRef.current[frame.id] : null;
     if (!canvas) return;
     const devices = canvas.getObjects().filter((o) => o.glintRole === 'framed-screenshot');
-    if (!devices.length) return;
-    if (devices.length === 1) {
-      await replaceDeviceScreenshot(devices[0], url);
+    const bare = canvas.getObjects().filter((o) => o.glintRole === 'screenshot');
+    if (devices.length) {
+      if (devices.length === 1) {
+        await replaceDeviceScreenshot(devices[0], url);
+        return;
+      }
+      const primary = devices.find((d) => (d.glintSlot ?? 0) === 0) || devices[0];
+      await replaceDeviceScreenshot(primary, url);
       return;
     }
-    // Multi-device frames: replace slot 0 by default (assets list is 1:1 with frames)
-    const primary = devices.find((d) => (d.glintSlot ?? 0) === 0) || devices[0];
-    await replaceDeviceScreenshot(primary, url);
+    if (bare.length) {
+      const primary = bare[0];
+      await restyleScreenshot(primary, screenshotStyle, { forceRebuild: true, screenshotUrl: url });
+    }
   };
 
   const handleReplaceScreenshot = async (index, file) => {
@@ -631,7 +713,6 @@ export default function Editor() {
               onFontFamilyChange={setFontFamily}
               onAddText={handleAddText}
               onDelete={handleDelete}
-              templateActive={!!activeFrame?.design}
             />
           </div>
         </aside>
