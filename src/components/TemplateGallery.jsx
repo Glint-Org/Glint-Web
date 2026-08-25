@@ -57,19 +57,19 @@ export default function TemplateGallery({ onChange, activeStore }) {
           No templates for this store yet.
         </p>
       ) : (
-        filtered.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            title={t.name || t.id}
-            onClick={() => onChange(t)}
-            className="group w-full rounded-xl overflow-hidden border border-glint-border hover:border-glint-accent/50 hover:shadow-md transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"
-          >
-            <div className="aspect-[5/1.35] relative">
+        <div className="space-y-2 overflow-hidden">
+          {filtered.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              title={t.name || t.id}
+              onClick={() => onChange(t)}
+              className="group w-full rounded-xl overflow-hidden border border-glint-border hover:border-glint-accent/50 hover:shadow-md transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"
+            >
               <TemplateSetPreview template={t} compact />
-            </div>
-          </button>
-        ))
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

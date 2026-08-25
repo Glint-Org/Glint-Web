@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
@@ -113,15 +113,24 @@ export default function Home() {
             ))}
           </div>
           {loading ? (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-48 rounded-2xl bg-glint-surface/50 animate-pulse" />
+                <div
+                  key={i}
+                  className="h-72 rounded-2xl bg-glint-surface/50 animate-pulse"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                />
               ))}
             </div>
           ) : (
-            <div className="space-y-5 hide-scrollbar">
-              {filteredTemplates.map((t) => (
-                <TemplateShowcaseRow key={t.id} template={t} onClick={() => handleStartFromTemplate(t)} />
+            <div className="space-y-6 hide-scrollbar">
+              {filteredTemplates.map((t, i) => (
+                <TemplateShowcaseRow
+                  key={t.id}
+                  template={t}
+                  index={i}
+                  onClick={() => handleStartFromTemplate(t)}
+                />
               ))}
             </div>
           )}
@@ -159,17 +168,37 @@ export default function Home() {
   );
 }
 
-function TemplateShowcaseRow({ template, onClick }) {
+function TemplateShowcaseRow({ template, onClick, index = 0 }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) setShown(true);
+      },
+      { rootMargin: '40px', threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <button
+      ref={ref}
       onClick={onClick}
       aria-label={template.name || template.id || 'Use template'}
       title={template.name || template.id}
-      className="group w-full rounded-2xl overflow-hidden border border-glint-border hover:border-glint-accent hover:shadow-xl hover:shadow-black/20 transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"
+      className={`group w-full rounded-2xl overflow-hidden border border-glint-border bg-glint-surface
+        focus:outline-none focus:ring-2 focus:ring-glint-accent/40
+        transition-[transform,box-shadow,border-color] duration-300 ease-out
+        hover:-translate-y-1 hover:border-glint-accent hover:shadow-xl hover:shadow-black/25
+        ${shown ? 'glint-reveal' : 'opacity-0 translate-y-4'}`}
+      style={shown ? { animationDelay: `${Math.min(index, 6) * 70}ms` } : undefined}
     >
-      <div className="relative aspect-[5/1.15] md:aspect-[5/1.05] overflow-hidden">
-        <TemplateSetPreview template={template} />
-      </div>
+      <TemplateSetPreview template={template} />
     </button>
   );
 }
