@@ -2,15 +2,15 @@ import { useState } from 'react';
 import FrameExport from './FrameExport';
 import QRExporter from './QRExporter';
 import ExportManager from './ExportManager';
+import { storeExportLabel } from '../utils/exportHelper';
 
 /**
- * Export panel for the left design sidebar (metadata + ZIP + View handoff).
+ * Export panel — store size is locked to the selected template.
  */
 export default function ExportPanel({
   frames,
   getLiveCanvases,
   exportPreset,
-  setExportPreset,
   appName,
   setAppName,
   tagline,
@@ -29,6 +29,10 @@ export default function ExportPanel({
   textOverlay,
 }) {
   const [exportedUrls, setExportedUrls] = useState([]);
+  const sizeLabel = storeExportLabel(
+    template?.store || exportPreset,
+    template?.canvas || { width: canvasWidth, height: canvasHeight },
+  );
 
   return (
     <div className="space-y-5">
@@ -53,15 +57,15 @@ export default function ExportPanel({
           }}
           className="w-full px-2.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-bg text-glint-text"
         />
-        <select
-          value={exportPreset}
-          onChange={(e) => setExportPreset(e.target.value)}
-          className="w-full px-2.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-bg text-glint-text"
-        >
-          <option value="play">Play Store (1080×1920)</option>
-          <option value="ios">App Store Phone (1290×2796)</option>
-          <option value="ios-tablet">App Store Tablet (2048×2732)</option>
-        </select>
+        <div className="rounded-lg border border-glint-border bg-glint-bg px-2.5 py-2 space-y-0.5">
+          <p className="text-[10px] uppercase tracking-wider text-glint-text-tertiary">Export size</p>
+          <p className="text-xs font-medium text-glint-text">{sizeLabel}</p>
+          <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
+            {template
+              ? 'Locked to your template. Change store under Templates (Play / App Store / iPad).'
+              : 'Pick a Play / App Store / iPad template to set export size.'}
+          </p>
+        </div>
         <p className="text-[10px] text-glint-text-tertiary">
           ZIP is named from app name, or glint.zip if empty.
         </p>

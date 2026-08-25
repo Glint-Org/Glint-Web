@@ -29,7 +29,7 @@ import {
   replaceDeviceFrame,
 } from '../utils/canvasEngine';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
-import { EXPORT_PRESETS } from '../utils/exportHelper';
+import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
 
@@ -117,7 +117,7 @@ export default function Editor() {
 
   const loadTemplate = (t) => {
     setTemplate(t);
-    if (t?.store) setExportPreset(t.store === 'ios-tablet' ? 'ios-tablet' : t.store);
+    if (t?.store) setExportPreset(resolveStoreKey(t.store));
     if (t) applyTemplatePack(t, { resizeToPack: true });
   };
 
@@ -204,7 +204,7 @@ export default function Editor() {
     setSession(importedSession);
     setAppName(importedSession.app ?? '');
     setTagline(importedSession.tagline ?? '');
-    setExportPreset(importedSession.store ?? 'play');
+    setExportPreset(resolveStoreKey(importedSession.store ?? 'play'));
     mapScreenshots(imported);
   };
 
@@ -549,7 +549,7 @@ export default function Editor() {
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4 hide-scrollbar">
               {leftTab === 'templates' && (
-                <TemplateGallery onChange={handleSelectTemplate} />
+                <TemplateGallery onChange={handleSelectTemplate} activeStore={exportPreset} />
               )}
               {leftTab === 'assets' && (
                 <>
@@ -599,7 +599,6 @@ export default function Editor() {
                   frames={frames}
                   getLiveCanvases={getLiveCanvases}
                   exportPreset={exportPreset}
-                  setExportPreset={setExportPreset}
                   appName={appName}
                   setAppName={setAppName}
                   tagline={tagline}

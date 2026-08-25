@@ -48,6 +48,22 @@ export function generateSessionJson(screens, appName, tagline, store = 'play') {
 
 export const EXPORT_PRESETS = {
   play: { width: 1080, height: 1920, label: 'Play Store', filename: 'screen' },
-  ios: { width: 1290, height: 2796, label: 'App Store Phone', filename: 'ios_screen' },
-  'ios-tablet': { width: 2048, height: 2732, label: 'App Store Tablet', filename: 'ipad_screen' },
+  ios: { width: 1290, height: 2796, label: 'App Store (iPhone)', filename: 'ios_screen' },
+  'ios-tablet': { width: 2048, height: 2732, label: 'App Store (iPad)', filename: 'ipad_screen' },
 };
+
+/** Normalize template.store / session.store to an export preset key. */
+export function resolveStoreKey(store) {
+  if (store === 'ios-tablet' || store === 'ipad') return 'ios-tablet';
+  if (store === 'ios' || store === 'iphone') return 'ios';
+  if (store === 'play' || store === 'android') return 'play';
+  return EXPORT_PRESETS[store] ? store : 'play';
+}
+
+export function storeExportLabel(store, canvas) {
+  const key = resolveStoreKey(store);
+  const preset = EXPORT_PRESETS[key];
+  const w = canvas?.width ?? preset.width;
+  const h = canvas?.height ?? preset.height;
+  return `${preset.label} · ${w}×${h}`;
+}

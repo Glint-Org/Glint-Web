@@ -23,6 +23,19 @@ export function getTheme(themeId, themes) {
   return themes[themeId] || { type: 'solid', value: '#1C1C1E' };
 }
 
+/** Filters for home + editor template gallery (matches template.store). */
+export const STORE_FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'play', label: 'Play Store' },
+  { id: 'ios', label: 'App Store' },
+  { id: 'ios-tablet', label: 'iPad' },
+];
+
+export function filterTemplatesByStore(templates, storeFilter) {
+  if (!storeFilter || storeFilter === 'all') return templates;
+  return templates.filter((t) => t.store === storeFilter);
+}
+
 /** Curated store-only templates - simple, premium, few. */
 export const TEMPLATE_IDS = [
   // Pixel-matched Figma packs

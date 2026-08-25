@@ -4,15 +4,10 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
-import { loadAllTemplates } from '../utils/templateLoader';
+import { loadAllTemplates, STORE_FILTERS, filterTemplatesByStore } from '../utils/templateLoader';
 import TemplateSetPreview from '../components/TemplateSetPreview';
 
-const CATEGORIES = [
-  { id: 'all', label: 'All' },
-  { id: 'play', label: 'Play Store' },
-  { id: 'ios', label: 'App Store' },
-  { id: 'ios-tablet', label: 'iPad' },
-];
+const CATEGORIES = STORE_FILTERS;
 
 export default function Home() {
   const [templates, setTemplates] = useState([]);
@@ -27,9 +22,7 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredTemplates = activeCategory === 'all'
-    ? templates
-    : templates.filter((t) => t.store === activeCategory);
+  const filteredTemplates = filterTemplatesByStore(templates, activeCategory);
 
   const handleUpload = (files) => {
     const urls = files.map((f) => URL.createObjectURL(f));
