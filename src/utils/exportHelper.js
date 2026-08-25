@@ -19,6 +19,31 @@ export function zipFileName(appName) {
   return slug ? `${slug}.zip` : 'glint.zip';
 }
 
+/**
+ * Build store ZIP filenames.
+ * @param {'flat'|'fastlane'} layout
+ * @param {string} locale - e.g. en-US (Fastlane phoneScreenshots/{locale}/)
+ */
+export function buildExportFilenames(count, {
+  exportPreset = 'play',
+  layout = 'flat',
+  locale = 'en-US',
+} = {}) {
+  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const prefix = preset.filename ?? 'screen';
+  const files = [];
+  for (let i = 0; i < count; i++) {
+    const base = `${prefix}_${i + 1}.png`;
+    if (layout === 'fastlane') {
+      const folder = preset.fastlaneFolder || 'phoneScreenshots';
+      files.push(`${folder}/${locale}/${base}`);
+    } else {
+      files.push(base);
+    }
+  }
+  return files;
+}
+
 export async function downloadBatchZip(dataUrls, filenames, zipName = 'glint.zip') {
   const zip = new JSZip();
   dataUrls.forEach((url, i) => {
@@ -35,21 +60,59 @@ export async function downloadBatchZip(dataUrls, filenames, zipName = 'glint.zip
   URL.revokeObjectURL(link.href);
 }
 
-export function generateSessionJson(screens, appName, tagline, store = 'play') {
+/** Return ZIP as Blob (for headless / MCP). */
+export async function buildZipBlob(dataUrls, filenames) {
+  const zip = new JSZip();
+  dataUrls.forEach((url, i) => {
+    const base64 = url.split(',')[1];
+    zip.file(filenames[i] || `screenshot_${i + 1}.png`, base64, { base64: true });
+  });
+  return zip.generateAsync({ type: 'blob' });
+}
+
+export function generateSessionJson(screens, appName, tagline, store = 'play', extra = {}) {
   return JSON.stringify({
     app: appName,
     tagline,
     screens,
     store,
     version: '1.0',
+    locales: extra.locales || ['en-US'],
     exportedAt: new Date().toISOString(),
+    ...extra,
   }, null, 2);
 }
 
 export const EXPORT_PRESETS = {
-  play: { width: 1080, height: 1920, label: 'Play Store', filename: 'screen' },
-  ios: { width: 1290, height: 2796, label: 'App Store (iPhone)', filename: 'ios_screen' },
-  'ios-tablet': { width: 2048, height: 2732, label: 'App Store (iPad)', filename: 'ipad_screen' },
+  play: {
+    width: 1080,
+    height: 1920,
+    label: 'Play Store',
+    filename: 'screen',
+    fastlaneFolder: 'phoneScreenshots',
+  },
+  ios: {
+    width: 1290,
+    height: 2796,
+    label: 'App Store (iPhone)',
+    filename: 'ios_screen',
+    fastlaneFolder: 'phoneScreenshots',
+  },
+  'ios-tablet': {
+    width: 2048,
+    height: 2732,
+    label: 'App Store (iPad)',
+    filename: 'ipad_screen',
+    fastlaneFolder: 'tabletScreenshots',
+  },
+  /** Google Play feature graphic */
+  'feature-graphic': {
+    width: 1024,
+    height: 500,
+    label: 'Play Feature Graphic',
+    filename: 'feature_graphic',
+    fastlaneFolder: 'featureGraphic',
+  },
 };
 
 /** Normalize template.store / session.store to an export preset key. */
@@ -57,6 +120,7 @@ export function resolveStoreKey(store) {
   if (store === 'ios-tablet' || store === 'ipad') return 'ios-tablet';
   if (store === 'ios' || store === 'iphone') return 'ios';
   if (store === 'play' || store === 'android') return 'play';
+  if (store === 'feature-graphic' || store === 'feature') return 'feature-graphic';
   return EXPORT_PRESETS[store] ? store : 'play';
 }
 

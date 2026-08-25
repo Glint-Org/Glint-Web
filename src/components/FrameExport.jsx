@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { applyDesignToFrame } from '../utils/templateEngine';
 import { createCanvas } from '../utils/canvasEngine';
-import { downloadBatchZip, EXPORT_PRESETS, zipFileName } from '../utils/exportHelper';
+import {
+  downloadBatchZip,
+  EXPORT_PRESETS,
+  zipFileName,
+  buildExportFilenames,
+} from '../utils/exportHelper';
 
 /**
  * Export each Frame as an ordered store PNG in a ZIP.
@@ -16,10 +21,12 @@ export default function FrameExport({
   canvasWidth = 1080,
   canvasHeight = 1920,
   onPreviewsReady,
+  locale = 'en-US',
 }) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState('');
   const [previews, setPreviews] = useState([]);
+  const [layout, setLayout] = useState('flat');
 
   const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
 
@@ -88,10 +95,15 @@ export default function FrameExport({
         results = await renderFrames();
         publishPreviews(results);
       }
-      const prefix = preset.filename ?? 'screen';
-      const filenames = results.map((_, i) => `${prefix}_${i + 1}.png`);
+      const filenames = buildExportFilenames(results.length, {
+        exportPreset,
+        layout,
+        locale,
+      });
       await downloadBatchZip(results, filenames, zipFileName(appName));
-      setProgress(`Exported ${results.length} screenshot(s) as ZIP (${preset.label})`);
+      setProgress(
+        `Exported ${results.length} screenshot(s) as ZIP (${preset.label}${layout === 'fastlane' ? ', Fastlane' : ''})`,
+      );
     } catch (err) {
       setProgress(`Error: ${err.message}`);
     } finally {
@@ -105,7 +117,19 @@ export default function FrameExport({
       <p className="text-xs text-glint-text-secondary">
         {frames.length} frame(s) · {preset.label}
       </p>
+      <label className="flex items-center justify-between gap-2 text-xs text-glint-text-secondary">
+        <span>ZIP layout</span>
+        <select
+          value={layout}
+          onChange={(e) => setLayout(e.target.value)}
+          className="px-2 py-1 rounded-lg border border-glint-border bg-glint-surface text-glint-text"
+        >
+          <option value="flat">Flat (screen_N.png)</option>
+          <option value="fastlane">Fastlane folders</option>
+        </select>
+      </label>
       <button
+        type="button"
         onClick={handlePreview}
         disabled={!frames.length || processing}
         className="w-full px-4 py-2.5 glint-btn-primary rounded-xl text-sm"
@@ -113,6 +137,7 @@ export default function FrameExport({
         {processing ? 'Processing...' : 'Preview All Frames'}
       </button>
       <button
+        type="button"
         onClick={handleExportZip}
         disabled={!frames.length || processing}
         className="w-full px-4 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"

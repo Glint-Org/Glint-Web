@@ -189,6 +189,7 @@ function TemplateShowcaseRow({ template, onClick, index = 0 }) {
     <button
       ref={ref}
       onClick={onClick}
+      data-template-id={template.id}
       aria-label={template.name || template.id || 'Use template'}
       title={template.name || template.id}
       className={`group w-full rounded-2xl overflow-hidden border border-glint-border bg-glint-surface

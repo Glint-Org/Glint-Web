@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { getTemplateSlides } from '../utils/templateEngine';
 import { renderTemplateStrip } from '../utils/templatePreview';
+import { resolveStaticPreview } from '../utils/templatePreviewSrc';
 
 /**
- * Template strip: pack background color + exact-aspect frames (no stretch / crop / scroll).
+ * Template strip: prefers static `/templates/previews/{id}.*`, else live Fabric.
+ * Pack background color + exact-aspect frames (no stretch / crop / scroll).
  */
 export default function TemplateSetPreview({ template, compact = false }) {
   const slides = getTemplateSlides(template);
   const rootRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [urls, setUrls] = useState([]);
+  const [staticSrc, setStaticSrc] = useState(null);
   const [ready, setReady] = useState(false);
   const [frameH, setFrameH] = useState(compact ? 140 : 260);
 
@@ -35,7 +38,6 @@ export default function TemplateSetPreview({ template, compact = false }) {
     return () => io.disconnect();
   }, []);
 
-  // Fit frame height so all slides sit side-by-side at true aspect — no overflow, no stretch.
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return undefined;
@@ -58,16 +60,47 @@ export default function TemplateSetPreview({ template, compact = false }) {
     if (!visible || !template?.id) return undefined;
 
     setReady(false);
-    renderTemplateStrip(template).then((next) => {
+    setStaticSrc(null);
+    setUrls([]);
+
+    (async () => {
+      const staticUrl = await resolveStaticPreview(template.id);
+      if (cancelled) return;
+      if (staticUrl) {
+        setStaticSrc(staticUrl);
+        setReady(true);
+        return;
+      }
+      const next = await renderTemplateStrip(template);
       if (cancelled) return;
       setUrls(next);
       setReady(true);
-    });
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [visible, template?.id]);
+
+  const stripH = frameH + (compact ? 16 : 24);
+
+  if (staticSrc) {
+    return (
+      <div
+        ref={rootRef}
+        className={`flex w-full items-center justify-center overflow-hidden ${compact ? 'px-1.5 py-2' : 'px-3 py-3'}`}
+        style={{ background: accent, minHeight: stripH }}
+      >
+        <img
+          src={staticSrc}
+          alt=""
+          className="max-h-full w-auto max-w-full object-contain pointer-events-none"
+          style={{ height: frameH }}
+          draggable={false}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -75,7 +108,7 @@ export default function TemplateSetPreview({ template, compact = false }) {
       className={`flex w-full items-center justify-center overflow-hidden ${compact ? 'px-1.5 py-2' : 'px-3 py-3'}`}
       style={{
         background: accent,
-        minHeight: frameH + (compact ? 16 : 24),
+        minHeight: stripH,
         gap,
       }}
     >

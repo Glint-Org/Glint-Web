@@ -62,6 +62,7 @@ export default function TemplateGallery({ onChange, activeStore }) {
             <button
               key={t.id}
               type="button"
+              data-template-id={t.id}
               title={t.name || t.id}
               onClick={() => onChange(t)}
               className="group w-full rounded-xl overflow-hidden border border-glint-border hover:border-glint-accent/50 hover:shadow-md transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"

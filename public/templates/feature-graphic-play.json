@@ -1,0 +1,38 @@
+{
+  "id": "feature-graphic-play",
+  "name": "Feature Graphic",
+  "store": "feature-graphic",
+  "canvas": { "width": 1024, "height": 500 },
+  "preview": { "bg": "#12151A" },
+  "frames": [
+    {
+      "id": "fg-1",
+      "layers": [
+        {
+          "type": "background",
+          "fill": "#12151A"
+        },
+        {
+          "type": "text",
+          "role": "headline",
+          "placeholder": "Your app, store-ready",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fill": "#FFFFFF",
+          "position": "center",
+          "marginTop": -40
+        },
+        {
+          "type": "text",
+          "role": "subheadline",
+          "placeholder": "Real screenshots. Fast export.",
+          "fontSize": 24,
+          "fontWeight": "500",
+          "fill": "#F5D06F",
+          "position": "center",
+          "marginTop": 40
+        }
+      ]
+    }
+  ]
+}

@@ -29,6 +29,7 @@ export const STORE_FILTERS = [
   { id: 'play', label: 'Play Store' },
   { id: 'ios', label: 'App Store' },
   { id: 'ios-tablet', label: 'iPad' },
+  { id: 'feature-graphic', label: 'Feature graphic' },
 ];
 
 export function filterTemplatesByStore(templates, storeFilter) {
@@ -59,6 +60,7 @@ export const TEMPLATE_IDS = [
   'ios-wave',
   'ios-dark',
   'tablet-showcase',
+  'feature-graphic-play',
 ];
 
 export async function loadTemplate(templateId) {
