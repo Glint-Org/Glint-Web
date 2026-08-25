@@ -9,9 +9,9 @@ Use this editor to turn real screenshots into polished store frames.
 
 ## Must keep
 
-1. Left sidebar: Templates · Assets · Frames · Export
-2. Center: frames board (1–10 store-size artboards), not an infinite canvas
-3. Right sidebar: design properties for the selected frame/object
+1. Left sidebar: Templates · Assets · Frames · Export (workflow)
+2. Right sidebar Design: device frame dropdown, graphic preview tiles, font dropdown, canvas
+3. Center: frames board (1–10 store-size artboards), not an infinite canvas
 4. Device frames must fill screenshot insets without gaps
 5. Export sizes stay store-correct (Play / iOS / iPad presets)
 6. ZIP naming: `{appName}.zip` when app name exists, else `glint.zip`

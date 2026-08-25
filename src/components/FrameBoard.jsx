@@ -89,10 +89,10 @@ export default function FrameBoard({
               </div>
 
               <div
-                className={`relative overflow-hidden rounded-md bg-glint-surface shadow-xl transition-shadow ${
+                className={`relative overflow-hidden rounded-md bg-glint-surface transition-all duration-150 ${
                   selected
-                    ? 'ring-2 ring-glint-accent shadow-glint-accent/20'
-                    : 'ring-1 ring-glint-border'
+                    ? 'ring-2 ring-glint-accent shadow-lg shadow-glint-accent/25 scale-[1.01]'
+                    : 'ring-1 ring-glint-border shadow-xl opacity-90 hover:opacity-100'
                 }`}
               >
                 <FrameCanvas

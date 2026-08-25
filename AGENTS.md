@@ -1,26 +1,23 @@
 # Glint-Web - Agent Instructions
 
-Glint-Web is the frames editor in the Glint ecosystem (AppLaunchpad-style board, not an infinite canvas).
+Glint-Web is the frames editor (AppLaunchpad-style board).
 
-## Core UI model
+## Sidebars
 
-- Left sidebar: `Templates` · `Assets` · `Frames` · `Export`
-- Center: **frames board** (1–10 store-size artboards)
-- Right sidebar: design controls for the selected frame/object
+**Left** (workflow tabs): Templates · Assets · Frames · Export
+
+**Right** (Design tabs):
+- `Device` — visual device bezel tiles (replace selected / active artboard device)
+- `Graphics` — visual graphic preview tiles
+- `Colors` — background swatches
+- `Design` — text insert, fonts, typography
+
+**Center:** frames board. Active artboard has accent ring; Fabric objects use gold selection handles.
 
 ## Rules
 
-1. Real UI only (do not fabricate app features)
-2. `session.json` + PNGs are the import contract
-3. Store sizes must stay correct:
-   - Play: `1080x1920`
-   - iOS phone: `1290x2796`
-   - iPad: `2048x2732`
-4. If app name is set, export ZIP as `{AppName}.zip`; else `glint.zip`
-5. View handoff: after Preview/Export, **Copy for Glint View** embeds `data:` screens (QR is metadata-only)
-
-## Related docs
-
-- `../Glint-Docs/guides/using-glint.md`
-- `../Glint-Docs/guides/ai-workflow.md`
-- `../Glint-Docs/reference/session-schema.md`
+1. Real UI only
+2. `session.json` + PNGs import contract
+3. Store sizes: Play `1080x1920`, iOS phone `1290x2796`, iPad `2048x2732`
+4. ZIP `{AppName}.zip` or `glint.zip`
+5. View handoff via Copy for Glint View (`data:` screens)
