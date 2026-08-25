@@ -26,6 +26,7 @@ import {
   deleteActiveObjects,
   setBackground,
   replaceDeviceScreenshot,
+  replaceDeviceFrame,
 } from '../utils/canvasEngine';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { EXPORT_PRESETS } from '../utils/exportHelper';
@@ -159,6 +160,45 @@ export default function Editor() {
     if (!activeCanvas) return;
     deleteActiveObjects(activeCanvas);
   }, [activeCanvas]);
+
+  const handleDeviceFrameChange = useCallback(async (nextId) => {
+    setDeviceFrame(nextId);
+    if (!nextId) return;
+
+    // Replace every device bezel on the board; keep each frame's screenshot (cover-filled).
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+      const canvas = canvasMapRef.current[frame.id];
+      if (!canvas) continue;
+
+      const devices = canvas
+        .getObjects()
+        .filter((o) => o.glintRole === 'framed-screenshot');
+      const shotUrl = frame.screenshotUrl;
+
+      for (const device of [...devices]) {
+        if (!device.glintScreenshotUrl && shotUrl) {
+          device.set({ glintScreenshotUrl: shotUrl });
+        }
+        const ok = await replaceDeviceFrame(device, nextId, shotUrl || device.glintScreenshotUrl);
+        if (!ok && shotUrl) {
+          // Fallback: force screenshot onto device then retry once.
+          device.set({ glintScreenshotUrl: shotUrl });
+          await replaceDeviceFrame(device, nextId, shotUrl);
+        }
+      }
+    }
+
+    if (activeCanvas && nextId) {
+      const refreshed = activeCanvas
+        .getObjects()
+        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === nextId);
+      if (refreshed) {
+        activeCanvas.setActiveObject(refreshed);
+        activeCanvas.requestRenderAll();
+      }
+    }
+  }, [activeCanvas, frames]);
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
@@ -503,6 +543,9 @@ export default function Editor() {
               )}
               {leftTab === 'assets' && (
                 <>
+                  <p className="text-[10px] text-glint-text-tertiary">
+                    Import screenshots or a Capture/Bridge session folder.
+                  </p>
                   <div className="space-y-2">
                     <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
                       Import
@@ -526,15 +569,20 @@ export default function Editor() {
                 </>
               )}
               {leftTab === 'frames' && (
-                <FramesPanel
-                  frames={frames}
-                  activeIndex={activeIndex}
-                  onSelectFrame={setActiveIndex}
-                  canvas={activeCanvas}
-                  getCanvasForFrame={getCanvasForFrame}
-                  canvasWidth={canvasW}
-                  canvasHeight={canvasH}
-                />
+                <>
+                  <p className="text-[10px] text-glint-text-tertiary">
+                    Select a frame and reorder layers. Device bezels live in Design (right).
+                  </p>
+                  <FramesPanel
+                    frames={frames}
+                    activeIndex={activeIndex}
+                    onSelectFrame={setActiveIndex}
+                    canvas={activeCanvas}
+                    getCanvasForFrame={getCanvasForFrame}
+                    canvasWidth={canvasW}
+                    canvasHeight={canvasH}
+                  />
+                </>
               )}
               {leftTab === 'export' && (
                 <ExportPanel
@@ -578,7 +626,8 @@ export default function Editor() {
               background={background}
               onBackgroundChange={handleBackgroundChange}
               frame={deviceFrame}
-              onFrameChange={setDeviceFrame}
+              onFrameChange={handleDeviceFrameChange}
+              onFrameHighlight={setDeviceFrame}
               screenshotStyle={screenshotStyle}
               onScreenshotStyleChange={handleScreenshotStyleChange}
               fontFamily={fontFamily}
