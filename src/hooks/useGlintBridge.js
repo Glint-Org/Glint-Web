@@ -56,10 +56,23 @@ export function useGLINTBridge() {
         return;
       }
 
+      const isBrowserUrl = (u) =>
+        typeof u === 'string' &&
+        (u.startsWith('data:') ||
+          u.startsWith('blob:') ||
+          u.startsWith('http://') ||
+          u.startsWith('https://'));
+
       if (msg.type === 'screenshot') {
-        setScreenshots((prev) => [...prev, msg.path]);
+        if (isBrowserUrl(msg.data_url)) {
+          setScreenshots((prev) => [...prev, msg.data_url]);
+        } else {
+          setError('Bridge sent no image data. Update Glint Bridge and capture again.');
+        }
       } else if (msg.type === 'batch_result' || msg.type === 'crawl_result') {
-        setScreenshots((prev) => [...prev, ...msg.paths]);
+        const urls = (msg.data_urls || []).filter(isBrowserUrl);
+        if (urls.length) setScreenshots((prev) => [...prev, ...urls]);
+        else setError('Bridge sent no image data. Update Glint Bridge and capture again.');
       } else if (msg.type === 'devices') {
         setDevices([...msg.usb, ...msg.wifi]);
       }

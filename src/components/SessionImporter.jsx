@@ -1,5 +1,17 @@
 import { useCallback, useRef } from 'react';
 
+/** Prefer one platform/device prefix so frames map to a coherent screen sequence. */
+function preferPrimaryDeviceScreens(screens) {
+  if (!Array.isArray(screens) || screens.length === 0) return screens;
+  const first = screens.find((s) => typeof s === 'string' && s.includes('/'));
+  if (!first) return screens;
+  const parts = first.split('/');
+  if (parts.length < 3) return screens;
+  const prefix = `${parts[0]}/${parts[1]}/`;
+  const filtered = screens.filter((s) => typeof s === 'string' && s.startsWith(prefix));
+  return filtered.length ? filtered : screens;
+}
+
 /**
  * Import session.json + PNG files from a folder (glint_capture or Bridge output).
  */
@@ -25,7 +37,9 @@ export default function SessionImporter({ onImport }) {
       throw new Error('No session.json or PNG files found in folder');
     }
 
-    const screenOrder = sessionData?.screens ?? pngFiles.map((f) => f.name).sort();
+    const screenOrder = preferPrimaryDeviceScreens(
+      sessionData?.screens ?? pngFiles.map((f) => f.name).sort(),
+    );
     // Prefer relative folder paths (webkitdirectory) so Capture nested paths resolve.
     const urlMap = new Map();
     for (const f of pngFiles) {
@@ -76,12 +90,20 @@ export default function SessionImporter({ onImport }) {
     try {
       const session = JSON.parse(json);
       const screens = session.screens ?? [];
-      const hasBlobUrls = screens.some((s) => typeof s === 'string' && s.startsWith('blob:'));
-      if (screens.length > 0 && !hasBlobUrls) {
-        alert('Pasted session contains file paths, not image data.\n\nUse "Import Folder" to load session.json + PNG files together.');
+      const isLoadable = (s) =>
+        typeof s === 'string' &&
+        (s.startsWith('blob:') ||
+          s.startsWith('data:') ||
+          s.startsWith('http://') ||
+          s.startsWith('https://'));
+      const loadable = screens.filter(isLoadable);
+      if (screens.length > 0 && loadable.length === 0) {
+        alert(
+          'Pasted session has filenames only, not image data.\n\nUse "Import Folder" for session.json + PNGs, or paste a session from Glint View handoff (data: URLs).',
+        );
         return;
       }
-      onImport({ screenshots: screens, session });
+      onImport({ screenshots: loadable.length ? loadable : screens, session });
     } catch {
       alert('Invalid JSON');
     }
