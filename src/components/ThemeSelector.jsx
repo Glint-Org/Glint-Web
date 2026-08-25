@@ -64,11 +64,14 @@ export default function ThemeSelector({ selected, onChange }) {
 
   return (
     <div className="space-y-2">
-      <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">Background</h3>
+      <p className="text-[10px] text-glint-text-tertiary">
+        Background for the active store frame. Selected swatch is highlighted.
+      </p>
       <div className="grid grid-cols-4 gap-1.5">
         {THEMES.map((t) => (
           <button
             key={t.label}
+            type="button"
             onClick={() => onChange(t)}
             title={t.label}
             className={`group relative rounded-lg overflow-hidden border-2 transition-all aspect-square ${

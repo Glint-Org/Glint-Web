@@ -4,8 +4,8 @@ import ColorPicker from './ColorPicker';
 import FontPicker from './FontPicker';
 import ThemeSelector from './ThemeSelector';
 import FrameSelector from './FrameSelector';
+import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
-import { GRAPHICS } from '../utils/graphicsCatalog';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
 
 const FONT_SIZES = [24, 32, 40, 48, 56, 64, 72, 80, 96, 120];
@@ -17,10 +17,19 @@ const WEIGHTS = [
   { value: '800', label: 'Extra' },
 ];
 
+const RIGHT_TABS = [
+  { id: 'device', label: 'Device' },
+  { id: 'graphics', label: 'Graphics' },
+  { id: 'colors', label: 'Colors' },
+  { id: 'design', label: 'Design' },
+];
+
 function Section({ title, children }) {
   return (
     <section className="space-y-2.5">
-      <h3 className="text-[10px] font-semibold text-glint-text-secondary uppercase tracking-wider">{title}</h3>
+      {title ? (
+        <h3 className="text-[10px] font-semibold text-glint-text-secondary uppercase tracking-wider">{title}</h3>
+      ) : null}
       {children}
     </section>
   );
@@ -31,8 +40,7 @@ function ColorField({ label, value, onChange }) {
 }
 
 /**
- * Right sidebar - Figma-style design properties only.
- * Left sidebar owns templates, assets, export.
+ * Right sidebar — tabbed Design tools (Device / Graphics / Colors / Design).
  */
 export default function PropertiesPanel({
   canvas,
@@ -40,6 +48,7 @@ export default function PropertiesPanel({
   onBackgroundChange,
   frame,
   onFrameChange,
+  onFrameHighlight,
   screenshotStyle,
   onScreenshotStyleChange,
   fontFamily,
@@ -48,6 +57,7 @@ export default function PropertiesPanel({
   onDelete,
   templateActive = false,
 }) {
+  const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
   const [textProps, setTextProps] = useState({
     text: '',
@@ -70,6 +80,16 @@ export default function PropertiesPanel({
       const role = obj.glintRole;
       const isText = role === 'text' || obj.type === 'textbox' || obj.type === 'i-text' || obj.type === 'text';
       setSelection({ type: isText ? 'text' : role || obj.type, obj });
+
+      if (role === 'framed-screenshot' && obj.glintFrameId) {
+        onFrameHighlight?.(obj.glintFrameId);
+        setRightTab('device');
+      } else if (role === 'graphic') {
+        setRightTab('graphics');
+      } else if (isText) {
+        setRightTab('design');
+      }
+
       if (isText) {
         setTextProps({
           text: obj.text || '',
@@ -93,7 +113,7 @@ export default function PropertiesPanel({
       canvas.off('selection:cleared');
       canvas.off('object:modified', sync);
     };
-  }, [canvas]);
+  }, [canvas, onFrameHighlight]);
 
   const applyToSelection = (patch) => {
     if (!canvas || !selection?.obj) return;
@@ -107,6 +127,7 @@ export default function PropertiesPanel({
 
   const isText = selection?.type === 'text';
   const isGraphic = selection?.obj?.glintRole === 'graphic' || selection?.type === 'graphic';
+  const isDevice = selection?.obj?.glintRole === 'framed-screenshot';
   const graphicFills = selection?.obj?.glintFills || { a: '#FF6B4A', b: '#FFD166', c: '#FFFFFF' };
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
   const showScreenshotStyle = !frame && !templateActive;
@@ -130,232 +151,229 @@ export default function PropertiesPanel({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-3 py-2.5 border-b border-glint-border shrink-0">
-        <h2 className="text-[11px] font-semibold text-glint-text uppercase tracking-wider">Design</h2>
-        <p className="text-[10px] text-glint-text-tertiary mt-0.5">
-          {isText ? 'Text layer' : isGraphic ? 'Graphic' : selection ? 'Layer selected' : 'Canvas'}
-        </p>
+      <div className="flex border-b border-glint-border shrink-0">
+        {RIGHT_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setRightTab(tab.id)}
+            className={`flex-1 px-1 py-2.5 text-[11px] font-medium transition-colors ${
+              rightTab === tab.id
+                ? 'text-glint-accent border-b-2 border-glint-accent'
+                : 'text-glint-text-secondary hover:text-glint-text'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-5">
-        {/* Actions - always visible */}
-        <Section title="Insert">
-          <div className="flex gap-1.5">
-            <button
-              onClick={onAddText}
-              className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-glint-accent text-glint-text-on-accent text-xs font-semibold hover:bg-glint-accent-hover"
-            >
-              <Type size={14} /> Text
-            </button>
-            <button
-              onClick={onDelete}
-              disabled={!selection}
-              className="px-2.5 py-2 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-danger hover:bg-glint-surface-2 disabled:opacity-40"
-              title="Delete selected (Del)"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        </Section>
-
-        <Section title="Graphics">
-          <select
-            defaultValue=""
-            onChange={(e) => {
-              const src = e.target.value;
-              if (src) handleInsertGraphic(src);
-              e.target.value = '';
-            }}
-            className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
-          >
-            <option value="" disabled>Insert graphic…</option>
-            {GRAPHICS.map((g) => (
-              <option key={g.id} value={g.src}>{g.label}</option>
-            ))}
-          </select>
-          <p className="text-[10px] text-glint-text-tertiary">Select a graphic on the canvas to recolor it.</p>
-        </Section>
-
-        {isGraphic && (
-          <Section title="Graphic colors">
-            <ColorField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
-            <ColorField label="Fill B" value={graphicFills.b || '#FFD166'} onChange={(v) => handleGraphicFill('b', v)} />
-            <ColorField label="Fill C" value={graphicFills.c || '#FFFFFF'} onChange={(v) => handleGraphicFill('c', v)} />
-            <label className="space-y-1 block">
-              <span className="text-[10px] text-glint-text-tertiary">Opacity</span>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={Math.round((selection.obj.opacity ?? 1) * 100)}
-                onChange={(e) => {
-                  selection.obj.set('opacity', Number(e.target.value) / 100);
-                  canvas.requestRenderAll();
-                }}
-                className="w-full accent-glint-accent"
-              />
-            </label>
-            <p className="text-[10px] text-glint-text-tertiary">Drag on canvas to move or scale.</p>
-          </Section>
-        )}
-
-        {/* Text - when text layer selected */}
-        {isText && (
-          <Section title="Typography">
-            <textarea
-              value={textProps.text}
-              onChange={(e) => applyToSelection({ text: e.target.value })}
-              rows={3}
-              placeholder="Headline or caption"
-              className="w-full px-2.5 py-2 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text resize-none"
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <label className="space-y-1">
-                <span className="text-[10px] text-glint-text-tertiary">Size</span>
-                <select
-                  value={textProps.fontSize}
-                  onChange={(e) => applyToSelection({ fontSize: Number(e.target.value) })}
-                  className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
-                >
-                  {!FONT_SIZES.includes(textProps.fontSize) && (
-                    <option value={textProps.fontSize}>{textProps.fontSize}</option>
-                  )}
-                  {FONT_SIZES.map((s) => (
-                    <option key={s} value={s}>{s}px</option>
-                  ))}
-                </select>
-              </label>
-              <label className="space-y-1">
-                <span className="text-[10px] text-glint-text-tertiary">Weight</span>
-                <select
-                  value={textProps.fontWeight}
-                  onChange={(e) => applyToSelection({ fontWeight: e.target.value })}
-                  className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
-                >
-                  {WEIGHTS.map((w) => (
-                    <option key={w.value} value={w.value}>{w.label}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <ColorField
-              label="Fill"
-              value={textProps.fill}
-              onChange={(v) => applyToSelection({ fill: v })}
-            />
-            <div className="flex gap-1">
-              {[
-                { id: 'left', Icon: AlignLeft },
-                { id: 'center', Icon: AlignCenter },
-                { id: 'right', Icon: AlignRight },
-              ].map(({ id, Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => applyToSelection({
-                    textAlign: id,
-                    originX: id === 'left' ? 'left' : id === 'right' ? 'right' : 'center',
-                  })}
-                  className={`flex-1 flex justify-center py-1.5 rounded-lg border transition-colors ${
-                    textProps.textAlign === id
-                      ? 'border-glint-accent bg-glint-accent-muted text-glint-accent'
-                      : 'border-glint-border text-glint-text-secondary hover:bg-glint-surface-2'
-                  }`}
-                >
-                  <Icon size={14} />
-                </button>
-              ))}
-              <button
-                onClick={() => applyToSelection({
-                  fontWeight: textProps.fontWeight === '700' || textProps.fontWeight === 'bold' ? '400' : '700',
-                })}
-                className={`flex-1 flex justify-center py-1.5 rounded-lg border transition-colors ${
-                  textProps.fontWeight === '700' || textProps.fontWeight === 'bold'
-                    ? 'border-glint-accent bg-glint-accent-muted text-glint-accent'
-                    : 'border-glint-border text-glint-text-secondary hover:bg-glint-surface-2'
-                }`}
-              >
-                <Bold size={14} />
-              </button>
-            </div>
-            <FontPicker
-              compact
-              selected={textProps.fontFamily}
-              onChange={(name) => {
-                onFontFamilyChange?.(name);
-                applyToSelection({ fontFamily: name });
-              }}
-            />
-          </Section>
-        )}
-
-        {/* Default font when nothing text-selected */}
-        {!isText && (
-          <Section title="Default font">
-            <FontPicker compact selected={fontFamily} onChange={onFontFamilyChange} />
-            <p className="text-[10px] text-glint-text-tertiary">Used when you add new text layers.</p>
-          </Section>
-        )}
-
-        {/* Canvas background */}
-        <Section title="Canvas">
-          <ThemeSelector selected={background} onChange={onBackgroundChange} />
-        </Section>
-
-        {/* Device frame */}
-        {!templateActive && (
-        <Section title="Device">
-          <FrameSelector selected={frame} onChange={onFrameChange} compact />
-          {frame && (
-            <p className="text-[10px] text-glint-text-tertiary">
-              Screenshot fills the screen area exactly - no gaps.
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4">
+        {rightTab === 'device' && (
+          <>
+            <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
+              {isDevice
+                ? 'Selected device on canvas — pick a bezel to replace it.'
+                : 'Pick a device bezel. Applies to the active artboard.'}
             </p>
-          )}
-        </Section>
+            <FrameSelector selected={frame} onChange={onFrameChange} />
+            {showScreenshotStyle && (
+              <Section title="No-frame screenshot">
+                <div className="flex items-center gap-2 text-glint-text-secondary text-[10px] mb-1">
+                  <Square size={12} />
+                  <span>Style raw screenshot corners</span>
+                </div>
+                <label className="space-y-1 block">
+                  <span className="text-[10px] text-glint-text-tertiary">Corner radius</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={0}
+                      max={80}
+                      value={style.cornerRadius ?? 0}
+                      onChange={(e) => onScreenshotStyleChange?.({ cornerRadius: Number(e.target.value) })}
+                      className="flex-1 accent-glint-accent"
+                    />
+                    <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.cornerRadius ?? 0}</span>
+                  </div>
+                </label>
+                <label className="space-y-1 block">
+                  <span className="text-[10px] text-glint-text-tertiary">Border width</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={0}
+                      max={12}
+                      value={style.strokeWidth}
+                      onChange={(e) => onScreenshotStyleChange?.({ strokeWidth: Number(e.target.value) })}
+                      className="flex-1 accent-glint-accent"
+                    />
+                    <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.strokeWidth}px</span>
+                  </div>
+                </label>
+                {style.strokeWidth > 0 && (
+                  <ColorField
+                    label="Border color"
+                    value={style.strokeColor}
+                    onChange={(v) => onScreenshotStyleChange?.({ strokeColor: v })}
+                  />
+                )}
+              </Section>
+            )}
+          </>
         )}
 
-        {/* Screenshot styling - only when no device frame */}
-        {showScreenshotStyle && (
-          <Section title="Screenshot">
-            <div className="flex items-center gap-2 text-glint-text-secondary text-[10px] mb-1">
-              <Square size={12} />
-              <span>No device frame - style the raw screenshot</span>
-            </div>
-            <label className="space-y-1 block">
-              <span className="text-[10px] text-glint-text-tertiary">Corner radius</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={80}
-                  value={style.cornerRadius ?? style.cornerRadius ?? 0}
-                  onChange={(e) => onScreenshotStyleChange?.({ cornerRadius: Number(e.target.value), cornerRadius: Number(e.target.value) })}
-                  className="flex-1 accent-glint-accent"
-                />
-                <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.cornerRadius ?? style.cornerRadius ?? 0}</span>
-              </div>
-            </label>
-            <label className="space-y-1 block">
-              <span className="text-[10px] text-glint-text-tertiary">Border width</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={0}
-                  max={12}
-                  value={style.strokeWidth}
-                  onChange={(e) => onScreenshotStyleChange?.({ strokeWidth: Number(e.target.value) })}
-                  className="flex-1 accent-glint-accent"
-                />
-                <span className="text-[11px] tabular-nums w-8 text-glint-text-secondary">{style.strokeWidth}px</span>
-              </div>
-            </label>
-            {style.strokeWidth > 0 && (
-              <ColorField
-                label="Border color"
-                value={style.strokeColor}
-                onChange={(v) => onScreenshotStyleChange?.({ strokeColor: v })}
-              />
+        {rightTab === 'graphics' && (
+          <>
+            <GraphicPicker onInsert={handleInsertGraphic} />
+            {isGraphic && (
+              <Section title="Selected graphic colors">
+                <ColorField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
+                <ColorField label="Fill B" value={graphicFills.b || '#FFD166'} onChange={(v) => handleGraphicFill('b', v)} />
+                <ColorField label="Fill C" value={graphicFills.c || '#FFFFFF'} onChange={(v) => handleGraphicFill('c', v)} />
+                <label className="space-y-1 block">
+                  <span className="text-[10px] text-glint-text-tertiary">Opacity</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={Math.round((selection.obj.opacity ?? 1) * 100)}
+                    onChange={(e) => {
+                      selection.obj.set('opacity', Number(e.target.value) / 100);
+                      canvas.requestRenderAll();
+                    }}
+                    className="w-full accent-glint-accent"
+                  />
+                </label>
+              </Section>
             )}
-          </Section>
+          </>
+        )}
+
+        {rightTab === 'colors' && (
+          <ThemeSelector selected={background} onChange={onBackgroundChange} />
+        )}
+
+        {rightTab === 'design' && (
+          <>
+            <Section title="Insert">
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={onAddText}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-glint-accent text-glint-text-on-accent text-xs font-semibold hover:bg-glint-accent-hover"
+                >
+                  <Type size={14} /> Text
+                </button>
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  disabled={!selection}
+                  className="px-2.5 py-2 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-danger hover:bg-glint-surface-2 disabled:opacity-40"
+                  title="Delete selected (Del)"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </Section>
+
+            {isText ? (
+              <Section title="Typography">
+                <textarea
+                  value={textProps.text}
+                  onChange={(e) => applyToSelection({ text: e.target.value })}
+                  rows={3}
+                  placeholder="Headline or caption"
+                  className="w-full px-2.5 py-2 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text resize-none"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="text-[10px] text-glint-text-tertiary">Size</span>
+                    <select
+                      value={textProps.fontSize}
+                      onChange={(e) => applyToSelection({ fontSize: Number(e.target.value) })}
+                      className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
+                    >
+                      {!FONT_SIZES.includes(textProps.fontSize) && (
+                        <option value={textProps.fontSize}>{textProps.fontSize}</option>
+                      )}
+                      {FONT_SIZES.map((s) => (
+                        <option key={s} value={s}>{s}px</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-[10px] text-glint-text-tertiary">Weight</span>
+                    <select
+                      value={textProps.fontWeight}
+                      onChange={(e) => applyToSelection({ fontWeight: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
+                    >
+                      {WEIGHTS.map((w) => (
+                        <option key={w.value} value={w.value}>{w.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <ColorField
+                  label="Fill"
+                  value={textProps.fill}
+                  onChange={(v) => applyToSelection({ fill: v })}
+                />
+                <div className="flex gap-1">
+                  {[
+                    { id: 'left', Icon: AlignLeft },
+                    { id: 'center', Icon: AlignCenter },
+                    { id: 'right', Icon: AlignRight },
+                  ].map(({ id, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => applyToSelection({
+                        textAlign: id,
+                        originX: id === 'left' ? 'left' : id === 'right' ? 'right' : 'center',
+                      })}
+                      className={`flex-1 flex justify-center py-1.5 rounded-lg border transition-colors ${
+                        textProps.textAlign === id
+                          ? 'border-glint-accent bg-glint-accent-muted text-glint-accent'
+                          : 'border-glint-border text-glint-text-secondary hover:bg-glint-surface-2'
+                      }`}
+                    >
+                      <Icon size={14} />
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => applyToSelection({
+                      fontWeight: textProps.fontWeight === '700' || textProps.fontWeight === 'bold' ? '400' : '700',
+                    })}
+                    className={`flex-1 flex justify-center py-1.5 rounded-lg border transition-colors ${
+                      textProps.fontWeight === '700' || textProps.fontWeight === 'bold'
+                        ? 'border-glint-accent bg-glint-accent-muted text-glint-accent'
+                        : 'border-glint-border text-glint-text-secondary hover:bg-glint-surface-2'
+                    }`}
+                  >
+                    <Bold size={14} />
+                  </button>
+                </div>
+                <FontPicker
+                  compact
+                  selected={textProps.fontFamily}
+                  onChange={(name) => {
+                    onFontFamilyChange?.(name);
+                    applyToSelection({ fontFamily: name });
+                  }}
+                />
+              </Section>
+            ) : (
+              <Section title="Font">
+                <FontPicker compact selected={fontFamily} onChange={onFontFamilyChange} />
+                <p className="text-[10px] text-glint-text-tertiary">
+                  Select text on the canvas to edit it, or add a new text layer.
+                </p>
+              </Section>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -1,63 +1,64 @@
-import { Smartphone, Tablet, Minus } from 'lucide-react';
+import { Minus } from 'lucide-react';
 
 /** Curated frames only — most-used Play / App Store devices. */
 export const FRAME_OPTIONS = [
-  { id: null, label: 'None', icon: Minus },
-  { id: 'pixel9', label: 'Pixel 9', icon: Smartphone },
-  { id: 'galaxy-s24', label: 'Galaxy S24', icon: Smartphone },
-  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', icon: Smartphone },
-  { id: 'iphone16-pro', label: 'iPhone 16 Pro', icon: Smartphone },
-  { id: 'ipad-pro-13', label: 'iPad Pro 13"', icon: Tablet },
-  { id: 'ipad-pro', label: 'iPad Pro 11"', icon: Tablet },
+  { id: null, label: 'None' },
+  { id: 'pixel9', label: 'Pixel 9' },
+  { id: 'galaxy-s24', label: 'Galaxy S24' },
+  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max' },
+  { id: 'iphone16-pro', label: 'iPhone 16 Pro' },
+  { id: 'ipad-pro-13', label: 'iPad Pro 13"' },
+  { id: 'ipad-pro', label: 'iPad Pro 11"' },
 ];
 
-export default function FrameSelector({ selected, onChange, compact = false }) {
-  if (compact) {
-    return (
-      <div className="space-y-1">
-        <span className="text-[10px] text-glint-text-tertiary">Device frame</span>
-        <select
-          value={selected ?? ''}
-          onChange={(e) => onChange(e.target.value || null)}
-          className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
-        >
-          {FRAME_OPTIONS.map((f) => (
-            <option key={f.id ?? 'none'} value={f.id ?? ''}>
-              {f.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
-
+/**
+ * Visual device frame picker — SVG tiles with clear selected state.
+ */
+export default function FrameSelector({ selected, onChange }) {
   return (
-    <div className="space-y-2">
-      <h3 className="text-[10px] font-semibold text-glint-text-secondary uppercase tracking-wider">
-        Device frame
-      </h3>
-      <div className="grid grid-cols-3 gap-1.5">
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {FRAME_OPTIONS.map((f) => {
-          const Icon = f.icon;
           const active = selected === f.id;
           return (
             <button
               key={f.id ?? 'none'}
               type="button"
-              onClick={() => onChange(f.id)}
               title={f.label}
-              className={`px-1.5 py-2 rounded-lg text-[10px] border transition-all text-center leading-tight ${
+              onClick={() => onChange(f.id)}
+              className={`group relative aspect-[3/4] rounded-lg border overflow-hidden transition-all text-left ${
                 active
-                  ? 'border-glint-accent ring-1 ring-glint-accent/30 bg-glint-accent-muted text-glint-accent font-semibold'
-                  : 'border-glint-border hover:border-glint-border-strong bg-glint-surface text-glint-text-secondary'
+                  ? 'border-glint-accent ring-2 ring-glint-accent/40 bg-glint-accent-muted'
+                  : 'border-glint-border bg-glint-surface-2 hover:border-glint-accent/50'
               }`}
             >
-              <Icon size={14} className="mx-auto mb-0.5 opacity-80" />
-              {f.label}
+              {f.id ? (
+                <img
+                  src={`/frames/${f.id}.svg`}
+                  alt={f.label}
+                  className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-2.25rem)] object-contain pointer-events-none"
+                  draggable={false}
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-glint-text-tertiary">
+                  <Minus size={18} />
+                  <span className="text-[10px]">No bezel</span>
+                </div>
+              )}
+              <span
+                className={`absolute inset-x-0 bottom-0 px-1 py-0.5 text-[9px] font-medium text-center truncate ${
+                  active ? 'bg-glint-accent text-glint-text-on-accent' : 'bg-black/45 text-white'
+                }`}
+              >
+                {f.label}
+              </span>
             </button>
           );
         })}
       </div>
+      <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
+        Click a bezel to replace every device on the board. Your screenshots stay and cover-fill the new screen.
+      </p>
     </div>
   );
 }
