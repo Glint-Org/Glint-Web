@@ -1,0 +1,219 @@
+{
+  "id": "blink-play",
+  "familyId": "blink",
+  "name": "Blink",
+  "description": "Pixel-matched Blink Android store set from your Figma (play)",
+  "store": "play",
+  "canvas": {
+    "width": 1080,
+    "height": 2400
+  },
+  "preview": {
+    "bg": "#611AB4",
+    "textColor": "#FFFFFF",
+    "frame": "simple-dark",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#D99BFA",
+        "x": "55%",
+        "y": "-5%",
+        "w": "60%",
+        "h": "35%"
+      },
+      {
+        "kind": "circle",
+        "color": "#8030DD",
+        "x": "-10%",
+        "y": "70%",
+        "w": "40%",
+        "h": "25%"
+      }
+    ],
+    "headlines": [
+      "BLINK",
+      "100% Free",
+      "Select & Share Instantly",
+      "Scan & Download",
+      "Download Securely"
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#FFFFFF"
+    }
+  ],
+  "slides": [
+    {
+      "id": "blink-play-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#FFFFFF"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 96,
+          "fontWeight": "800",
+          "color": "#611AB4",
+          "placeholder": "BLINK",
+          "marginTop": 180
+        },
+        {
+          "type": "subheadline",
+          "position": "top",
+          "fontSize": 36,
+          "fontWeight": "600",
+          "color": "#8030DD",
+          "placeholder": "Share Files in a Flash",
+          "marginTop": 300
+        },
+        {
+          "type": "device",
+          "frame": "simple-dark",
+          "slot": 0,
+          "scale": 0.903,
+          "minCoverage": 0.85,
+          "marginLeft": 52.5,
+          "marginTop": 822.5
+        }
+      ]
+    },
+    {
+      "id": "blink-play-f2",
+      "name": "Free",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#FFFFFF"
+        },
+        {
+          "type": "device",
+          "frame": "simple-dark",
+          "slot": 1,
+          "scale": 0.903,
+          "minCoverage": 0.85,
+          "marginLeft": 52.5,
+          "marginTop": 190.5
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": -178.7,
+          "top": 1948.8,
+          "width": 1399,
+          "height": 844.9,
+          "fill": "#611AB4",
+          "angle": -16.7853
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 72,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "100% Free",
+          "marginLeft": 145,
+          "marginTop": 1980
+        },
+        {
+          "type": "subheadline",
+          "position": "left",
+          "fontSize": 40,
+          "fontWeight": "700",
+          "color": "#FFFFFF",
+          "placeholder": "No Login. No Tracking",
+          "marginLeft": 145,
+          "marginTop": 2085
+        }
+      ]
+    },
+    {
+      "id": "blink-play-f3",
+      "name": "Share",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#FFFFFF"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 52,
+          "fontWeight": "800",
+          "color": "#8A2BE2",
+          "placeholder": "Select & Share Instantly",
+          "marginTop": 160
+        },
+        {
+          "type": "device",
+          "frame": "simple-dark",
+          "slot": 2,
+          "scale": 0.903,
+          "minCoverage": 0.85,
+          "marginLeft": 52.5,
+          "marginTop": 507.5
+        }
+      ]
+    },
+    {
+      "id": "blink-play-f4",
+      "name": "Scan",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#D99BFA"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 56,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Scan & Download",
+          "marginTop": 160
+        },
+        {
+          "type": "device",
+          "frame": "simple-dark",
+          "slot": 3,
+          "scale": 0.903,
+          "minCoverage": 0.85,
+          "marginLeft": 52.5,
+          "marginTop": 499.5
+        }
+      ]
+    },
+    {
+      "id": "blink-play-f5",
+      "name": "Secure",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#611AB4"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 56,
+          "fontWeight": "800",
+          "color": "#FFFFFF",
+          "placeholder": "Download Securely",
+          "marginTop": 140
+        },
+        {
+          "type": "device",
+          "frame": "simple-dark",
+          "slot": 4,
+          "scale": 0.903,
+          "minCoverage": 0.85,
+          "marginLeft": 52.5,
+          "marginTop": 587.5
+        }
+      ]
+    }
+  ]
+}

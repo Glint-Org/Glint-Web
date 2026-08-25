@@ -6,6 +6,8 @@ export const FRAME_INSETS = {
   'iphone16-pro-max': { top: 14, right: 16, bottom: 14, left: 16, rx: 48, width: 430, height: 932 },
   'ipad-pro-13': { top: 30, right: 30, bottom: 30, left: 30, rx: 18, width: 1024, height: 1366 },
   'ipad-pro': { top: 28, right: 28, bottom: 28, left: 28, rx: 16, width: 834, height: 1194 },
+  /** Matches Blink/BoxLock Figma bezel (975x1966, rx ~82). */
+  'simple-dark': { top: 25, right: 25, bottom: 25, left: 25, rx: 62, width: 975, height: 1966 },
 };
 
 /** Fallback when an unknown frame id is requested. */

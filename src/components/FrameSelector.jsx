@@ -5,6 +5,7 @@ export const FRAME_OPTIONS = [
   { id: null, label: 'None' },
   { id: 'pixel9', label: 'Pixel 9' },
   { id: 'galaxy-s24', label: 'Galaxy S24' },
+  { id: 'simple-dark', label: 'Simple Dark' },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max' },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro' },
   { id: 'ipad-pro-13', label: 'iPad Pro 13"' },

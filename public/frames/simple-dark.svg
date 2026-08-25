@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 975 1966" fill="none">
+  <!-- Blink/BoxLock style: thin dark rounded bezel, screen is inset -->
+  <rect x="0.5" y="0.5" width="974" height="1965" rx="82" fill="#1C1C1E" stroke="#3B3A3A" stroke-width="25"/>
+  <rect x="25" y="25" width="925" height="1916" rx="62" fill="#000000"/>
+</svg>
