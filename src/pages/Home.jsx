@@ -170,7 +170,8 @@ function TemplateShowcaseRow({ template, onClick }) {
   return (
     <button
       onClick={onClick}
-      aria-label="Use template"
+      aria-label={template.name || template.id || 'Use template'}
+      title={template.name || template.id}
       className="group w-full rounded-2xl overflow-hidden border border-glint-border hover:border-glint-accent hover:shadow-xl hover:shadow-black/20 transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"
     >
       <div className="relative aspect-[5/1.15] md:aspect-[5/1.05] overflow-hidden">
