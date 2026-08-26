@@ -99,6 +99,7 @@ export default function FrameBoard({
                   frameId={frame.id}
                   design={frame.design}
                   screenshotUrl={frame.screenshotUrl}
+                  fabricJson={frame.fabricJson || null}
                   canvasWidth={canvasWidth}
                   canvasHeight={canvasHeight}
                   displayScale={scale}
@@ -106,7 +107,7 @@ export default function FrameBoard({
                   editable={selected}
                   onCanvasReady={onCanvasReady}
                   onDeviceContextMenu={onDeviceContextMenu}
-                  paintKey={frame.design?.id || 'nodesign'}
+                  paintKey={frame.fabricRestoreKey || frame.design?.id || 'nodesign'}
                 />
               </div>
 

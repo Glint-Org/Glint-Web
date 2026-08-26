@@ -136,6 +136,8 @@ export function useFrames(initialFrames) {
           id: prev[i]?.id || newFrameId(),
           design: slides[i] || null,
           screenshotUrl: keepUrls[i] || placeholders[i] || null,
+          fabricJson: null,
+          fabricRestoreKey: null,
         });
       }
       return next;

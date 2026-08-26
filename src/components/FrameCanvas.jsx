@@ -40,6 +40,7 @@ export default function FrameCanvas({
   frameId,
   design,
   screenshotUrl,
+  fabricJson = null,
   canvasWidth = 1080,
   canvasHeight = 1920,
   displayScale = 0.16,
@@ -127,20 +128,40 @@ export default function FrameCanvas({
     if (!canvas) return;
     const ac = new AbortController();
     (async () => {
-      await applyDesignToFrame(canvas, design, screenshotRef.current, {
-        canvasWidth,
-        canvasHeight,
-        themes: themesRef.current,
-        editable: editableRef.current,
-        signal: ac.signal,
-      });
+      if (fabricJson) {
+        try {
+          if (typeof canvas.loadFromJSON === 'function') {
+            await canvas.loadFromJSON(fabricJson);
+          } else if (typeof canvas.loadFromObject === 'function') {
+            await canvas.loadFromObject(fabricJson);
+          }
+          if (ac.signal.aborted) return;
+          canvas.requestRenderAll?.();
+        } catch (err) {
+          console.warn('Glint pack fabric restore failed, falling back to design', err);
+          await applyDesignToFrame(canvas, design, screenshotRef.current, {
+            canvasWidth,
+            canvasHeight,
+            themes: themesRef.current,
+            editable: editableRef.current,
+            signal: ac.signal,
+          });
+        }
+      } else {
+        await applyDesignToFrame(canvas, design, screenshotRef.current, {
+          canvasWidth,
+          canvasHeight,
+          themes: themesRef.current,
+          editable: editableRef.current,
+          signal: ac.signal,
+        });
+      }
       if (ac.signal.aborted) return;
-      // Always use latest board zoom — paint can finish after a re-fit.
       applyDisplayScale(canvas, canvasWidth, canvasHeight, scaleRef.current);
       setFrameEditable(canvas, editableRef.current);
     })();
     return () => ac.abort();
-  }, [design, canvasWidth, canvasHeight, paintKey, themesReady]);
+  }, [design, fabricJson, canvasWidth, canvasHeight, paintKey, themesReady]);
 
   return (
     <div
