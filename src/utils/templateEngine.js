@@ -56,33 +56,61 @@ function shiftLayer(layer, originX) {
 }
 
 async function addScreenshotLayer(canvas, screenshotUrl, layer, canvasW, canvasH, editable, originX = 0) {
-  const scale = layer.scale ?? 0.7;
   const img = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
-  const maxW = canvasW * scale;
-  const maxH = canvasH * scale;
-  const imgScale = Math.min(maxW / (img.width || 1), maxH / (img.height || 1), 1);
+  const iw = img.width || 1;
+  const ih = img.height || 1;
+
+  // Absolute box (tablet / wear / chromebook packs author left/top/width/height).
+  const hasBox =
+    layer.width != null &&
+    layer.height != null &&
+    (layer.left != null || layer.top != null);
+
+  let imgScale;
+  let left;
+  let top;
+  let objW;
+  let objH;
+
+  if (hasBox) {
+    const boxW = layer.width;
+    const boxH = layer.height;
+    imgScale = Math.min(boxW / iw, boxH / ih);
+    objW = iw * imgScale;
+    objH = ih * imgScale;
+    left = (layer.left ?? 0) + originX + (boxW - objW) / 2;
+    top = (layer.top ?? 0) + (boxH - objH) / 2;
+  } else {
+    const scale = layer.scale ?? 0.7;
+    const maxW = canvasW * scale;
+    const maxH = canvasH * scale;
+    imgScale = Math.min(maxW / iw, maxH / ih, 1);
+    objW = iw * imgScale;
+    objH = ih * imgScale;
+    const pos = resolvePosition(layer.position ?? 'center', canvasW, canvasH, objW, objH, layer);
+    left = pos.left + originX;
+    top = pos.top;
+  }
 
   img.set({
     scaleX: imgScale,
     scaleY: imgScale,
+    left,
+    top,
     evented: editable,
     selectable: editable,
     glintRole: 'screenshot',
     glintSlot: layer.slot ?? 0,
   });
 
-  const objW = (img.width || 0) * imgScale;
-  const objH = (img.height || 0) * imgScale;
-  const pos = resolvePosition(layer.position ?? 'center', canvasW, canvasH, objW, objH, layer);
-  img.set({ left: pos.left + originX, top: pos.top });
-
-  if (layer.rounded) {
+  const radius = layer.rx ?? layer.rounded;
+  if (radius) {
     img.set({
       clipPath: new Rect({
         width: objW,
         height: objH,
-        rx: layer.rounded,
-        ry: layer.rounded,
+        rx: radius,
+        ry: radius,
         originX: 'center',
         originY: 'center',
       }),
@@ -161,7 +189,7 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, origi
   const alignLeft = layer.position === 'left';
   const fb = new Text(text, {
     fontSize: layer.fontSize ?? 36,
-    fontFamily: `${layer.fontFamily || 'Inter'}, sans-serif`,
+    fontFamily: `${layer.fontFamily || 'Space Grotesk'}, sans-serif`,
     fontWeight: layer.fontWeight ?? 'normal',
     fill: layer.color ?? '#ffffff',
     textAlign: alignLeft ? 'left' : 'center',
@@ -184,7 +212,7 @@ function addBadgeLayer(canvas, layer, canvasW, editable, originX = 0) {
   const paddingY = layer.paddingY ?? 12;
   const fb = new Text(text, {
     fontSize: layer.fontSize ?? 20,
-    fontFamily: `${layer.fontFamily || 'Inter'}, sans-serif`,
+    fontFamily: `${layer.fontFamily || 'Space Grotesk'}, sans-serif`,
     fontWeight: layer.fontWeight ?? 'bold',
     fill: layer.color ?? '#ffffff',
     evented: editable,
@@ -221,7 +249,7 @@ function addBulletsLayer(canvas, layer, editable, originX = 0) {
       left: (layer.marginLeft ?? 80) + originX,
       top: (layer.marginTop ?? 200) + i * 48,
       fontSize: layer.fontSize ?? 28,
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'Space Grotesk, sans-serif',
       fill: layer.color ?? '#ffffff',
       evented: editable,
       selectable: editable,
@@ -281,8 +309,11 @@ export function getTemplateSlides(template) {
 function expandToFiveSlides(template) {
   const baseLayers = template.layers || [];
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
+  const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
+  const landscape = canvasW > canvasH * 1.15;
+  const square = Math.abs(canvasW - canvasH) / canvasW < 0.12;
   const bgLayer = baseLayers.find((l) => l.type === 'background');
-  const accent = bgLayer?.color || template.preview?.bg || '#611AB4';
+  const accent = bgLayer?.color || template.preview?.bg || '#F5D06F';
   const deviceLayer = baseLayers.find((l) => l.type === 'device' || l.type === 'screenshot');
   const frame = deviceLayer?.frame || template.preview?.frame || 'pixel9';
   const graphics = baseLayers.filter((l) => l.type === 'graphic' || l.type === 'shape');
@@ -295,64 +326,30 @@ function expandToFiveSlides(template) {
             : h,
         );
 
-  // Blink-inspired layouts. Each becomes a named Frame artboard.
-  const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
-  const layouts = [
-    {
-      // Frame 1: phone upper, accent band + headline at bottom
-      bg: '#FFFFFF',
-      textColor: '#FFFFFF',
-      band: accent,
-      headlineBottom: true,
-      phoneTop: Math.round(canvasH * 0.06),
-      phoneScale: 0.62,
-      showGraphics: false,
-    },
-    {
-      // Frame 2: headline top, phone below
-      bg: '#FFFFFF',
-      textColor: accent,
-      band: null,
-      headlineBottom: false,
-      headlineTop: Math.round(canvasH * 0.055),
-      phoneTop: Math.round(canvasH * 0.18),
-      phoneScale: 0.6,
-      showGraphics: false,
-    },
-    {
-      // Frame 3: soft tint bg
-      bg: mix(accent, '#FFFFFF', 0.42),
-      textColor: '#FFFFFF',
-      band: null,
-      headlineBottom: false,
-      headlineTop: Math.round(canvasH * 0.055),
-      phoneTop: Math.round(canvasH * 0.18),
-      phoneScale: 0.6,
-      showGraphics: true,
-    },
-    {
-      // Frame 4: solid accent
-      bg: accent,
-      textColor: '#FFFFFF',
-      band: null,
-      headlineBottom: false,
-      headlineTop: Math.round(canvasH * 0.055),
-      phoneTop: Math.round(canvasH * 0.18),
-      phoneScale: 0.6,
-      showGraphics: true,
-    },
-    {
-      // Frame 5: deeper tone
-      bg: mix(accent, '#000000', 0.18),
-      textColor: isLight(accent) ? '#1A1A1A' : '#FFFFFF',
-      band: null,
-      headlineBottom: false,
-      headlineTop: Math.round(canvasH * 0.05),
-      phoneTop: Math.round(canvasH * 0.16),
-      phoneScale: 0.62,
-      showGraphics: false,
-    },
-  ];
+  // Aspect-aware Blink-inspired layouts.
+  const layouts = landscape
+    ? [
+        { bg: '#0B0D10', textColor: '#F5D06F', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.08), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.78, showGraphics: false },
+        { bg: '#151A21', textColor: '#E8E6DF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.08), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.78, showGraphics: false },
+        { bg: mix(accent, '#0B0D10', 0.35), textColor: '#FFFFFF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.08), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.78, showGraphics: true },
+        { bg: accent, textColor: '#412402', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.08), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.78, showGraphics: true },
+        { bg: mix(accent, '#000000', 0.45), textColor: '#FFFFFF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.08), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.78, showGraphics: false },
+      ]
+    : square
+      ? [
+          { bg: '#0B0D10', textColor: '#F5D06F', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.06), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.72, showGraphics: false },
+          { bg: '#151A21', textColor: '#E8E6DF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.06), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.72, showGraphics: false },
+          { bg: mix(accent, '#FFFFFF', 0.15), textColor: '#0B0D10', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.06), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.72, showGraphics: true },
+          { bg: accent, textColor: '#412402', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.06), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.72, showGraphics: true },
+          { bg: '#1C222B', textColor: '#F5D06F', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.06), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.72, showGraphics: false },
+        ]
+      : [
+          { bg: '#FFFFFF', textColor: '#FFFFFF', band: accent, headlineBottom: true, phoneTop: Math.round(canvasH * 0.06), phoneScale: 0.62, showGraphics: false },
+          { bg: '#FFFFFF', textColor: isLight(accent) ? '#1A1A1A' : accent, band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.055), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.6, showGraphics: false },
+          { bg: mix(accent, '#FFFFFF', 0.42), textColor: '#FFFFFF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.055), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.6, showGraphics: true },
+          { bg: accent, textColor: isLight(accent) ? '#1A1A1A' : '#FFFFFF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.055), phoneTop: Math.round(canvasH * 0.18), phoneScale: 0.6, showGraphics: true },
+          { bg: mix(accent, '#000000', 0.18), textColor: isLight(accent) ? '#1A1A1A' : '#FFFFFF', band: null, headlineBottom: false, headlineTop: Math.round(canvasH * 0.05), phoneTop: Math.round(canvasH * 0.16), phoneScale: 0.62, showGraphics: false },
+        ];
 
   return layouts.map((layout, i) => {
     const layers = [{ type: 'background', color: layout.bg }];
@@ -369,7 +366,6 @@ function expandToFiveSlides(template) {
     }
 
     if (layout.band) {
-      // Bottom accent strip (clipped to frame) - Blink-style
       layers.push({
         type: 'shape',
         shape: 'rect',
@@ -385,20 +381,37 @@ function expandToFiveSlides(template) {
 
     layers.push({
       type: 'headline',
-      position: 'top',
-      fontSize: layout.headlineBottom ? 46 : 54,
+      position: landscape || square ? 'left' : 'top',
+      fontSize: landscape ? 44 : square ? 28 : layout.headlineBottom ? 46 : 54,
       fontWeight: '800',
+      fontFamily: 'Space Grotesk',
       color: layout.textColor,
       placeholder: headlines[i],
       marginTop: layout.headlineBottom
         ? Math.round(canvasH * 0.84)
         : layout.headlineTop,
+      ...(landscape || square ? { marginLeft: Math.round(canvasW * 0.05) } : {}),
     });
 
-    if (deviceLayer?.type === 'screenshot') {
+    const absShot =
+      deviceLayer?.type === 'screenshot' &&
+      deviceLayer.width != null &&
+      deviceLayer.height != null;
+
+    if (absShot) {
       layers.push({
         type: 'screenshot',
-        slot: 0,
+        slot: i % 5,
+        left: deviceLayer.left,
+        top: deviceLayer.top,
+        width: deviceLayer.width,
+        height: deviceLayer.height,
+        rx: deviceLayer.rx ?? deviceLayer.rounded ?? 32,
+      });
+    } else if (deviceLayer?.type === 'screenshot') {
+      layers.push({
+        type: 'screenshot',
+        slot: i % 5,
         scale: layout.phoneScale,
         position: 'center',
         marginTop: layout.phoneTop,
@@ -408,7 +421,7 @@ function expandToFiveSlides(template) {
       layers.push({
         type: 'device',
         frame,
-        slot: 0,
+        slot: i % 5,
         scale: layout.phoneScale,
         position: 'center',
         marginTop: layout.phoneTop,

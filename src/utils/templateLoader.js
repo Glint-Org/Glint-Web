@@ -34,8 +34,12 @@ export {
   devicesForPlatform,
 } from './storeCatalog';
 
-/** Curated store templates — phone / tablet packs + form-factor starters. */
+/** Curated store templates — phone / tablet packs + form-factor sets. */
 export const TEMPLATE_IDS = [
+  // Flagship Glint brand
+  'glint-gold-play',
+  'glint-gold-ios',
+  'glint-gold-ipad',
   // Pixel-matched Figma packs
   'blink-play',
   'blink-ios',
@@ -59,7 +63,7 @@ export const TEMPLATE_IDS = [
   'ios-dark',
   // App Store iPad
   'tablet-showcase',
-  // Play form-factor starters
+  // Play form-factor 5-slide sets
   'play-tablet-7',
   'play-tablet-10',
   'play-tv',

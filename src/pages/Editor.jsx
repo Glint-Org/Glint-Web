@@ -77,7 +77,7 @@ export default function Editor() {
   const [exportPreset, setExportPreset] = useState(
     resolveStoreKey(session?.store ?? initialTemplate?.store ?? 'play/phone'),
   );
-  const [fontFamily, setFontFamily] = useState('Inter');
+  const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
   const [bridgeToken, setBridgeToken] = useState('');
   const [leftTab, setLeftTab] = useState('templates');

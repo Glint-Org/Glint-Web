@@ -1,32 +1,206 @@
 {
   "id": "play-tablet-10",
   "name": "Play 10″ Tablet",
-  "description": "Large tablet listing frames for Google Play",
+  "description": "Five 10-inch tablet listing frames — Glint charcoal & gold",
   "store": "play/tablet-10",
-  "canvas": { "width": 1600, "height": 2560 },
+  "canvas": {
+    "width": 1600,
+    "height": 2560
+  },
   "preview": {
-    "bg": "#0F2744",
-    "textColor": "#FFFFFF"
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "headlines": [
+      "Room to create",
+      "Big canvas energy",
+      "Side-by-side flow",
+      "Immersive reading",
+      "10″ ready"
+    ]
   },
   "layers": [
-    { "type": "background", "color": "#0F2744" },
     {
-      "type": "headline",
-      "position": "top",
-      "fontSize": 72,
-      "fontWeight": "800",
-      "color": "#FFFFFF",
-      "placeholder": "Room to create",
-      "marginTop": 160
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "play-tablet-10-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 700,
+          "top": -120,
+          "width": 1000,
+          "fill": "#F5D06F",
+          "fill2": "#151A21",
+          "fill3": "#0B0D10",
+          "opacity": 0.2,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 72,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Room to create",
+          "marginTop": 140
+        },
+        {
+          "type": "subheadline",
+          "position": "top",
+          "fontSize": 32,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Google Play · 10″",
+          "marginTop": 260
+        },
+        {
+          "type": "screenshot",
+          "slot": 0,
+          "left": 160,
+          "top": 420,
+          "width": 1280,
+          "height": 1920,
+          "rx": 28
+        }
+      ]
     },
     {
-      "type": "screenshot",
-      "slot": 0,
-      "left": 160,
-      "top": 420,
-      "width": 1280,
-      "height": 1920,
-      "rx": 28
+      "id": "play-tablet-10-f2",
+      "name": "Canvas",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 60,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Big canvas energy",
+          "marginTop": 140
+        },
+        {
+          "type": "screenshot",
+          "slot": 1,
+          "left": 160,
+          "top": 380,
+          "width": 1280,
+          "height": 1920,
+          "rx": 28
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-10-f3",
+      "name": "Flow",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 60,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Side-by-side flow",
+          "marginTop": 140
+        },
+        {
+          "type": "screenshot",
+          "slot": 2,
+          "left": 160,
+          "top": 380,
+          "width": 1280,
+          "height": 1920,
+          "rx": 28
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-10-f4",
+      "name": "Immerse",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 60,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Immersive reading",
+          "marginTop": 140
+        },
+        {
+          "type": "screenshot",
+          "slot": 3,
+          "left": 160,
+          "top": 380,
+          "width": 1280,
+          "height": 1920,
+          "rx": 28
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-10-f5",
+      "name": "Ready",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 1600,
+          "height": 10,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 60,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "10″ ready",
+          "marginTop": 140
+        },
+        {
+          "type": "screenshot",
+          "slot": 4,
+          "left": 160,
+          "top": 380,
+          "width": 1280,
+          "height": 1920,
+          "rx": 28
+        }
+      ]
     }
   ]
 }

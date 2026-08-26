@@ -778,7 +778,7 @@ export function addTextOverlay(canvas, text, opts = {}) {
     left: opts.left ?? canvas.getWidth() / 2,
     top: opts.top ?? 120,
     fontSize: opts.fontSize ?? 48,
-    fontFamily: `${opts.fontFamily || 'Inter'}, sans-serif`,
+    fontFamily: `${opts.fontFamily || 'Space Grotesk'}, sans-serif`,
     fontWeight: opts.fontWeight ?? '700',
     fill: opts.fill ?? '#ffffff',
     textAlign: opts.textAlign ?? 'center',

@@ -1,0 +1,299 @@
+{
+  "id": "glint-gold-ios",
+  "familyId": "glint-gold",
+  "name": "Glint Gold",
+  "description": "Flagship Glint charcoal & gold iPhone pack for the App Store",
+  "store": "ios/iphone",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "preview": {
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "frame": "iphone16-pro-max",
+    "art": [
+      {
+        "kind": "blob",
+        "color": "#F5D06F",
+        "x": "60%",
+        "y": "-8%",
+        "w": "55%",
+        "h": "30%"
+      },
+      {
+        "kind": "circle",
+        "color": "#1C222B",
+        "x": "-12%",
+        "y": "72%",
+        "w": "45%",
+        "h": "28%"
+      }
+    ],
+    "headlines": [
+      "Capture. Polish. Ship.",
+      "Your app, store-ready",
+      "Swap shots in seconds",
+      "Five screens. One look.",
+      "Built for Play & App Store"
+    ]
+  },
+  "layers": [
+    {
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "glint-gold-ios-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": -100,
+          "top": -160,
+          "width": 860,
+          "fill": "#F5D06F",
+          "fill2": "#FFE9A8",
+          "fill3": "#151A21",
+          "opacity": 0.22,
+          "sendToBack": true
+        },
+        {
+          "type": "graphic",
+          "src": "glow-ring.svg",
+          "left": 620,
+          "top": 1500,
+          "width": 820,
+          "fill": "#F5D06F",
+          "fill2": "#1C222B",
+          "fill3": "#0B0D10",
+          "opacity": 0.35,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 72,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Capture. Polish. Ship.",
+          "marginTop": 200
+        },
+        {
+          "type": "subheadline",
+          "position": "top",
+          "fontSize": 32,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Store screenshots that shine",
+          "marginTop": 380
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 0,
+          "scale": 0.58,
+          "position": "center",
+          "marginTop": 560
+        }
+      ]
+    },
+    {
+      "id": "glint-gold-ios-f2",
+      "name": "Ready",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 58,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Your app, store-ready",
+          "marginTop": 180
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 1,
+          "scale": 0.54,
+          "position": "center",
+          "marginTop": 520
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": -80,
+          "top": 2320,
+          "width": 1450,
+          "height": 560,
+          "fill": "#F5D06F",
+          "angle": -8,
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 44,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Export in one click",
+          "marginTop": 2460,
+          "marginLeft": 100
+        }
+      ]
+    },
+    {
+      "id": "glint-gold-ios-f3",
+      "name": "Swap",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 80,
+          "top": 220,
+          "width": 140,
+          "fill": "#F5D06F",
+          "fill2": "#E8E6DF",
+          "fill3": "#151A21"
+        },
+        {
+          "type": "graphic",
+          "src": "spark-mini.svg",
+          "left": 1050,
+          "top": 320,
+          "width": 120,
+          "fill": "#E8E6DF",
+          "fill2": "#F5D06F",
+          "fill3": "#151A21",
+          "angle": 20
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 58,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Swap shots in seconds",
+          "marginTop": 200
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 2,
+          "scale": 0.54,
+          "position": "center",
+          "marginTop": 540,
+          "angle": -5
+        }
+      ]
+    },
+    {
+      "id": "glint-gold-ios-f4",
+      "name": "Look",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "graphic",
+          "src": "curve-sweep.svg",
+          "left": -50,
+          "top": 1400,
+          "width": 1400,
+          "fill": "#412402",
+          "fill2": "#C4960A",
+          "fill3": "#F5D06F",
+          "opacity": 0.18,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 64,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Five screens. One look.",
+          "marginTop": 200
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 3,
+          "scale": 0.54,
+          "position": "center",
+          "marginTop": 540
+        }
+      ]
+    },
+    {
+      "id": "glint-gold-ios-f5",
+      "name": "Ship",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 1290,
+          "height": 10,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 54,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Built for Play & App Store",
+          "marginTop": 180
+        },
+        {
+          "type": "subheadline",
+          "position": "top",
+          "fontSize": 28,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Phone · Tablet · TV · Wear",
+          "marginTop": 340
+        },
+        {
+          "type": "device",
+          "frame": "iphone16-pro-max",
+          "slot": 4,
+          "scale": 0.56,
+          "position": "center",
+          "marginTop": 500
+        }
+      ]
+    }
+  ]
+}

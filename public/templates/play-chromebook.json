@@ -1,32 +1,208 @@
 {
   "id": "play-chromebook",
   "name": "Play Chromebook",
-  "description": "16:9 Chromebook / large-screen listing screenshots",
+  "description": "Five 16:9 Chromebook listing frames — Glint charcoal & gold",
   "store": "play/chromebook",
-  "canvas": { "width": 1920, "height": 1080 },
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
   "preview": {
-    "bg": "#E8F1F8",
-    "textColor": "#0F2744"
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "headlines": [
+      "Desktop-class apps",
+      "Keyboard ready",
+      "Windowed workflow",
+      "Large-screen focus",
+      "Chromebook native"
+    ]
   },
   "layers": [
-    { "type": "background", "color": "#E8F1F8" },
     {
-      "type": "headline",
-      "position": "top",
-      "fontSize": 56,
-      "fontWeight": "800",
-      "color": "#0F2744",
-      "placeholder": "Desktop-class apps",
-      "marginTop": 40
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "play-chromebook-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "graphic",
+          "src": "glow-ring.svg",
+          "left": 1280,
+          "top": 200,
+          "width": 700,
+          "fill": "#F5D06F",
+          "fill2": "#151A21",
+          "fill3": "#0B0D10",
+          "opacity": 0.25,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Desktop-class apps",
+          "marginTop": 80,
+          "marginLeft": 80
+        },
+        {
+          "type": "subheadline",
+          "position": "left",
+          "fontSize": 26,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Large-screen Play listings",
+          "marginTop": 170,
+          "marginLeft": 80
+        },
+        {
+          "type": "screenshot",
+          "slot": 0,
+          "left": 720,
+          "top": 140,
+          "width": 1080,
+          "height": 780,
+          "rx": 12
+        }
+      ]
     },
     {
-      "type": "screenshot",
-      "slot": 0,
-      "left": 160,
-      "top": 160,
-      "width": 1600,
-      "height": 820,
-      "rx": 12
+      "id": "play-chromebook-f2",
+      "name": "Keyboard",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Keyboard ready",
+          "marginTop": 48
+        },
+        {
+          "type": "screenshot",
+          "slot": 1,
+          "left": 160,
+          "top": 160,
+          "width": 1600,
+          "height": 820,
+          "rx": 12
+        }
+      ]
+    },
+    {
+      "id": "play-chromebook-f3",
+      "name": "Windows",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Windowed workflow",
+          "marginTop": 48
+        },
+        {
+          "type": "screenshot",
+          "slot": 2,
+          "left": 160,
+          "top": 160,
+          "width": 1600,
+          "height": 820,
+          "rx": 12
+        }
+      ]
+    },
+    {
+      "id": "play-chromebook-f4",
+      "name": "Focus",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Large-screen focus",
+          "marginTop": 48
+        },
+        {
+          "type": "screenshot",
+          "slot": 3,
+          "left": 160,
+          "top": 160,
+          "width": 1600,
+          "height": 820,
+          "rx": 12
+        }
+      ]
+    },
+    {
+      "id": "play-chromebook-f5",
+      "name": "Native",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 6,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Chromebook native",
+          "marginTop": 48
+        },
+        {
+          "type": "screenshot",
+          "slot": 4,
+          "left": 160,
+          "top": 160,
+          "width": 1600,
+          "height": 820,
+          "rx": 12
+        }
+      ]
     }
   ]
 }

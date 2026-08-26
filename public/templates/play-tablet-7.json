@@ -1,32 +1,206 @@
 {
   "id": "play-tablet-7",
   "name": "Play 7″ Tablet",
-  "description": "Clean 7-inch tablet listing frames for Google Play",
+  "description": "Five 7-inch tablet listing frames — Glint charcoal & gold",
   "store": "play/tablet-7",
-  "canvas": { "width": 1200, "height": 1920 },
+  "canvas": {
+    "width": 1200,
+    "height": 1920
+  },
   "preview": {
-    "bg": "#12151A",
-    "textColor": "#FFFFFF"
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "headlines": [
+      "Made for tablets",
+      "More room to create",
+      "Split & multitask",
+      "Touch-first layouts",
+      "7″ ready"
+    ]
   },
   "layers": [
-    { "type": "background", "color": "#12151A" },
     {
-      "type": "headline",
-      "position": "top",
-      "fontSize": 56,
-      "fontWeight": "800",
-      "color": "#FFFFFF",
-      "placeholder": "Made for tablets",
-      "marginTop": 120
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "play-tablet-7-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 500,
+          "top": -100,
+          "width": 800,
+          "fill": "#F5D06F",
+          "fill2": "#151A21",
+          "fill3": "#0B0D10",
+          "opacity": 0.2,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Made for tablets",
+          "marginTop": 100
+        },
+        {
+          "type": "subheadline",
+          "position": "top",
+          "fontSize": 26,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Google Play · 7″",
+          "marginTop": 200
+        },
+        {
+          "type": "screenshot",
+          "slot": 0,
+          "left": 120,
+          "top": 320,
+          "width": 960,
+          "height": 1440,
+          "rx": 24
+        }
+      ]
     },
     {
-      "type": "screenshot",
-      "slot": 0,
-      "left": 120,
-      "top": 320,
-      "width": 960,
-      "height": 1440,
-      "rx": 24
+      "id": "play-tablet-7-f2",
+      "name": "Create",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "More room to create",
+          "marginTop": 100
+        },
+        {
+          "type": "screenshot",
+          "slot": 1,
+          "left": 120,
+          "top": 280,
+          "width": 960,
+          "height": 1440,
+          "rx": 24
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-7-f3",
+      "name": "Split",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Split & multitask",
+          "marginTop": 100
+        },
+        {
+          "type": "screenshot",
+          "slot": 2,
+          "left": 120,
+          "top": 280,
+          "width": 960,
+          "height": 1440,
+          "rx": 24
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-7-f4",
+      "name": "Touch",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Touch-first layouts",
+          "marginTop": 100
+        },
+        {
+          "type": "screenshot",
+          "slot": 3,
+          "left": 120,
+          "top": 280,
+          "width": 960,
+          "height": 1440,
+          "rx": 24
+        }
+      ]
+    },
+    {
+      "id": "play-tablet-7-f5",
+      "name": "Ready",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 1200,
+          "height": 8,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 48,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "7″ ready",
+          "marginTop": 100
+        },
+        {
+          "type": "screenshot",
+          "slot": 4,
+          "left": 120,
+          "top": 280,
+          "width": 960,
+          "height": 1440,
+          "rx": 24
+        }
+      ]
     }
   ]
 }

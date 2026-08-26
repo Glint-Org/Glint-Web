@@ -17,11 +17,13 @@ const outDir = path.join(root, 'public/templates/previews');
 const base = process.env.GLINT_PREVIEW_BASE || 'http://127.0.0.1:4173';
 
 const TEMPLATE_IDS = [
+  'glint-gold-play', 'glint-gold-ios', 'glint-gold-ipad',
   'blink-play', 'blink-ios', 'blink-tablet',
   'warm-glow-play', 'warm-glow-ios', 'warm-glow-tablet',
   'mint-tags-play', 'mint-tags-ios', 'mint-tags-tablet',
   'play-hero', 'play-pop', 'play-feature', 'play-dual', 'play-minimal',
-  'ios-clean', 'ios-wave', 'ios-dark', 'ios-dual',
+  'ios-clean', 'ios-wave', 'ios-dark',
+  'play-tablet-7', 'play-tablet-10', 'play-tv', 'play-wear', 'play-chromebook',
 ];
 
 async function main() {

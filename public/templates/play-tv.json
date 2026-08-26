@@ -1,32 +1,224 @@
 {
   "id": "play-tv",
   "name": "Play TV",
-  "description": "16:9 Android TV listing screenshots",
+  "description": "Five 16:9 Android TV listing frames — Glint charcoal & gold",
   "store": "play/tv",
-  "canvas": { "width": 1920, "height": 1080 },
+  "canvas": {
+    "width": 1920,
+    "height": 1080
+  },
   "preview": {
     "bg": "#0B0D10",
-    "textColor": "#FFFFFF",
-    "frame": "tv"
+    "textColor": "#F5D06F",
+    "frame": "tv",
+    "headlines": [
+      "On the big screen",
+      "Lean back & play",
+      "Cinematic clarity",
+      "Remote-ready UI",
+      "Made for living rooms"
+    ]
   },
   "layers": [
-    { "type": "background", "color": "#0B0D10" },
     {
-      "type": "headline",
-      "position": "top",
-      "fontSize": 56,
-      "fontWeight": "800",
-      "color": "#FFFFFF",
-      "placeholder": "On the big screen",
-      "marginTop": 36
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "play-tv-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "graphic",
+          "src": "soft-blob.svg",
+          "left": 1100,
+          "top": -80,
+          "width": 900,
+          "fill": "#F5D06F",
+          "fill2": "#151A21",
+          "fill3": "#0B0D10",
+          "opacity": 0.2,
+          "sendToBack": true
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 64,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "On the big screen",
+          "marginTop": 120,
+          "marginLeft": 80
+        },
+        {
+          "type": "subheadline",
+          "position": "left",
+          "fontSize": 28,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "Android TV store screenshots",
+          "marginTop": 220,
+          "marginLeft": 80
+        },
+        {
+          "type": "device",
+          "frame": "tv",
+          "slot": 0,
+          "position": "absolute",
+          "marginTop": 200,
+          "marginLeft": 720,
+          "scale": 0.72
+        }
+      ]
     },
     {
-      "type": "device",
-      "frame": "tv",
-      "slot": 0,
-      "scale": 0.82,
-      "position": "center",
-      "marginTop": 140
+      "id": "play-tv-f2",
+      "name": "Lean",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Lean back & play",
+          "marginTop": 100,
+          "marginLeft": 80
+        },
+        {
+          "type": "screenshot",
+          "slot": 1,
+          "left": 620,
+          "top": 160,
+          "width": 1200,
+          "height": 780,
+          "rx": 16
+        }
+      ]
+    },
+    {
+      "id": "play-tv-f3",
+      "name": "Cinema",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 16,
+          "height": 1080,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Cinematic clarity",
+          "marginTop": 100,
+          "marginLeft": 80
+        },
+        {
+          "type": "screenshot",
+          "slot": 2,
+          "left": 620,
+          "top": 160,
+          "width": 1200,
+          "height": 780,
+          "rx": 16
+        }
+      ]
+    },
+    {
+      "id": "play-tv-f4",
+      "name": "Remote",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Remote-ready UI",
+          "marginTop": 100,
+          "marginLeft": 80
+        },
+        {
+          "type": "screenshot",
+          "slot": 3,
+          "left": 620,
+          "top": 160,
+          "width": 1200,
+          "height": 780,
+          "rx": 16
+        }
+      ]
+    },
+    {
+      "id": "play-tv-f5",
+      "name": "Living",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "headline",
+          "position": "left",
+          "fontSize": 56,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Made for living rooms",
+          "marginTop": 100,
+          "marginLeft": 80
+        },
+        {
+          "type": "subheadline",
+          "position": "left",
+          "fontSize": 24,
+          "fontWeight": "500",
+          "fontFamily": "Space Grotesk",
+          "color": "#8A8F98",
+          "placeholder": "1920 × 1080",
+          "marginTop": 200,
+          "marginLeft": 80
+        },
+        {
+          "type": "screenshot",
+          "slot": 4,
+          "left": 620,
+          "top": 160,
+          "width": 1200,
+          "height": 780,
+          "rx": 16
+        }
+      ]
     }
   ]
 }

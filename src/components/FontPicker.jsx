@@ -34,7 +34,7 @@ const GOOGLE_FONTS = [
   { name: 'Space Mono', category: 'monospace' },
 ];
 
-const loadedFonts = new Set(['Inter']);
+const loadedFonts = new Set(['Inter', 'Space Grotesk']);
 
 function loadGoogleFont(fontName) {
   if (loadedFonts.has(fontName)) return;

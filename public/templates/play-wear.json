@@ -1,23 +1,184 @@
 {
   "id": "play-wear",
   "name": "Play Wear OS",
-  "description": "Square Wear OS listing screenshots",
+  "description": "Five square Wear OS listing frames — Glint charcoal & gold",
   "store": "play/wear",
-  "canvas": { "width": 450, "height": 450 },
+  "canvas": {
+    "width": 450,
+    "height": 450
+  },
   "preview": {
-    "bg": "#1C1C1E",
-    "textColor": "#FFFFFF"
+    "bg": "#0B0D10",
+    "textColor": "#F5D06F",
+    "headlines": [
+      "On wrist",
+      "Glance & go",
+      "Always with you",
+      "Tap to act",
+      "Wear it well"
+    ]
   },
   "layers": [
-    { "type": "background", "color": "#1C1C1E" },
     {
-      "type": "screenshot",
-      "slot": 0,
-      "left": 45,
-      "top": 45,
-      "width": 360,
-      "height": 360,
-      "rx": 180
+      "type": "background",
+      "color": "#0B0D10"
+    }
+  ],
+  "slides": [
+    {
+      "id": "play-wear-f1",
+      "name": "Hero",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 28,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "On wrist",
+          "marginTop": 28
+        },
+        {
+          "type": "screenshot",
+          "slot": 0,
+          "left": 85,
+          "top": 90,
+          "width": 280,
+          "height": 280,
+          "rx": 140
+        }
+      ]
+    },
+    {
+      "id": "play-wear-f2",
+      "name": "Glance",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#151A21"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 26,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Glance & go",
+          "marginTop": 28
+        },
+        {
+          "type": "screenshot",
+          "slot": 1,
+          "left": 85,
+          "top": 90,
+          "width": 280,
+          "height": 280,
+          "rx": 140
+        }
+      ]
+    },
+    {
+      "id": "play-wear-f3",
+      "name": "Always",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#1C222B"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 26,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#F5D06F",
+          "placeholder": "Always with you",
+          "marginTop": 28
+        },
+        {
+          "type": "screenshot",
+          "slot": 2,
+          "left": 85,
+          "top": 90,
+          "width": 280,
+          "height": 280,
+          "rx": 140
+        }
+      ]
+    },
+    {
+      "id": "play-wear-f4",
+      "name": "Tap",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#F5D06F"
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 26,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#412402",
+          "placeholder": "Tap to act",
+          "marginTop": 28
+        },
+        {
+          "type": "screenshot",
+          "slot": 3,
+          "left": 85,
+          "top": 90,
+          "width": 280,
+          "height": 280,
+          "rx": 140
+        }
+      ]
+    },
+    {
+      "id": "play-wear-f5",
+      "name": "Wear",
+      "layers": [
+        {
+          "type": "background",
+          "color": "#0B0D10"
+        },
+        {
+          "type": "shape",
+          "shape": "rect",
+          "left": 0,
+          "top": 0,
+          "width": 450,
+          "height": 4,
+          "fill": "#F5D06F",
+          "rx": 0
+        },
+        {
+          "type": "headline",
+          "position": "top",
+          "fontSize": 26,
+          "fontWeight": "700",
+          "fontFamily": "Space Grotesk",
+          "color": "#E8E6DF",
+          "placeholder": "Wear it well",
+          "marginTop": 28
+        },
+        {
+          "type": "screenshot",
+          "slot": 4,
+          "left": 85,
+          "top": 90,
+          "width": 280,
+          "height": 280,
+          "rx": 140
+        }
+      ]
     }
   ]
 }

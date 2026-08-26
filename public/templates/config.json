@@ -2,6 +2,8 @@
   "themes": {
     "charcoal": { "type": "solid", "value": "#1C1C1E" },
     "midnight": { "type": "solid", "value": "#0B0D10" },
+    "glint-gold": { "type": "solid", "value": "#F5D06F" },
+    "glint-surface": { "type": "solid", "value": "#151A21" },
     "snow": { "type": "solid", "value": "#F5F5F7" },
     "white": { "type": "solid", "value": "#FFFFFF" },
     "slate": { "type": "solid", "value": "#2C2C2E" },
