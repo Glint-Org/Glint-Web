@@ -1,0 +1,33 @@
+{
+  "id": "play-tablet-10",
+  "name": "Play 10″ Tablet",
+  "description": "Large tablet listing frames for Google Play",
+  "store": "play/tablet-10",
+  "canvas": { "width": 1600, "height": 2560 },
+  "preview": {
+    "bg": "#0F2744",
+    "textColor": "#FFFFFF",
+    "frame": "ipad-pro-13",
+    "tablet": true
+  },
+  "layers": [
+    { "type": "background", "color": "#0F2744" },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 72,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "Room to create",
+      "marginTop": 160
+    },
+    {
+      "type": "device",
+      "frame": "ipad-pro-13",
+      "slot": 0,
+      "scale": 0.7,
+      "position": "center",
+      "marginTop": 480
+    }
+  ]
+}

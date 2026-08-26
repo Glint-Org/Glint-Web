@@ -1,0 +1,33 @@
+{
+  "id": "play-tablet-7",
+  "name": "Play 7″ Tablet",
+  "description": "Clean 7-inch tablet listing frames for Google Play",
+  "store": "play/tablet-7",
+  "canvas": { "width": 1200, "height": 1920 },
+  "preview": {
+    "bg": "#12151A",
+    "textColor": "#FFFFFF",
+    "frame": "ipad-pro",
+    "tablet": true
+  },
+  "layers": [
+    { "type": "background", "color": "#12151A" },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 56,
+      "fontWeight": "800",
+      "color": "#FFFFFF",
+      "placeholder": "Made for tablets",
+      "marginTop": 120
+    },
+    {
+      "type": "device",
+      "frame": "ipad-pro",
+      "slot": 0,
+      "scale": 0.72,
+      "position": "center",
+      "marginTop": 360
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "play-chromebook",
+  "name": "Play Chromebook",
+  "description": "16:9 Chromebook / large-screen listing screenshots",
+  "store": "play/chromebook",
+  "canvas": { "width": 1920, "height": 1080 },
+  "preview": {
+    "bg": "#E8F1F8",
+    "textColor": "#0F2744"
+  },
+  "layers": [
+    { "type": "background", "color": "#E8F1F8" },
+    {
+      "type": "headline",
+      "position": "top",
+      "fontSize": 56,
+      "fontWeight": "800",
+      "color": "#0F2744",
+      "placeholder": "Desktop-class apps",
+      "marginTop": 40
+    },
+    {
+      "type": "screenshot",
+      "slot": 0,
+      "left": 160,
+      "top": 160,
+      "width": 1600,
+      "height": 820,
+      "rx": 12
+    }
+  ]
+}

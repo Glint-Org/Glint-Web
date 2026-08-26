@@ -1,0 +1,23 @@
+{
+  "id": "play-wear",
+  "name": "Play Wear OS",
+  "description": "Square Wear OS listing screenshots",
+  "store": "play/wear",
+  "canvas": { "width": 450, "height": 450 },
+  "preview": {
+    "bg": "#1C1C1E",
+    "textColor": "#FFFFFF"
+  },
+  "layers": [
+    { "type": "background", "color": "#1C1C1E" },
+    {
+      "type": "screenshot",
+      "slot": 0,
+      "left": 45,
+      "top": 45,
+      "width": 360,
+      "height": 360,
+      "rx": 180
+    }
+  ]
+}
