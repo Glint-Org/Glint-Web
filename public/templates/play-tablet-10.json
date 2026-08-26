@@ -6,9 +6,7 @@
   "canvas": { "width": 1600, "height": 2560 },
   "preview": {
     "bg": "#0F2744",
-    "textColor": "#FFFFFF",
-    "frame": "ipad-pro-13",
-    "tablet": true
+    "textColor": "#FFFFFF"
   },
   "layers": [
     { "type": "background", "color": "#0F2744" },
@@ -22,12 +20,13 @@
       "marginTop": 160
     },
     {
-      "type": "device",
-      "frame": "ipad-pro-13",
+      "type": "screenshot",
       "slot": 0,
-      "scale": 0.7,
-      "position": "center",
-      "marginTop": 480
+      "left": 160,
+      "top": 420,
+      "width": 1280,
+      "height": 1920,
+      "rx": 28
     }
   ]
 }

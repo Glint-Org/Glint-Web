@@ -6,27 +6,27 @@
   "canvas": { "width": 1920, "height": 1080 },
   "preview": {
     "bg": "#0B0D10",
-    "textColor": "#FFFFFF"
+    "textColor": "#FFFFFF",
+    "frame": "tv"
   },
   "layers": [
     { "type": "background", "color": "#0B0D10" },
     {
       "type": "headline",
       "position": "top",
-      "fontSize": 64,
+      "fontSize": 56,
       "fontWeight": "800",
       "color": "#FFFFFF",
       "placeholder": "On the big screen",
-      "marginTop": 48
+      "marginTop": 36
     },
     {
-      "type": "screenshot",
+      "type": "device",
+      "frame": "tv",
       "slot": 0,
-      "left": 240,
-      "top": 180,
-      "width": 1440,
-      "height": 810,
-      "rx": 16
+      "scale": 0.82,
+      "position": "center",
+      "marginTop": 140
     }
   ]
 }

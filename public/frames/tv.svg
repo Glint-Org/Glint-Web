@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1200" fill="none">
+  <!-- Landscape TV / monitor bezel for Play TV screenshots -->
+  <rect x="0" y="0" width="1920" height="1120" rx="28" fill="#1A1A1C"/>
+  <rect x="48" y="40" width="1824" height="1024" rx="8" fill="#000000"/>
+  <rect x="860" y="1120" width="200" height="48" fill="#2A2A2E"/>
+  <rect x="720" y="1168" width="480" height="32" rx="4" fill="#2A2A2E"/>
+</svg>
