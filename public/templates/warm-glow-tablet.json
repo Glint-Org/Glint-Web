@@ -3,7 +3,7 @@
   "familyId": "warm-glow",
   "name": "Warm Glow",
   "description": "Solid warm field, soft blob, glow ring, centered device (tablet)",
-  "store": "ios-tablet",
+  "store": "ios/ipad",
   "canvas": {
     "width": 2048,
     "height": 2732

@@ -38,8 +38,13 @@
     }
   },
   "exportPresets": {
-    "play": { "width": 1080, "height": 1920, "label": "Play Store" },
-    "ios": { "width": 1290, "height": 2796, "label": "App Store Phone" },
-    "ios-tablet": { "width": 2048, "height": 2732, "label": "App Store Tablet" }
+    "play/phone": { "width": 1080, "height": 1920, "label": "Play Store · Phone" },
+    "play/tablet-7": { "width": 1200, "height": 1920, "label": "Play Store · 7″ Tablet" },
+    "play/tablet-10": { "width": 1600, "height": 2560, "label": "Play Store · 10″ Tablet" },
+    "play/tv": { "width": 1920, "height": 1080, "label": "Play Store · TV" },
+    "play/wear": { "width": 450, "height": 450, "label": "Play Store · Wear OS" },
+    "play/chromebook": { "width": 1920, "height": 1080, "label": "Play Store · Chromebook" },
+    "ios/iphone": { "width": 1290, "height": 2796, "label": "App Store · iPhone" },
+    "ios/ipad": { "width": 2048, "height": 2732, "label": "App Store · iPad" }
   }
 }

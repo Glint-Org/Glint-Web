@@ -2,7 +2,7 @@
   "id": "play-feature",
   "name": "Ocean Rings",
   "description": "Deep navy, gold rings, feature bullets",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

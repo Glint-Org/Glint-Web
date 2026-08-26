@@ -2,7 +2,7 @@
   "id": "play-minimal",
   "name": "Soft Cream",
   "description": "Warm cream canvas, botanical flourish, light phone",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

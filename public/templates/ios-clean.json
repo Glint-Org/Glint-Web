@@ -2,7 +2,7 @@
   "id": "ios-clean",
   "name": "Air Pastel",
   "description": "Mint and lavender blobs - App Store light",
-  "store": "ios",
+  "store": "ios/iphone",
   "canvas": {
     "width": 1290,
     "height": 2796

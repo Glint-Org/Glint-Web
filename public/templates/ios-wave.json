@@ -2,7 +2,7 @@
   "id": "ios-wave",
   "name": "Coral Arch",
   "description": "Warm coral arch framing an iPhone",
-  "store": "ios",
+  "store": "ios/iphone",
   "canvas": {
     "width": 1290,
     "height": 2796

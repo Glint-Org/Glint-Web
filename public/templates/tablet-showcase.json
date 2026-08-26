@@ -2,7 +2,7 @@
   "id": "tablet-showcase",
   "name": "Studio Blue",
   "description": "Soft studio orbs around an iPad",
-  "store": "ios-tablet",
+  "store": "ios/ipad",
   "canvas": {
     "width": 2048,
     "height": 2732

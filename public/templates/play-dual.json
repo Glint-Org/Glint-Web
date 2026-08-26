@@ -2,7 +2,7 @@
   "id": "play-dual",
   "name": "Split Dual",
   "description": "Diagonal color bars with two phones",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

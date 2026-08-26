@@ -3,7 +3,7 @@
   "familyId": "mint-tags",
   "name": "Mint Tags",
   "description": "Color bands, pill tags, centered device (play)",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

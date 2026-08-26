@@ -3,7 +3,7 @@
   "familyId": "blink",
   "name": "Blink",
   "description": "Pixel-matched Blink Android store set from your Figma (play)",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 2400

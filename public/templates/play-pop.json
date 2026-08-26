@@ -2,7 +2,7 @@
   "id": "play-pop",
   "name": "Pop Wave",
   "description": "Magenta waves and confetti - bold Play Store look",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

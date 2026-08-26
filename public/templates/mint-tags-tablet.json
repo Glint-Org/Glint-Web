@@ -3,7 +3,7 @@
   "familyId": "mint-tags",
   "name": "Mint Tags",
   "description": "Color bands, pill tags, centered device (tablet)",
-  "store": "ios-tablet",
+  "store": "ios/ipad",
   "canvas": {
     "width": 2048,
     "height": 2732

@@ -2,7 +2,7 @@
   "id": "play-hero",
   "name": "Sunset Bloom",
   "description": "Coral blobs, gold orbs, framed phone - Play Store hero",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920

@@ -3,7 +3,7 @@
   "familyId": "warm-glow",
   "name": "Warm Glow",
   "description": "Solid warm field, soft blob, glow ring, centered device (play)",
-  "store": "play",
+  "store": "play/phone",
   "canvas": {
     "width": 1080,
     "height": 1920
