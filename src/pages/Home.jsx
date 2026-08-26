@@ -4,15 +4,15 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
-import { loadAllTemplates, STORE_FILTERS, filterTemplatesByStore } from '../utils/templateLoader';
+import { loadAllTemplates, filterTemplatesByStore, browseFilterId } from '../utils/templateLoader';
 import TemplateSetPreview from '../components/TemplateSetPreview';
-
-const CATEGORIES = STORE_FILTERS;
+import StoreBrowseFilters from '../components/StoreBrowseFilters';
 
 export default function Home() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [platform, setPlatform] = useState('all');
+  const [device, setDevice] = useState('all');
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
@@ -22,7 +22,10 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredTemplates = filterTemplatesByStore(templates, activeCategory);
+  const filteredTemplates = filterTemplatesByStore(
+    templates,
+    browseFilterId(platform, device),
+  );
 
   const handleUpload = (files) => {
     const urls = files.map((f) => URL.createObjectURL(f));
@@ -105,17 +108,12 @@ export default function Home() {
               Pick a design pack, open it in the editor, swap placeholder app shots for yours, then edit text and colors.
             </p>
           </div>
-          <div className="flex gap-2 justify-center flex-wrap">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat.id ? 'bg-glint-accent text-glint-text-on-accent shadow-md' : 'bg-glint-surface/80 text-glint-text-secondary hover:bg-glint-surface border border-glint-border'}`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          <StoreBrowseFilters
+            platform={platform}
+            device={device}
+            onPlatformChange={setPlatform}
+            onDeviceChange={setDevice}
+          />
           {loading ? (
             <div className="space-y-6">
               {[...Array(3)].map((_, i) => (

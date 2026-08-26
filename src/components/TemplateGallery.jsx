@@ -1,31 +1,35 @@
 import { useEffect, useState } from 'react';
 import {
   loadAllTemplates,
-  STORE_FILTERS,
   filterTemplatesByStore,
+  browseFilterId,
+  getStoreTarget,
 } from '../utils/templateLoader';
 import TemplateSetPreview from './TemplateSetPreview';
+import StoreBrowseFilters from './StoreBrowseFilters';
 
 /**
  * Left sidebar — pick a store template pack (preview only).
- * Store size is chosen here via filters, not in Export.
+ * Platform → device filters set the export size via the pack.
  */
 export default function TemplateGallery({ onChange, activeStore }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [storeFilter, setStoreFilter] = useState(activeStore || 'all');
+  const [platform, setPlatform] = useState('all');
+  const [device, setDevice] = useState('all');
 
   useEffect(() => {
     loadAllTemplates().then(setTemplates).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    if (activeStore && STORE_FILTERS.some((f) => f.id === activeStore)) {
-      setStoreFilter(activeStore);
-    }
+    if (!activeStore) return;
+    const target = getStoreTarget(activeStore);
+    setPlatform(target.platform);
+    setDevice(target.id);
   }, [activeStore]);
 
-  const filtered = filterTemplatesByStore(templates, storeFilter);
+  const filtered = filterTemplatesByStore(templates, browseFilterId(platform, device));
 
   if (loading) {
     return <p className="text-sm text-glint-text-tertiary">Loading templates…</p>;
@@ -34,27 +38,18 @@ export default function TemplateGallery({ onChange, activeStore }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Filter by store, then pick a pack. Export uses that size.
+        Pick a platform, then a device size. Export uses that canvas.
       </p>
-      <div className="flex flex-wrap gap-1">
-        {STORE_FILTERS.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setStoreFilter(f.id)}
-            className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
-              storeFilter === f.id
-                ? 'bg-glint-accent text-glint-text-on-accent'
-                : 'bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <StoreBrowseFilters
+        platform={platform}
+        device={device}
+        onPlatformChange={setPlatform}
+        onDeviceChange={setDevice}
+        size="sm"
+      />
       {filtered.length === 0 ? (
         <p className="text-xs text-glint-text-tertiary py-4 text-center">
-          No templates for this store yet.
+          No templates for this size yet.
         </p>
       ) : (
         <div className="space-y-2 overflow-hidden">

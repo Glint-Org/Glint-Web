@@ -23,42 +23,48 @@ export function getTheme(themeId, themes) {
   return themes[themeId] || { type: 'solid', value: '#1C1C1E' };
 }
 
-/** Filters for home + editor template gallery (matches template.store). */
-export const STORE_FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'play', label: 'Play Store' },
-  { id: 'ios', label: 'App Store' },
-  { id: 'ios-tablet', label: 'iPad' },
-];
+export {
+  PLATFORMS,
+  STORE_TARGETS,
+  STORE_TARGET_IDS,
+  filterTemplatesByStore,
+  browseFilterId,
+  resolveStoreKey,
+  getStoreTarget,
+  devicesForPlatform,
+} from './storeCatalog';
 
-export function filterTemplatesByStore(templates, storeFilter) {
-  if (!storeFilter || storeFilter === 'all') return templates;
-  return templates.filter((t) => t.store === storeFilter);
-}
-
-/** Curated store-only templates - simple, premium, few. */
+/** Curated store templates — phone / tablet packs + form-factor starters. */
 export const TEMPLATE_IDS = [
   // Pixel-matched Figma packs
   'blink-play',
   'blink-ios',
   'blink-tablet',
-  // New families (play / ios / tablet variants)
+  // Families (play phone / ios iphone / ios ipad)
   'warm-glow-play',
   'warm-glow-ios',
   'warm-glow-tablet',
   'mint-tags-play',
   'mint-tags-ios',
   'mint-tags-tablet',
-  // Legacy curated packs
+  // Legacy curated packs — Play phone
   'play-hero',
   'play-pop',
   'play-feature',
   'play-dual',
   'play-minimal',
+  // App Store iPhone
   'ios-clean',
   'ios-wave',
   'ios-dark',
+  // App Store iPad
   'tablet-showcase',
+  // Play form-factor starters
+  'play-tablet-7',
+  'play-tablet-10',
+  'play-tv',
+  'play-wear',
+  'play-chromebook',
 ];
 
 export async function loadTemplate(templateId) {
