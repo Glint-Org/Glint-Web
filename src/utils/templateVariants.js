@@ -1,22 +1,34 @@
 /**
- * Scale a Play-canonical template (1080x1920) to iOS phone or iPad store sizes.
+ * Scale a Play-phone-canonical template (1080x1920) to other store sizes.
  * X metrics use width ratio; Y metrics use height ratio; font uses avg.
  */
 
+import { STORE_TARGETS } from './storeCatalog';
+
 const STORES = {
-  play: {
-    store: 'play',
+  'play/phone': {
+    store: 'play/phone',
     canvas: { width: 1080, height: 1920 },
     frame: 'pixel9',
   },
-  ios: {
-    store: 'ios',
+  'ios/iphone': {
+    store: 'ios/iphone',
     canvas: { width: 1290, height: 2796 },
     frame: 'iphone16-pro-max',
   },
-  'ios-tablet': {
-    store: 'ios-tablet',
+  'ios/ipad': {
+    store: 'ios/ipad',
     canvas: { width: 2048, height: 2732 },
+    frame: 'ipad-pro-13',
+  },
+  'play/tablet-7': {
+    store: 'play/tablet-7',
+    canvas: { width: 1200, height: 1920 },
+    frame: 'ipad-pro',
+  },
+  'play/tablet-10': {
+    store: 'play/tablet-10',
+    canvas: { width: 1600, height: 2560 },
     frame: 'ipad-pro-13',
   },
 };
@@ -53,7 +65,6 @@ function scaleLayer(layer, sx, sy, sf, defaultFrame) {
 function scaleArt(art, sx, sy) {
   if (!Array.isArray(art)) return art;
   return art.map((item) => {
-    // preview.art uses % strings — leave as-is
     if (typeof item?.x === 'string') return { ...item };
     return {
       ...item,
@@ -65,12 +76,29 @@ function scaleArt(art, sx, sy) {
   });
 }
 
+function idSuffixFor(storeKey) {
+  const map = {
+    'play/phone': 'play',
+    'ios/iphone': 'ios',
+    'ios/ipad': 'tablet',
+    'play/tablet-7': 'tablet-7',
+    'play/tablet-10': 'tablet-10',
+  };
+  return map[storeKey] || storeKey.replace('/', '-');
+}
+
 /**
  * @param {object} base - Play template with slides[]
- * @param {'play'|'ios'|'ios-tablet'} storeKey
+ * @param {string} storeKey - catalog id e.g. ios/iphone
  */
 export function buildStoreVariant(base, storeKey) {
-  const target = STORES[storeKey];
+  const target = STORES[storeKey] || (STORE_TARGETS[storeKey]
+    ? {
+        store: storeKey,
+        canvas: { width: STORE_TARGETS[storeKey].width, height: STORE_TARGETS[storeKey].height },
+        frame: STORE_TARGETS[storeKey].defaultFrame,
+      }
+    : null);
   if (!target) throw new Error(`Unknown store: ${storeKey}`);
 
   const baseW = base.canvas?.width || 1080;
@@ -79,7 +107,7 @@ export function buildStoreVariant(base, storeKey) {
   const sy = target.canvas.height / baseH;
   const sf = (sx + sy) / 2;
 
-  const idSuffix = storeKey === 'ios-tablet' ? 'tablet' : storeKey;
+  const idSuffix = idSuffixFor(storeKey);
   const id = base.familyId ? `${base.familyId}-${idSuffix}` : `${base.id}-${idSuffix}`;
 
   const slides = (base.slides || []).map((slide, i) => ({
@@ -101,7 +129,7 @@ export function buildStoreVariant(base, storeKey) {
     preview: {
       ...(base.preview || {}),
       frame: target.frame,
-      tablet: storeKey === 'ios-tablet' || undefined,
+      tablet: storeKey.includes('tablet') || storeKey.includes('ipad') || undefined,
       art: scaleArt(base.preview?.art, sx, sy),
     },
     layers,
@@ -110,7 +138,7 @@ export function buildStoreVariant(base, storeKey) {
 }
 
 export function buildAllStoreVariants(base) {
-  return ['play', 'ios', 'ios-tablet'].map((key) => buildStoreVariant(base, key));
+  return ['play/phone', 'ios/iphone', 'ios/ipad'].map((key) => buildStoreVariant(base, key));
 }
 
 export { STORES };

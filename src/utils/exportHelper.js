@@ -1,4 +1,12 @@
 import JSZip from 'jszip';
+import {
+  STORE_TARGETS,
+  resolveStoreKey,
+  storeExportLabel,
+  getStoreTarget,
+} from './storeCatalog';
+
+export { resolveStoreKey, storeExportLabel } from './storeCatalog';
 
 export function downloadSinglePNG(dataUrl, filename = 'screenshot.png') {
   const link = document.createElement('a');
@@ -25,11 +33,11 @@ export function zipFileName(appName) {
  * @param {string} locale - e.g. en-US (Fastlane phoneScreenshots/{locale}/)
  */
 export function buildExportFilenames(count, {
-  exportPreset = 'play',
+  exportPreset = 'play/phone',
   layout = 'flat',
   locale = 'en-US',
 } = {}) {
-  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const preset = getStoreTarget(exportPreset);
   const prefix = preset.filename ?? 'screen';
   const files = [];
   for (let i = 0; i < count; i++) {
@@ -70,12 +78,12 @@ export async function buildZipBlob(dataUrls, filenames) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-export function generateSessionJson(screens, appName, tagline, store = 'play', extra = {}) {
+export function generateSessionJson(screens, appName, tagline, store = 'play/phone', extra = {}) {
   return JSON.stringify({
     app: appName,
     tagline,
     screens,
-    store,
+    store: resolveStoreKey(store),
     version: '1.0',
     locales: extra.locales || ['en-US'],
     exportedAt: new Date().toISOString(),
@@ -83,42 +91,21 @@ export function generateSessionJson(screens, appName, tagline, store = 'play', e
   }, null, 2);
 }
 
-export const EXPORT_PRESETS = {
-  play: {
-    width: 1080,
-    height: 1920,
-    label: 'Play Store',
-    filename: 'screen',
-    fastlaneFolder: 'phoneScreenshots',
-  },
-  ios: {
-    width: 1290,
-    height: 2796,
-    label: 'App Store (iPhone)',
-    filename: 'ios_screen',
-    fastlaneFolder: 'phoneScreenshots',
-  },
-  'ios-tablet': {
-    width: 2048,
-    height: 2732,
-    label: 'App Store (iPad)',
-    filename: 'ipad_screen',
-    fastlaneFolder: 'tabletScreenshots',
-  },
-};
+/** @deprecated Prefer getStoreTarget — kept for callers using EXPORT_PRESETS[key] */
+export const EXPORT_PRESETS = Object.fromEntries(
+  Object.entries(STORE_TARGETS).map(([id, t]) => [
+    id,
+    {
+      width: t.width,
+      height: t.height,
+      label: t.fullLabel,
+      filename: t.filename,
+      fastlaneFolder: t.fastlaneFolder,
+    },
+  ]),
+);
 
-/** Normalize template.store / session.store to an export preset key. */
-export function resolveStoreKey(store) {
-  if (store === 'ios-tablet' || store === 'ipad') return 'ios-tablet';
-  if (store === 'ios' || store === 'iphone') return 'ios';
-  if (store === 'play' || store === 'android') return 'play';
-  return EXPORT_PRESETS[store] ? store : 'play';
-}
-
-export function storeExportLabel(store, canvas) {
-  const key = resolveStoreKey(store);
-  const preset = EXPORT_PRESETS[key];
-  const w = canvas?.width ?? preset.width;
-  const h = canvas?.height ?? preset.height;
-  return `${preset.label} · ${w}×${h}`;
-}
+// Legacy flat-key lookups still used in a few places
+EXPORT_PRESETS.play = EXPORT_PRESETS['play/phone'];
+EXPORT_PRESETS.ios = EXPORT_PRESETS['ios/iphone'];
+EXPORT_PRESETS['ios-tablet'] = EXPORT_PRESETS['ios/ipad'];
