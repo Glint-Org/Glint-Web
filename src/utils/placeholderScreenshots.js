@@ -12,6 +12,7 @@ function makeWhiteScreenshot() {
   el.width = W;
   el.height = H;
   const ctx = el.getContext('2d');
+  if (!ctx) return '';
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
   whiteUrl = el.toDataURL('image/png');
