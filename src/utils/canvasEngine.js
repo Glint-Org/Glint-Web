@@ -6,6 +6,9 @@ import {
   MIN_DEVICE_COVERAGE,
   DEFAULT_SCREENSHOT_STYLE,
 } from './frameMeta';
+import { GLINT_CLONE_PROPS } from './glintCloneProps';
+
+export { GLINT_CLONE_PROPS } from './glintCloneProps';
 
 /** Build a Fabric Shadow from screenshot chrome style (or null when off). */
 export function buildChromeShadow(style = {}) {
@@ -63,23 +66,6 @@ export function applySelectionStyle(obj) {
   });
   return obj;
 }
-
-/** Custom props Fabric clone drops unless listed. */
-export const GLINT_CLONE_PROPS = [
-  'glintRole',
-  'glintFrameId',
-  'glintBaseScale',
-  'glintCoverage',
-  'glintScreenshotUrl',
-  'glintSlot',
-  'glintSlide',
-  'glintFills',
-  'glintGraphic',
-  'glintShape',
-  'glintChrome',
-  'glintTargetW',
-  'glintTargetH',
-];
 
 /** Copy Glint metadata after Fabric clone (clone alone drops custom fields). */
 export function copyGlintProps(from, to) {

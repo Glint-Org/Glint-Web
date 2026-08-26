@@ -1,0 +1,16 @@
+/** Custom props Fabric clone drops unless listed. */
+export const GLINT_CLONE_PROPS = [
+  'glintRole',
+  'glintFrameId',
+  'glintBaseScale',
+  'glintCoverage',
+  'glintScreenshotUrl',
+  'glintSlot',
+  'glintSlide',
+  'glintFills',
+  'glintGraphic',
+  'glintShape',
+  'glintChrome',
+  'glintTargetW',
+  'glintTargetH',
+];

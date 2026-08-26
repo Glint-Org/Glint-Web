@@ -12,7 +12,7 @@
  */
 
 import JSZip from 'jszip';
-import { GLINT_CLONE_PROPS } from './canvasEngine';
+import { GLINT_CLONE_PROPS } from './glintCloneProps';
 
 export const GLINTPACK_FORMAT = 'glintpack';
 export const GLINTPACK_VERSION = 1;
