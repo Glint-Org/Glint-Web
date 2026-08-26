@@ -8,8 +8,8 @@ Browser editor that turns real app screenshots into store-ready frames. No login
 - **Graphic templates** - curated Play / App Store / iPad packs with premium device frames (Pixel 9, Galaxy S24, iPhone 16 Pro Max, iPad Pro)
 - **Assets** - import screenshots, sessions, or Bridge captures; map 1:1 onto frames
 - **Layers** - drag to restack, device right-click → import screenshot
-- **Export** - ZIP at Play (1080×1920), App Store phone, or iPad sizes
-- **Glint View handoff** - Preview frames → **Copy for Glint View** → paste on device
+- **Export** - store PNG ZIP, **`.glintpack`** (editable round-trip), Copy for Glint View
+- **Glint View handoff** - pack import/share, or Preview → **Copy for Glint View**
 
 ## Quick Start
 
@@ -26,7 +26,7 @@ Open `http://localhost:5173`.
 2. Import the folder (or drop PNGs) in **Assets**
 3. Pick a template in **Templates** (loads a frame pack)
 4. Edit frames on the board; manage layers in **Frames**
-5. **Export** → Preview → ZIP, then Copy for Glint View
+5. **Export** → Download `.glintpack` (editable) and/or store PNG ZIP → optional Copy for Glint View
 
 ## Tech Stack
 
