@@ -3,6 +3,7 @@ import FrameExport from './FrameExport';
 import QRExporter from './QRExporter';
 import ExportManager from './ExportManager';
 import { storeExportLabel } from '../utils/exportHelper';
+import { buildGlintPackBlob, downloadGlintPack } from '../utils/projectPack';
 
 /**
  * Export panel — store size is locked to the selected template.
@@ -27,12 +28,40 @@ export default function ExportPanel({
   deviceFrame,
   screenshotStyle,
   textOverlay,
+  fontFamily,
 }) {
   const [exportedUrls, setExportedUrls] = useState([]);
+  const [packing, setPacking] = useState(false);
   const sizeLabel = storeExportLabel(
     template?.store || exportPreset,
     template?.canvas || { width: canvasWidth, height: canvasHeight },
   );
+
+  const handleDownloadPack = async () => {
+    setPacking(true);
+    try {
+      const live = getLiveCanvases?.() || [];
+      const blob = await buildGlintPackBlob({
+        frames,
+        liveCanvases: live,
+        template,
+        appName,
+        tagline,
+        store: exportPreset,
+        background,
+        deviceFrame,
+        screenshotStyle,
+        fontFamily,
+        previewDataUrls: exportedUrls,
+      });
+      await downloadGlintPack(blob, appName);
+    } catch (err) {
+      console.error(err);
+      alert(`Project pack failed: ${err.message || err}`);
+    } finally {
+      setPacking(false);
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -66,9 +95,24 @@ export default function ExportPanel({
               : 'Pick a Play / App Store / iPad template to set export size.'}
           </p>
         </div>
-        <p className="text-[10px] text-glint-text-tertiary">
-          ZIP is named from app name, or glint.zip if empty.
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
+          Editable project
+        </h3>
+        <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
+          Download a <span className="font-medium text-glint-text-secondary">.glintpack</span> —
+          reopen in Web for pixel-perfect edits, or import in Glint View Store Room.
         </p>
+        <button
+          type="button"
+          disabled={packing || !frames?.length}
+          onClick={handleDownloadPack}
+          className="w-full px-3 py-2 glint-btn-primary rounded-lg text-xs disabled:opacity-50"
+        >
+          {packing ? 'Building pack…' : 'Download .glintpack'}
+        </button>
       </div>
 
       <FrameExport

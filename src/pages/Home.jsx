@@ -33,6 +33,10 @@ export default function Home() {
     navigate('/editor', { state: { screenshots: imported, session: importedSession } });
   };
 
+  const handleProjectImport = (pack) => {
+    navigate('/editor', { state: { glintPack: pack } });
+  };
+
   const handleStartFromTemplate = (template) => {
     navigate('/editor', { state: { template } });
   };
@@ -154,7 +158,10 @@ export default function Home() {
                 <span className="w-6 h-6 rounded-full bg-glint-accent-muted text-glint-accent text-xs flex items-center justify-center font-bold">2</span>
                 Import session folder
               </h4>
-              <SessionImporter onImport={handleSessionImport} />
+              <SessionImporter
+                onImport={handleSessionImport}
+                onProjectImport={handleProjectImport}
+              />
               <p className="text-xs text-glint-text-tertiary mt-3">Folder with session.json + PNGs from glint capture or Bridge</p>
             </div>
           </div>

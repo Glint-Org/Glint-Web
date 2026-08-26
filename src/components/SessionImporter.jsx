@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { isGlintPackFile, parseGlintPack } from '../utils/projectPack';
 
 /** Prefer one platform/device prefix so frames map to a coherent screen sequence. */
 function preferPrimaryDeviceScreens(screens) {
@@ -13,10 +14,11 @@ function preferPrimaryDeviceScreens(screens) {
 }
 
 /**
- * Import session.json + PNG files from a folder (glint_capture or Bridge output).
+ * Import Capture/Bridge folders, or editable .glintpack projects.
  */
-export default function SessionImporter({ onImport }) {
+export default function SessionImporter({ onImport, onProjectImport }) {
   const inputRef = useRef(null);
+  const packRef = useRef(null);
 
   const parseSession = useCallback(async (files) => {
     const fileList = Array.from(files);
@@ -40,7 +42,6 @@ export default function SessionImporter({ onImport }) {
     const screenOrder = preferPrimaryDeviceScreens(
       sessionData?.screens ?? pngFiles.map((f) => f.name).sort(),
     );
-    // Prefer relative folder paths (webkitdirectory) so Capture nested paths resolve.
     const urlMap = new Map();
     for (const f of pngFiles) {
       const rel = (f.webkitRelativePath || f.name).replace(/^[^/]+\//, '');
@@ -84,6 +85,27 @@ export default function SessionImporter({ onImport }) {
     e.target.value = '';
   };
 
+  const handlePackSelect = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      if (!isGlintPackFile(file) && !file.name.toLowerCase().endsWith('.zip')) {
+        // Still try parse — zip may be renamed
+      }
+      const pack = await parseGlintPack(file);
+      if (onProjectImport) onProjectImport(pack);
+      else {
+        onImport({
+          screenshots: pack.screenshots,
+          session: pack.session,
+        });
+      }
+    } catch (err) {
+      alert(err.message || String(err));
+    }
+  };
+
   const handleJsonPaste = async () => {
     const json = prompt('Paste session.json contents:');
     if (!json) return;
@@ -99,7 +121,7 @@ export default function SessionImporter({ onImport }) {
       const loadable = screens.filter(isLoadable);
       if (screens.length > 0 && loadable.length === 0) {
         alert(
-          'Pasted session has filenames only, not image data.\n\nUse "Import Folder" for session.json + PNGs, or paste a session from Glint View handoff (data: URLs).',
+          'Pasted session has filenames only, not image data.\n\nUse Import Folder, .glintpack, or paste Copy for Glint View (data: URLs).',
         );
         return;
       }
@@ -111,7 +133,7 @@ export default function SessionImporter({ onImport }) {
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-glint-text-secondary">Import Session</h3>
+      <h3 className="font-semibold text-glint-text-secondary">Import</h3>
       <input
         ref={inputRef}
         type="file"
@@ -121,13 +143,29 @@ export default function SessionImporter({ onImport }) {
         onChange={handleFolderSelect}
         className="hidden"
       />
+      <input
+        ref={packRef}
+        type="file"
+        accept=".glintpack,.zip,application/zip"
+        onChange={handlePackSelect}
+        className="hidden"
+      />
       <button
-        onClick={() => inputRef.current?.click()}
+        type="button"
+        onClick={() => packRef.current?.click()}
         className="w-full px-4 py-2 glint-btn-primary rounded-lg text-sm"
+      >
+        Open .glintpack (editable)
+      </button>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary"
       >
         Import Folder (session.json + PNGs)
       </button>
       <button
+        type="button"
         onClick={handleJsonPaste}
         className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary"
       >

@@ -52,6 +52,7 @@ export default function Editor() {
 
   const {
     frames,
+    setFrames,
     activeIndex,
     setActiveIndex,
     activeFrame,
@@ -271,6 +272,43 @@ export default function Editor() {
     setExportPreset(resolveStoreKey(importedSession.store ?? 'play'));
     mapScreenshots(imported);
   };
+
+  const handleProjectImport = (pack) => {
+    setSession(pack.session);
+    setAppName(pack.session?.app ?? '');
+    setTagline(pack.session?.tagline ?? '');
+    setExportPreset(resolveStoreKey(pack.session?.store ?? 'play'));
+    if (pack.editor?.background) setBackgroundState(pack.editor.background);
+    if (pack.editor?.deviceFrame !== undefined) setDeviceFrame(pack.editor.deviceFrame);
+    if (pack.editor?.screenshotStyle) setScreenshotStyle({ ...pack.editor.screenshotStyle });
+    if (pack.editor?.fontFamily) setFontFamily(pack.editor.fontFamily);
+    if (pack.templateMeta) {
+      setTemplate({
+        ...pack.templateMeta,
+        slides: pack.frames.map((f) => f.design).filter(Boolean),
+      });
+    }
+    setFrames(
+      pack.frames.map((f) => ({
+        id: f.id,
+        design: f.design,
+        screenshotUrl: f.screenshotUrl,
+        fabricJson: f.fabricJson,
+        fabricRestoreKey: f.fabricRestoreKey,
+      })),
+    );
+    setActiveIndex(0);
+    setLeftTab('frames');
+  };
+
+  useEffect(() => {
+    const pack = location.state?.glintPack;
+    if (!pack) return;
+    handleProjectImport(pack);
+    navigate(location.pathname, { replace: true, state: {} });
+    // one-shot hydrate from Home
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUpload = (files) => {
     const urls = files.map((f) => URL.createObjectURL(f));
@@ -624,7 +662,7 @@ export default function Editor() {
               {leftTab === 'assets' && (
                 <>
                   <p className="text-[10px] text-glint-text-tertiary">
-                    Import screenshots or a Capture/Bridge session folder.
+                    Import a .glintpack for editable restore, or Capture/Bridge session folders.
                   </p>
                   <div className="space-y-2">
                     <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
@@ -632,7 +670,10 @@ export default function Editor() {
                     </h3>
                     <UploadZone onUpload={handleUpload} compact />
                   </div>
-                  <SessionImporter onImport={handleSessionImport} />
+                  <SessionImporter
+                    onImport={handleSessionImport}
+                    onProjectImport={handleProjectImport}
+                  />
                   {bridge.connected && (
                     <button
                       onClick={() => bridge.captureSingle()}
@@ -685,6 +726,7 @@ export default function Editor() {
                   deviceFrame={deviceFrame}
                   screenshotStyle={screenshotStyle}
                   textOverlay={textOverlay}
+                  fontFamily={fontFamily}
                 />
               )}
             </div>
