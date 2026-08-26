@@ -105,14 +105,6 @@ export const EXPORT_PRESETS = {
     filename: 'ipad_screen',
     fastlaneFolder: 'tabletScreenshots',
   },
-  /** Google Play feature graphic */
-  'feature-graphic': {
-    width: 1024,
-    height: 500,
-    label: 'Play Feature Graphic',
-    filename: 'feature_graphic',
-    fastlaneFolder: 'featureGraphic',
-  },
 };
 
 /** Normalize template.store / session.store to an export preset key. */
@@ -120,7 +112,6 @@ export function resolveStoreKey(store) {
   if (store === 'ios-tablet' || store === 'ipad') return 'ios-tablet';
   if (store === 'ios' || store === 'iphone') return 'ios';
   if (store === 'play' || store === 'android') return 'play';
-  if (store === 'feature-graphic' || store === 'feature') return 'feature-graphic';
   return EXPORT_PRESETS[store] ? store : 'play';
 }
 
