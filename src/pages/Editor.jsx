@@ -30,8 +30,9 @@ import {
   stripDeviceFrame,
   restyleScreenshot,
 } from '../utils/canvasEngine';
-import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
+import { DEFAULT_SCREENSHOT_STYLE, resolveFrameForStore } from '../utils/frameMeta';
 import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
+import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
 
@@ -130,7 +131,8 @@ export default function Editor() {
 
   const loadTemplate = (t) => {
     setTemplate(t);
-    if (t?.store) setExportPreset(resolveStoreKey(t.store));
+    const storeKey = t?.store ? resolveStoreKey(t.store) : exportPreset;
+    if (t?.store) setExportPreset(storeKey);
     if (t) applyTemplatePack(t, { resizeToPack: true });
   };
 
@@ -187,7 +189,10 @@ export default function Editor() {
   }, []);
 
   const handleDeviceFrameChange = useCallback(async (nextId) => {
-    setDeviceFrame(nextId);
+    const target = getStoreTarget(exportPreset);
+    const frameId = resolveFrameForStore(nextId, target, null);
+    if (nextId != null && frameId !== nextId) return;
+    setDeviceFrame(frameId);
 
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
@@ -198,7 +203,7 @@ export default function Editor() {
       const devices = canvas.getObjects().filter((o) => o.glintRole === 'framed-screenshot');
       const bare = canvas.getObjects().filter((o) => o.glintRole === 'screenshot');
 
-      if (!nextId) {
+      if (!frameId) {
         // None — strip every bezel into a styled screenshot.
         for (const device of [...devices]) {
           if (!device.glintScreenshotUrl && shotUrl) {
@@ -216,13 +221,13 @@ export default function Editor() {
         }
         const ok = await replaceDeviceFrame(
           device,
-          nextId,
+          frameId,
           shotUrl || device.glintScreenshotUrl,
           screenshotStyle,
         );
         if (!ok && shotUrl) {
           device.set({ glintScreenshotUrl: shotUrl });
-          await replaceDeviceFrame(device, nextId, shotUrl, screenshotStyle);
+          await replaceDeviceFrame(device, frameId, shotUrl, screenshotStyle);
         }
       }
 
@@ -233,23 +238,34 @@ export default function Editor() {
         }
         await replaceDeviceFrame(
           shot,
-          nextId,
+          frameId,
           shotUrl || shot.glintScreenshotUrl,
           screenshotStyle,
         );
       }
     }
 
-    if (activeCanvas && nextId) {
+    if (activeCanvas && frameId) {
       const refreshed = activeCanvas
         .getObjects()
-        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === nextId);
+        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === frameId);
       if (refreshed) {
         activeCanvas.setActiveObject(refreshed);
         activeCanvas.requestRenderAll();
       }
     }
-  }, [activeCanvas, frames, screenshotStyle]);
+  }, [activeCanvas, exportPreset, frames, screenshotStyle]);
+
+  /** Drop illegal bezels when store size changes (e.g. iPhone → Play TV). */
+  useEffect(() => {
+    const target = getStoreTarget(exportPreset);
+    const next = resolveFrameForStore(deviceFrame, target, null);
+    if (next !== deviceFrame) {
+      handleDeviceFrameChange(next);
+    }
+    // Clamp only when the store target changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exportPreset]);
 
   const handleAddText = useCallback(() => {
     if (!activeCanvas) return;
@@ -279,7 +295,12 @@ export default function Editor() {
     setTagline(pack.session?.tagline ?? '');
     setExportPreset(resolveStoreKey(pack.session?.store ?? 'play/phone'));
     if (pack.editor?.background) setBackgroundState(pack.editor.background);
-    if (pack.editor?.deviceFrame !== undefined) setDeviceFrame(pack.editor.deviceFrame);
+    if (pack.editor?.deviceFrame !== undefined) {
+      const storeKey = resolveStoreKey(pack.session?.store ?? 'play/phone');
+      setDeviceFrame(
+        resolveFrameForStore(pack.editor.deviceFrame, getStoreTarget(storeKey), null),
+      );
+    }
     if (pack.editor?.screenshotStyle) setScreenshotStyle({ ...pack.editor.screenshotStyle });
     if (pack.editor?.fontFamily) setFontFamily(pack.editor.fontFamily);
     if (pack.templateMeta) {
@@ -755,6 +776,7 @@ export default function Editor() {
               onFontFamilyChange={setFontFamily}
               onAddText={handleAddText}
               onDelete={handleDelete}
+              store={exportPreset}
             />
           </div>
         </aside>

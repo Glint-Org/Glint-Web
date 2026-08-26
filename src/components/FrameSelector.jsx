@@ -1,26 +1,16 @@
 import { Minus } from 'lucide-react';
-import { getFrameSrc } from '../utils/frameMeta';
-
-/** Curated frames only — most-used Play / App Store devices. */
-export const FRAME_OPTIONS = [
-  { id: null, label: 'None' },
-  { id: 'pixel9', label: 'Pixel 9' },
-  { id: 'galaxy-s24', label: 'Galaxy' },
-  { id: 'phone-3d', label: 'Phone Shadow' },
-  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max' },
-  { id: 'iphone16-pro', label: 'iPhone 16 Pro' },
-  { id: 'ipad-pro-13', label: 'iPad Pro 13"' },
-  { id: 'ipad-pro', label: 'iPad Pro 11"' },
-];
+import { getFrameSrc, framesForStore } from '../utils/frameMeta';
 
 /**
- * Visual device frame picker — tiles with clear selected state.
+ * Visual device frame picker — only bezels allowed for the active store target.
  */
-export default function FrameSelector({ selected, onChange }) {
+export default function FrameSelector({ selected, onChange, store }) {
+  const options = framesForStore(store);
+
   return (
     <div className="space-y-1.5">
       <div className="grid grid-cols-2 gap-1.5">
-        {FRAME_OPTIONS.map((f) => {
+        {options.map((f) => {
           const active = selected === f.id;
           return (
             <button
@@ -59,7 +49,7 @@ export default function FrameSelector({ selected, onChange }) {
         })}
       </div>
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Pick a bezel for every device on the board, or None to strip bezels. Use Design for shadow, radius, and border.
+        Bezels match this store size (Play vs App Store, phone vs TV). None strips the device chrome.
       </p>
     </div>
   );

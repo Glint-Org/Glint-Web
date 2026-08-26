@@ -1,23 +1,37 @@
-import { useState, useRef } from 'react';
-import { Smartphone, Tablet, Image, Minus } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { Smartphone, Tablet, Tv, Watch, Image, Minus, Monitor } from 'lucide-react';
+import { framesForStore } from '../utils/frameMeta';
 
-const BUILTIN_FRAMES = [
-  { id: null, label: 'No Frame', Icon: Minus },
-  { id: 'pixel9', label: 'Pixel 9', Icon: Smartphone },
-  { id: 'galaxy-s24', label: 'Galaxy', Icon: Smartphone },
-  { id: 'phone-3d', label: 'Phone Shadow', Icon: Smartphone },
-  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', Icon: Smartphone },
-  { id: 'iphone16-pro', label: 'iPhone 16 Pro', Icon: Smartphone },
-  { id: 'ipad-pro-13', label: 'iPad Pro 13"', Icon: Tablet },
-  { id: 'ipad-pro', label: 'iPad Pro 11"', Icon: Tablet },
-];
+const ICONS = {
+  null: Minus,
+  pixel9: Smartphone,
+  'galaxy-s24': Smartphone,
+  'simple-dark': Smartphone,
+  tv: Tv,
+  'iphone16-pro-max': Smartphone,
+  'iphone16-pro': Smartphone,
+  'phone-3d': Smartphone,
+  'ipad-pro-13': Tablet,
+  'ipad-pro': Tablet,
+  'tablet-3d': Tablet,
+  wear: Watch,
+  chromebook: Monitor,
+};
 
-export default function FramePicker({ selected, onChange }) {
+export default function FramePicker({ selected, onChange, store }) {
   const [customFrames, setCustomFrames] = useState([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const allFrames = [...BUILTIN_FRAMES, ...customFrames.map((f) => ({ id: f.id, label: f.name, Icon: Image }))];
+  const builtin = useMemo(() => framesForStore(store), [store]);
+  const allFrames = [
+    ...builtin.map((f) => ({
+      id: f.id,
+      label: f.label,
+      Icon: ICONS[f.id] || (f.id == null ? Minus : Smartphone),
+    })),
+    ...customFrames.map((f) => ({ id: f.id, label: f.name, Icon: Image })),
+  ];
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files || []);

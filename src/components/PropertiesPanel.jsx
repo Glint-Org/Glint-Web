@@ -77,6 +77,7 @@ export default function PropertiesPanel({
   onFontFamilyChange,
   onAddText,
   onDelete,
+  store,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -208,7 +209,7 @@ export default function PropertiesPanel({
                 ? 'Selected device on canvas — pick a bezel to replace it.'
                 : 'Pick a device bezel for every shot on the board, or None to remove bezels.'}
             </p>
-            <FrameSelector selected={frame} onChange={onFrameChange} />
+            <FrameSelector selected={frame} onChange={onFrameChange} store={store} />
           </>
         )}
 

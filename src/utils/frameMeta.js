@@ -97,6 +97,47 @@ export const FRAME_INSETS = {
     width: 2264,
     height: 2952,
   },
+  /** Landscape TV / monitor bezel for Play TV listings. */
+  tv: {
+    ext: 'svg',
+    top: 40,
+    right: 48,
+    bottom: 176,
+    left: 48,
+    rx: 8,
+    width: 1920,
+    height: 1200,
+  },
+};
+
+/**
+ * Curated bezels tagged by store platform + form factor.
+ * FrameSelector only offers options allowed for the active store target.
+ */
+export const DEVICE_FRAME_OPTIONS = [
+  { id: null, label: 'None' },
+  { id: 'pixel9', label: 'Pixel 9', platforms: ['play'], formFactors: ['phone'] },
+  { id: 'galaxy-s24', label: 'Galaxy', platforms: ['play'], formFactors: ['phone'] },
+  { id: 'simple-dark', label: 'Simple Dark', platforms: ['play'], formFactors: ['phone'] },
+  { id: 'tv', label: 'TV', platforms: ['play'], formFactors: ['tv'] },
+  { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', platforms: ['ios'], formFactors: ['iphone'] },
+  { id: 'iphone16-pro', label: 'iPhone 16 Pro', platforms: ['ios'], formFactors: ['iphone'] },
+  { id: 'phone-3d', label: 'Phone Shadow', platforms: ['ios'], formFactors: ['iphone'] },
+  { id: 'ipad-pro-13', label: 'iPad Pro 13"', platforms: ['ios'], formFactors: ['ipad'] },
+  { id: 'ipad-pro', label: 'iPad Pro 11"', platforms: ['ios'], formFactors: ['ipad'] },
+  { id: 'tablet-3d', label: 'Tablet Shadow', platforms: ['ios'], formFactors: ['ipad'] },
+];
+
+/** Map store target device → form factor used by DEVICE_FRAME_OPTIONS. */
+export const STORE_FORM_FACTOR = {
+  phone: 'phone',
+  'tablet-7': 'tablet',
+  'tablet-10': 'tablet',
+  tv: 'tv',
+  wear: 'wear',
+  chromebook: 'chromebook',
+  iphone: 'iphone',
+  ipad: 'ipad',
 };
 
 /** Fallback when an unknown frame id is requested. */
@@ -108,6 +149,48 @@ export const MAX_DEVICE_COVERAGE = 0.92;
 
 export function getFrameMeta(frameId) {
   return FRAME_INSETS[frameId] || FRAME_INSETS[DEFAULT_FRAME];
+}
+
+/**
+ * Device bezels allowed for a store target (platform/device).
+ * Always includes None. TV → TV + None; Wear/Chromebook/Play tablet → None only
+ * until we add dedicated bezels.
+ *
+ * @param {{ platform?: string, device?: string } | string | null} storeOrTarget
+ */
+export function framesForStore(storeOrTarget) {
+  let platform = null;
+  let device = null;
+  if (typeof storeOrTarget === 'string') {
+    const [p, d] = storeOrTarget.split('/');
+    platform = p;
+    device = d;
+  } else if (storeOrTarget && typeof storeOrTarget === 'object') {
+    platform = storeOrTarget.platform;
+    device = storeOrTarget.device;
+  }
+
+  const formFactor = STORE_FORM_FACTOR[device] || device || null;
+  return DEVICE_FRAME_OPTIONS.filter((opt) => {
+    if (opt.id == null) return true;
+    if (!platform || !formFactor) return false;
+    if (!opt.platforms?.includes(platform)) return false;
+    return opt.formFactors?.includes(formFactor);
+  });
+}
+
+/** Whether a bezel id (including null) is valid for the active store. */
+export function isFrameAllowedForStore(frameId, storeOrTarget) {
+  return framesForStore(storeOrTarget).some((f) => f.id === frameId);
+}
+
+/** Prefer store defaultFrame when allowed; otherwise None. */
+export function resolveFrameForStore(frameId, storeOrTarget, preferredDefault = null) {
+  if (isFrameAllowedForStore(frameId, storeOrTarget)) return frameId ?? null;
+  if (preferredDefault != null && isFrameAllowedForStore(preferredDefault, storeOrTarget)) {
+    return preferredDefault;
+  }
+  return null;
 }
 
 /** Public URL for a curated frame asset. */
