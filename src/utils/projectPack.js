@@ -81,7 +81,7 @@ export async function buildGlintPackBlob({
   template = null,
   appName = 'My App',
   tagline = '',
-  store = 'play',
+  store = 'play/phone',
   background = null,
   deviceFrame = null,
   screenshotStyle = null,
@@ -167,7 +167,7 @@ export async function buildGlintPackBlob({
     schemaVersion: GLINTPACK_VERSION,
     app: appName || 'My App',
     tagline: tagline || '',
-    store: store || 'play',
+    store: store || 'play/phone',
     exportedAt: new Date().toISOString(),
     editor: {
       background,

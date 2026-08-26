@@ -74,7 +74,7 @@ export default function Editor() {
   const [appName, setAppName] = useState(session?.app ?? '');
   const [tagline, setTagline] = useState(session?.tagline ?? '');
   const [exportPreset, setExportPreset] = useState(
-    session?.store ?? initialTemplate?.store ?? 'play',
+    resolveStoreKey(session?.store ?? initialTemplate?.store ?? 'play/phone'),
   );
   const [fontFamily, setFontFamily] = useState('Inter');
   const [themes, setThemes] = useState({});
@@ -97,7 +97,7 @@ export default function Editor() {
   const bridge = useGLINTBridge();
   const { theme, toggle } = useTheme();
 
-  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const preset = EXPORT_PRESETS[resolveStoreKey(exportPreset)] ?? EXPORT_PRESETS['play/phone'];
   const canvasW = template?.canvas?.width ?? preset.width;
   const canvasH = template?.canvas?.height ?? preset.height;
 
@@ -269,7 +269,7 @@ export default function Editor() {
     setSession(importedSession);
     setAppName(importedSession.app ?? '');
     setTagline(importedSession.tagline ?? '');
-    setExportPreset(resolveStoreKey(importedSession.store ?? 'play'));
+    setExportPreset(resolveStoreKey(importedSession.store ?? 'play/phone'));
     mapScreenshots(imported);
   };
 
@@ -277,7 +277,7 @@ export default function Editor() {
     setSession(pack.session);
     setAppName(pack.session?.app ?? '');
     setTagline(pack.session?.tagline ?? '');
-    setExportPreset(resolveStoreKey(pack.session?.store ?? 'play'));
+    setExportPreset(resolveStoreKey(pack.session?.store ?? 'play/phone'));
     if (pack.editor?.background) setBackgroundState(pack.editor.background);
     if (pack.editor?.deviceFrame !== undefined) setDeviceFrame(pack.editor.deviceFrame);
     if (pack.editor?.screenshotStyle) setScreenshotStyle({ ...pack.editor.screenshotStyle });

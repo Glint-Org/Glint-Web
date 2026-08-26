@@ -42,8 +42,8 @@ export default function HeadlessExport() {
         const template = templates.find((t) => t.id === templateId) || templates[0];
         if (!template) throw new Error(`Template not found: ${templateId}`);
 
-        const store = resolveStoreKey(template.store || 'play');
-        const preset = EXPORT_PRESETS[store] ?? EXPORT_PRESETS.play;
+        const store = resolveStoreKey(template.store || 'play/phone');
+        const preset = EXPORT_PRESETS[store] ?? EXPORT_PRESETS['play/phone'];
         const canvasW = template.canvas?.width || preset.width;
         const canvasH = template.canvas?.height || preset.height;
 

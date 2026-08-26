@@ -8,14 +8,14 @@ export default function BatchProcessor({
   screenshots,
   template,
   metadata,
-  exportPreset = 'play',
+  exportPreset = 'play/phone',
   appName = '',
 }) {
   const [processing, setProcessing] = useState(false);
   const [previews, setPreviews] = useState([]);
   const [progress, setProgress] = useState('');
 
-  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS['play/phone'];
   const exportSize = { width: preset.width, height: preset.height };
   const canRun = !!template;
 

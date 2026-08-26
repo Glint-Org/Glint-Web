@@ -17,13 +17,13 @@ export default function QRExporter({ session, exportedUrls }) {
     hasFrames ? exportedUrls : (session?.screens ?? []),
     session?.app ?? 'My App',
     session?.tagline ?? '',
-    session?.store ?? 'play',
+    session?.store ?? 'play/phone',
   );
 
   const buildCompactSession = () => JSON.stringify({
     app: session?.app ?? 'My App',
     tagline: session?.tagline ?? '',
-    store: session?.store ?? 'play',
+    store: session?.store ?? 'play/phone',
     version: '1.0',
     screens: [],
     hint: 'Paste the full session from Glint Web (Copy for Glint View) to load screenshots.',

@@ -9,12 +9,12 @@ export default function ExportManager({
   frame,
   screenshotStyle,
   textOverlay,
-  exportPreset = 'play',
+  exportPreset = 'play/phone',
   appName = '',
 }) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState('');
-  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS['play/phone'];
 
   const handleExportSingle = () => {
     if (!canvas) return;

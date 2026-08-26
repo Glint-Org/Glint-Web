@@ -15,7 +15,7 @@ import {
 export default function FrameExport({
   frames,
   getLiveCanvases,
-  exportPreset = 'play',
+  exportPreset = 'play/phone',
   appName = '',
   themes = {},
   canvasWidth = 1080,
@@ -28,7 +28,7 @@ export default function FrameExport({
   const [previews, setPreviews] = useState([]);
   const [layout, setLayout] = useState('flat');
 
-  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS.play;
+  const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS['play/phone'];
 
   const renderFrames = async () => {
     const results = [];

@@ -91,8 +91,8 @@ export default function ExportPanel({
           <p className="text-xs font-medium text-glint-text">{sizeLabel}</p>
           <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
             {template
-              ? 'Locked to your template. Change store under Templates (Play / App Store / iPad).'
-              : 'Pick a Play / App Store / iPad template to set export size.'}
+              ? 'Locked to your template. Change platform/device under Templates.'
+              : 'Pick a Play Store or App Store template to set export size.'}
           </p>
         </div>
       </div>
