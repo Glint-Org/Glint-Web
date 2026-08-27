@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { createCanvas } from '../utils/canvasEngine';
+import { createCanvas, selectDeviceLayer } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 
 function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
@@ -145,6 +145,7 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     setFrameEditable(canvas, editable);
+    if (editable) selectDeviceLayer(canvas);
   }, [editable]);
 
   useEffect(() => {
@@ -183,6 +184,7 @@ export default function FrameCanvas({
       if (ac.signal.aborted) return;
       applyDisplayScale(canvas, canvasWidth, canvasHeight, scaleRef.current);
       setFrameEditable(canvas, editableRef.current);
+      if (editableRef.current) selectDeviceLayer(canvas);
     })();
     return () => ac.abort();
   }, [design, fabricJson, canvasWidth, canvasHeight, paintKey, themesReady]);

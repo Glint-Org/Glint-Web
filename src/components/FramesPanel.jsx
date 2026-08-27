@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, GripVertical, Trash2 } from 'lucide-react';
+import { isProtectedLayer } from '../utils/layerGuards';
 
 function layerName(obj, index) {
   if (obj?.glintRole === 'store-frame') return obj.glintFrameName || `Frame ${index + 1}`;
@@ -36,6 +37,7 @@ function captureThumb(canvas) {
 
 /**
  * Frames tab: pick a frame (live canvas thumbs), then drag layers to restack.
+ * Device + screenshot layers are hide-only (no delete).
  */
 export default function FramesPanel({
   frames,
@@ -80,7 +82,6 @@ export default function FramesPanel({
       const objs = canvas.getObjects().slice().reverse();
       setLayers(objs);
       setActive(canvas.getActiveObject() || null);
-      // Refresh active frame thumb after edits
       const frame = frames[activeIndex];
       if (frame) {
         const url = captureThumb(canvas);
@@ -112,10 +113,17 @@ export default function FramesPanel({
   };
 
   const removeLayer = (obj) => {
-    if (!canvas || !obj) return;
+    if (!canvas || !obj || isProtectedLayer(obj)) return;
     canvas.remove(obj);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
+  };
+
+  const toggleVisible = (obj) => {
+    if (!canvas || !obj) return;
+    obj.set('visible', obj.visible === false);
+    canvas.requestRenderAll();
+    setLayers(canvas.getObjects().slice().reverse());
   };
 
   const onDragStart = (e, index) => {
@@ -123,7 +131,6 @@ export default function FramesPanel({
     setDragging(true);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(index));
-    // Transparent drag image keeps list readable
     if (e.currentTarget instanceof HTMLElement) {
       e.dataTransfer.setDragImage(e.currentTarget, 12, 16);
     }
@@ -215,7 +222,7 @@ export default function FramesPanel({
           </span>
         </div>
         <p className="text-[10px] text-glint-text-tertiary">
-          Drag to reorder · top = front
+          Drag to reorder · top = front · device is hide-only
         </p>
 
         {!canvas && (
@@ -230,6 +237,8 @@ export default function FramesPanel({
             const isActive = active === obj;
             const isOver = dragOver === i;
             const isSource = dragging && dragFrom.current === i;
+            const protectedLayer = isProtectedLayer(obj);
+            const hidden = obj.visible === false;
             return (
               <div
                 key={obj.__uid ?? `${obj.type}-${i}`}
@@ -250,7 +259,7 @@ export default function FramesPanel({
                     : !isOver && !isSource
                       ? 'border-glint-border bg-glint-surface hover:bg-glint-surface-2'
                       : ''
-                }`}
+                } ${hidden && !isSource ? 'opacity-55' : ''}`}
               >
                 <span className="text-glint-text-tertiary cursor-grab active:cursor-grabbing shrink-0 touch-none">
                   <GripVertical size={14} />
@@ -262,14 +271,25 @@ export default function FramesPanel({
                 >
                   {layerName(obj, i)}
                 </button>
-                <button
-                  type="button"
-                  title="Delete"
-                  onClick={() => removeLayer(obj)}
-                  className="p-1 rounded text-glint-text-tertiary hover:text-red-500 hover:bg-glint-surface-2 shrink-0"
-                >
-                  <Trash2 size={12} />
-                </button>
+                {protectedLayer ? (
+                  <button
+                    type="button"
+                    title={hidden ? 'Show layer' : 'Hide layer'}
+                    onClick={() => toggleVisible(obj)}
+                    className="p-1 rounded text-glint-text-tertiary hover:text-glint-accent hover:bg-glint-surface-2 shrink-0"
+                  >
+                    {hidden ? <EyeOff size={12} /> : <Eye size={12} />}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    title="Delete"
+                    onClick={() => removeLayer(obj)}
+                    className="p-1 rounded text-glint-text-tertiary hover:text-red-500 hover:bg-glint-surface-2 shrink-0"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
               </div>
             );
           })}

@@ -7,8 +7,10 @@ import {
   DEFAULT_SCREENSHOT_STYLE,
 } from './frameMeta';
 import { GLINT_CLONE_PROPS } from './glintCloneProps';
+import { isProtectedLayer } from './layerGuards';
 
 export { GLINT_CLONE_PROPS } from './glintCloneProps';
+export { isProtectedLayer } from './layerGuards';
 
 /** Build a Fabric Shadow from screenshot chrome style (or null when off). */
 export function buildChromeShadow(style = {}) {
@@ -799,9 +801,30 @@ export function addTextOverlay(canvas, text, opts = {}) {
 export function deleteActiveObjects(canvas) {
   const active = canvas.getActiveObjects();
   if (!active.length) return;
-  active.forEach((obj) => canvas.remove(obj));
+  const removable = active.filter((obj) => !isProtectedLayer(obj));
+  if (!removable.length) return;
+  removable.forEach((obj) => canvas.remove(obj));
   canvas.discardActiveObject();
   canvas.requestRenderAll();
+}
+
+export function findDeviceLayer(canvas) {
+  const objs = canvas?.getObjects?.() || [];
+  return (
+    objs.find((o) => o.glintRole === 'framed-screenshot') ||
+    objs.find((o) => o.glintRole === 'screenshot') ||
+    null
+  );
+}
+
+/** Select the device/screenshot group on a frame (template default selection). */
+export function selectDeviceLayer(canvas) {
+  if (!canvas) return null;
+  const device = findDeviceLayer(canvas);
+  if (!device) return null;
+  canvas.setActiveObject(device);
+  canvas.requestRenderAll();
+  return device;
 }
 
 export function exportAsPNG(canvas) {
