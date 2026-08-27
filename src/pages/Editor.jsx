@@ -20,7 +20,7 @@ import {
   framesFromTemplate,
   framesFromScreenshots,
 } from '../hooks/useFrames';
-import { loadThemePresets } from '../utils/templateLoader';
+import { loadThemePresets, loadAllTemplates } from '../utils/templateLoader';
 import {
   addTextOverlay,
   deleteActiveObjects,
@@ -38,6 +38,7 @@ import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
+const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
 
 export default function Editor() {
   const location = useLocation();
@@ -48,6 +49,7 @@ export default function Editor() {
   const initialFrames = useMemo(() => {
     if (initialTemplate) return framesFromTemplate(initialTemplate, initialScreenshots);
     if (initialScreenshots.length) return framesFromScreenshots(initialScreenshots);
+    // Blank until an enabled gallery pack is applied (avoids fake charcoal+Pixel scratch).
     return framesFromScreenshots([]);
   }, []);
 
@@ -133,7 +135,14 @@ export default function Editor() {
     setTemplate(t);
     const storeKey = t?.store ? resolveStoreKey(t.store) : exportPreset;
     if (t?.store) setExportPreset(storeKey);
-    if (t) applyTemplatePack(t, { resizeToPack: true });
+    if (t) {
+      try {
+        sessionStorage.setItem(LAST_TEMPLATE_KEY, t.id);
+      } catch {
+        /* ignore */
+      }
+      applyTemplatePack(t, { resizeToPack: true });
+    }
   };
 
   const handleSelectTemplate = (t) => {
@@ -141,6 +150,46 @@ export default function Editor() {
     // Always replace — screenshots stay; designs swap to the new pack.
     loadTemplate(t);
   };
+
+  // Reload / bare /editor: restore last pack or first enabled gallery template.
+  // (location.state is lost on refresh — that charcoal+Pixel board was the empty fallback.)
+  useEffect(() => {
+    if (initialTemplate) {
+      try {
+        sessionStorage.setItem(LAST_TEMPLATE_KEY, initialTemplate.id);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    if (location.state?.glintPack || location.state?.screenshots?.length) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const packs = await loadAllTemplates({ enabledOnly: true });
+        if (cancelled || !packs.length) return;
+        let savedId = null;
+        try {
+          savedId = sessionStorage.getItem(LAST_TEMPLATE_KEY);
+        } catch {
+          /* ignore */
+        }
+        const pick =
+          packs.find((t) => t.id === savedId) ||
+          packs.find((t) => resolveStoreKey(t.store) === 'play/phone') ||
+          packs[0];
+        if (!cancelled && pick) loadTemplate(pick);
+      } catch {
+        /* keep blank board */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally once on mount for bare editor entry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBackgroundChange = (bg) => {
     setBackgroundState(bg);

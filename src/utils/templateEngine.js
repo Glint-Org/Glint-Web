@@ -577,7 +577,8 @@ async function paintDesignContents(
   }
 
   if (!design?.layers?.length) {
-    setBackground(canvas, 'solid', '#1C1C1E');
+    // Scratch board only — not a gallery template. Neutral white + no invented bezel theme.
+    setBackground(canvas, 'solid', '#FFFFFF');
     if (screenshotUrl) {
       await addDeviceLayer(
         canvas,
