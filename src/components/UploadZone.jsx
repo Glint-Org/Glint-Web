@@ -42,7 +42,7 @@ export default function UploadZone({ onUpload, compact = false }) {
         Drop screenshots here
       </p>
       <p className={`text-glint-text-tertiary mt-1 ${compact ? 'text-[10px]' : 'text-sm'}`}>
-        or click to browse
+        {compact ? 'Fits each template frame' : 'or click to browse — fitted into template frames'}
       </p>
     </div>
   );

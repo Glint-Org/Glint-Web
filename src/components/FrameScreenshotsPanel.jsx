@@ -15,7 +15,7 @@ export default function FrameScreenshotsPanel({ frames, onReplace, onClear }) {
         Screenshots
       </h3>
       <p className="text-[10px] text-glint-text-tertiary">
-        One shot per frame. Reorder frames on the canvas.
+        Import one shot per frame — each fits the template slot automatically.
       </p>
       <div className="space-y-1.5">
         {frames.map((frame, i) => (

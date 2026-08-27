@@ -15,6 +15,9 @@ describe('exportHelper', () => {
     expect(zipFileName('My Cool App!')).toBe('My-Cool-App.zip');
     expect(zipFileName('')).toBe('glint.zip');
     expect(zipFileName('   ')).toBe('glint.zip');
+    expect(zipFileName('Demo', 'png')).toBe('Demo-png.zip');
+    expect(zipFileName('Demo', 'svg')).toBe('Demo-svg.zip');
+    expect(zipFileName('', 'svg')).toBe('glint-svg.zip');
   });
 
   it('builds flat store filenames', () => {
@@ -23,6 +26,12 @@ describe('exportHelper', () => {
       'screen_2.png',
       'screen_3.png',
     ]);
+  });
+
+  it('builds SVG filenames', () => {
+    expect(
+      buildExportFilenames(2, { exportPreset: 'play/phone', format: 'svg' }),
+    ).toEqual(['screen_1.svg', 'screen_2.svg']);
   });
 
   it('builds Fastlane layout paths with locale', () => {
@@ -70,5 +79,12 @@ describe('exportHelper', () => {
     );
     expect(blob).toBeInstanceOf(Blob);
     expect(blob.size).toBeGreaterThan(20);
+  });
+
+  it('packs SVG markup into a ZIP blob', async () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>';
+    const blob = await buildZipBlob([svg], ['screen_1.svg']);
+    expect(blob).toBeInstanceOf(Blob);
+    expect(blob.size).toBeGreaterThan(10);
   });
 });

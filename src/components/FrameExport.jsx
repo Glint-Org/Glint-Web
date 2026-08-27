@@ -9,7 +9,7 @@ import {
 } from '../utils/exportHelper';
 
 /**
- * Export each Frame as an ordered store PNG in a ZIP.
+ * Preview frames, then export as PNG or SVG — each export downloads a ZIP of all frames.
  * Prefers live Fabric canvases so in-editor edits stick.
  */
 export default function FrameExport({
@@ -30,37 +30,53 @@ export default function FrameExport({
 
   const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS['play/phone'];
 
-  const renderFrames = async () => {
+  const withIdentityViewport = (canvas, fn) => {
+    const vpt = canvas.viewportTransform?.slice?.() || [1, 0, 0, 1, 0, 0];
+    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    try {
+      return fn();
+    } finally {
+      canvas.setViewportTransform(vpt);
+      canvas.requestRenderAll();
+    }
+  };
+
+  const renderOffscreen = async (frame, format) => {
+    const el = document.createElement('canvas');
+    const canvas = createCanvas(el, canvasWidth, canvasHeight);
+    try {
+      await applyDesignToFrame(canvas, frame.design, frame.screenshotUrl, {
+        canvasWidth,
+        canvasHeight,
+        themes,
+        editable: false,
+      });
+      if (format === 'svg') return canvas.toSVG();
+      return canvas.toDataURL({ format: 'png', multiplier: 1 });
+    } finally {
+      canvas.dispose();
+    }
+  };
+
+  const renderFrames = async (format = 'png') => {
     const results = [];
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
       const live = getLiveCanvases?.()?.[i];
       if (live) {
         try {
-          const vpt = live.viewportTransform?.slice?.() || [1, 0, 0, 1, 0, 0];
-          live.setViewportTransform([1, 0, 0, 1, 0, 0]);
-          const url = live.toDataURL({ format: 'png', multiplier: 1 });
-          live.setViewportTransform(vpt);
-          live.requestRenderAll();
-          results.push(url);
+          const payload = withIdentityViewport(live, () =>
+            format === 'svg'
+              ? live.toSVG()
+              : live.toDataURL({ format: 'png', multiplier: 1 }),
+          );
+          results.push(payload);
           continue;
         } catch {
-          // fall through
+          // fall through to offscreen
         }
       }
-      const el = document.createElement('canvas');
-      const canvas = createCanvas(el, canvasWidth, canvasHeight);
-      try {
-        await applyDesignToFrame(canvas, frame.design, frame.screenshotUrl, {
-          canvasWidth,
-          canvasHeight,
-          themes,
-          editable: false,
-        });
-        results.push(canvas.toDataURL({ format: 'png', multiplier: 1 }));
-      } finally {
-        canvas.dispose();
-      }
+      results.push(await renderOffscreen(frame, format));
     }
     return results;
   };
@@ -73,11 +89,11 @@ export default function FrameExport({
   const handlePreview = async () => {
     if (!frames.length) return;
     setProcessing(true);
-    setProgress('Rendering frames...');
+    setProgress('Rendering preview...');
     try {
-      const results = await renderFrames();
+      const results = await renderFrames('png');
       publishPreviews(results);
-      setProgress(`Rendered ${results.length} frame(s)`);
+      setProgress(`Preview ready · ${results.length} frame(s)`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);
     } finally {
@@ -85,24 +101,22 @@ export default function FrameExport({
     }
   };
 
-  const handleExportZip = async () => {
+  const handleExport = async (format) => {
     if (!frames.length) return;
     setProcessing(true);
     try {
-      let results = previews;
-      if (!results.length) {
-        setProgress('Rendering frames...');
-        results = await renderFrames();
-        publishPreviews(results);
-      }
+      setProgress(`Rendering ${format.toUpperCase()}...`);
+      const results = await renderFrames(format);
+      if (format === 'png') publishPreviews(results);
       const filenames = buildExportFilenames(results.length, {
         exportPreset,
         layout,
         locale,
+        format,
       });
-      await downloadBatchZip(results, filenames, zipFileName(appName));
+      await downloadBatchZip(results, filenames, zipFileName(appName, format));
       setProgress(
-        `Exported ${results.length} screenshot(s) as ZIP (${preset.label}${layout === 'fastlane' ? ', Fastlane' : ''})`,
+        `Exported ${results.length} ${format.toUpperCase()} file(s) as ZIP (${preset.label}${layout === 'fastlane' ? ', Fastlane' : ''})`,
       );
     } catch (err) {
       setProgress(`Error: ${err.message}`);
@@ -117,6 +131,9 @@ export default function FrameExport({
       <p className="text-xs text-glint-text-secondary">
         {frames.length} frame(s) · {preset.label}
       </p>
+      <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
+        Preview first, then export. PNG and SVG each download a ZIP of every frame.
+      </p>
       <label className="flex items-center justify-between gap-2 text-xs text-glint-text-secondary">
         <span>ZIP layout</span>
         <select
@@ -124,7 +141,7 @@ export default function FrameExport({
           onChange={(e) => setLayout(e.target.value)}
           className="px-2 py-1 rounded-lg border border-glint-border bg-glint-surface text-glint-text"
         >
-          <option value="flat">Flat (screen_N.png)</option>
+          <option value="flat">Flat (screen_N)</option>
           <option value="fastlane">Fastlane folders</option>
         </select>
       </label>
@@ -132,18 +149,28 @@ export default function FrameExport({
         type="button"
         onClick={handlePreview}
         disabled={!frames.length || processing}
-        className="w-full px-4 py-2.5 glint-btn-primary rounded-xl text-sm"
+        className="w-full px-4 py-2.5 border border-glint-border-strong bg-glint-surface text-glint-text rounded-xl hover:bg-glint-surface-2 disabled:opacity-50 text-sm font-semibold"
       >
-        {processing ? 'Processing...' : 'Preview All Frames'}
+        {processing ? 'Processing...' : 'Preview'}
       </button>
-      <button
-        type="button"
-        onClick={handleExportZip}
-        disabled={!frames.length || processing}
-        className="w-full px-4 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
-      >
-        Export All as ZIP
-      </button>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => handleExport('png')}
+          disabled={!frames.length || processing}
+          className="px-3 py-2.5 glint-btn-primary rounded-xl text-sm font-semibold disabled:opacity-50"
+        >
+          Export as PNG
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExport('svg')}
+          disabled={!frames.length || processing}
+          className="px-3 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
+        >
+          Export as SVG
+        </button>
+      </div>
       {progress && <p className="text-xs text-glint-text-secondary">{progress}</p>}
       {previews.length > 0 && (
         <div className="grid grid-cols-5 gap-1">

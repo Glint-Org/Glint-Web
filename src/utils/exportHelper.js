@@ -17,31 +17,36 @@ export function downloadSinglePNG(dataUrl, filename = 'screenshot.png') {
   document.body.removeChild(link);
 }
 
-/** ZIP name: MyApp.zip, or glint.zip when app name is empty. */
-export function zipFileName(appName) {
+/** ZIP name: MyApp.zip, or glint.zip when empty. Optional format → MyApp-png.zip. */
+export function zipFileName(appName, format) {
   const slug = String(appName || '')
     .trim()
     .replace(/[^\w\s-]+/g, '')
     .replace(/\s+/g, '-')
     .slice(0, 48);
-  return slug ? `${slug}.zip` : 'glint.zip';
+  const base = slug || 'glint';
+  if (format === 'png' || format === 'svg') return `${base}-${format}.zip`;
+  return `${base}.zip`;
 }
 
 /**
  * Build store ZIP filenames.
  * @param {'flat'|'fastlane'} layout
+ * @param {'png'|'svg'} format
  * @param {string} locale - e.g. en-US (Fastlane phoneScreenshots/{locale}/)
  */
 export function buildExportFilenames(count, {
   exportPreset = 'play/phone',
   layout = 'flat',
   locale = 'en-US',
+  format = 'png',
 } = {}) {
   const preset = getStoreTarget(exportPreset);
   const prefix = preset.filename ?? 'screen';
+  const ext = format === 'svg' ? 'svg' : 'png';
   const files = [];
   for (let i = 0; i < count; i++) {
-    const base = `${prefix}_${i + 1}.png`;
+    const base = `${prefix}_${i + 1}.${ext}`;
     if (layout === 'fastlane') {
       const folder = preset.fastlaneFolder || 'phoneScreenshots';
       files.push(`${folder}/${locale}/${base}`);
@@ -52,13 +57,9 @@ export function buildExportFilenames(count, {
   return files;
 }
 
-export async function downloadBatchZip(dataUrls, filenames, zipName = 'glint.zip') {
-  const zip = new JSZip();
-  dataUrls.forEach((url, i) => {
-    const base64 = url.split(',')[1];
-    zip.file(filenames[i] || `screenshot_${i + 1}.png`, base64, { base64: true });
-  });
-  const blob = await zip.generateAsync({ type: 'blob' });
+/** Pack data-URL images or raw SVG/text into a ZIP and download. */
+export async function downloadBatchZip(payloads, filenames, zipName = 'glint.zip') {
+  const blob = await buildZipBlob(payloads, filenames);
   const link = document.createElement('a');
   link.download = zipName || 'glint.zip';
   link.href = URL.createObjectURL(blob);
@@ -68,12 +69,20 @@ export async function downloadBatchZip(dataUrls, filenames, zipName = 'glint.zip
   URL.revokeObjectURL(link.href);
 }
 
-/** Return ZIP as Blob (for headless / MCP). */
-export async function buildZipBlob(dataUrls, filenames) {
+function zipEntry(zip, name, payload) {
+  if (typeof payload === 'string' && payload.startsWith('data:')) {
+    const base64 = payload.split(',')[1];
+    zip.file(name, base64, { base64: true });
+    return;
+  }
+  zip.file(name, payload);
+}
+
+/** Return ZIP as Blob (for headless / MCP). Accepts data-URLs or SVG markup. */
+export async function buildZipBlob(payloads, filenames) {
   const zip = new JSZip();
-  dataUrls.forEach((url, i) => {
-    const base64 = url.split(',')[1];
-    zip.file(filenames[i] || `screenshot_${i + 1}.png`, base64, { base64: true });
+  payloads.forEach((payload, i) => {
+    zipEntry(zip, filenames[i] || `screenshot_${i + 1}.png`, payload);
   });
   return zip.generateAsync({ type: 'blob' });
 }

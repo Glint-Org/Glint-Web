@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { exportAsPNG, renderScratchFrame } from '../utils/canvasEngine';
-import { downloadSinglePNG, downloadBatchZip, EXPORT_PRESETS, zipFileName } from '../utils/exportHelper';
+import {
+  downloadSinglePNG,
+  downloadBatchZip,
+  EXPORT_PRESETS,
+  zipFileName,
+  buildExportFilenames,
+} from '../utils/exportHelper';
 
+/** Scratch-mode export when no template is loaded. */
 export default function ExportManager({
   canvas,
   screenshots,
@@ -22,12 +29,12 @@ export default function ExportManager({
     downloadSinglePNG(dataUrl, 'glint-frame.png');
   };
 
-  const handleExportAll = async () => {
+  const handleExportAll = async (format) => {
     if (!screenshots.length) return;
     setExporting(true);
-    setProgress('Rendering screens...');
+    setProgress(`Rendering ${format.toUpperCase()}...`);
     try {
-      const dataUrls = [];
+      const payloads = [];
       for (let i = 0; i < screenshots.length; i++) {
         setProgress(`Rendering ${i + 1}/${screenshots.length}...`);
         const dataUrl = await renderScratchFrame({
@@ -39,11 +46,21 @@ export default function ExportManager({
           width: preset.width,
           height: preset.height,
         });
-        dataUrls.push(dataUrl);
+        if (format === 'svg') {
+          // Scratch path is PNG-only today; embed as image in a minimal SVG wrapper.
+          payloads.push(
+            `<svg xmlns="http://www.w3.org/2000/svg" width="${preset.width}" height="${preset.height}"><image href="${dataUrl}" width="${preset.width}" height="${preset.height}"/></svg>`,
+          );
+        } else {
+          payloads.push(dataUrl);
+        }
       }
-      const filenames = dataUrls.map((_, i) => `${preset.filename || 'screen'}_${i + 1}.png`);
-      await downloadBatchZip(dataUrls, filenames, zipFileName(appName));
-      setProgress(`Exported ${dataUrls.length} screenshot(s)`);
+      const filenames = buildExportFilenames(payloads.length, {
+        exportPreset,
+        format,
+      });
+      await downloadBatchZip(payloads, filenames, zipFileName(appName, format));
+      setProgress(`Exported ${payloads.length} ${format.toUpperCase()} file(s) as ZIP`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);
     } finally {
@@ -58,19 +75,31 @@ export default function ExportManager({
         {screenshots.length} screen(s) · {preset.label} ({preset.width}×{preset.height})
       </p>
       <button
+        type="button"
         onClick={handleExportSingle}
         disabled={!canvas}
-        className="w-full px-4 py-2 glint-btn-primary rounded-lg text-sm disabled:opacity-50"
+        className="w-full px-4 py-2 border border-glint-border-strong bg-glint-surface text-glint-text rounded-lg text-sm disabled:opacity-50"
       >
         Export Current Frame
       </button>
-      <button
-        onClick={handleExportAll}
-        disabled={!screenshots.length || exporting}
-        className="w-full px-4 py-2 bg-glint-success text-white rounded-lg hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
-      >
-        {exporting ? 'Exporting...' : 'Export All as ZIP'}
-      </button>
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => handleExportAll('png')}
+          disabled={!screenshots.length || exporting}
+          className="px-3 py-2 glint-btn-primary rounded-lg text-sm font-semibold disabled:opacity-50"
+        >
+          {exporting ? '…' : 'Export as PNG'}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleExportAll('svg')}
+          disabled={!screenshots.length || exporting}
+          className="px-3 py-2 bg-glint-success text-white rounded-lg hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
+        >
+          {exporting ? '…' : 'Export as SVG'}
+        </button>
+      </div>
       {progress && <p className="text-xs text-glint-text-secondary">{progress}</p>}
     </div>
   );
