@@ -3,7 +3,6 @@ import {
   STORE_TARGETS,
   resolveStoreKey,
   storeExportLabel,
-  getStoreTarget,
 } from './storeCatalog';
 
 export { resolveStoreKey, storeExportLabel } from './storeCatalog';
@@ -30,29 +29,14 @@ export function zipFileName(appName, format) {
 }
 
 /**
- * Build store ZIP filenames.
- * @param {'flat'|'fastlane'} layout
+ * Build ZIP entry names: Frame_1.png, Frame_2.svg, …
  * @param {'png'|'svg'} format
- * @param {string} locale - e.g. en-US (Fastlane phoneScreenshots/{locale}/)
  */
-export function buildExportFilenames(count, {
-  exportPreset = 'play/phone',
-  layout = 'flat',
-  locale = 'en-US',
-  format = 'png',
-} = {}) {
-  const preset = getStoreTarget(exportPreset);
-  const prefix = preset.filename ?? 'screen';
+export function buildExportFilenames(count, { format = 'png' } = {}) {
   const ext = format === 'svg' ? 'svg' : 'png';
   const files = [];
   for (let i = 0; i < count; i++) {
-    const base = `${prefix}_${i + 1}.${ext}`;
-    if (layout === 'fastlane') {
-      const folder = preset.fastlaneFolder || 'phoneScreenshots';
-      files.push(`${folder}/${locale}/${base}`);
-    } else {
-      files.push(base);
-    }
+    files.push(`Frame_${i + 1}.${ext}`);
   }
   return files;
 }
@@ -82,7 +66,7 @@ function zipEntry(zip, name, payload) {
 export async function buildZipBlob(payloads, filenames) {
   const zip = new JSZip();
   payloads.forEach((payload, i) => {
-    zipEntry(zip, filenames[i] || `screenshot_${i + 1}.png`, payload);
+    zipEntry(zip, filenames[i] || `Frame_${i + 1}.png`, payload);
   });
   return zip.generateAsync({ type: 'blob' });
 }

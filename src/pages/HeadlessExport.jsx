@@ -14,15 +14,13 @@ import {
 
 /**
  * Headless / agent export page.
- * Query: ?template=blink-play&layout=flat|fastlane&locale=en-US&app=MyApp
+ * Query: ?template=blink-play&app=MyApp
  * PostMessage or window.__GLINT_HEADLESS__ with { screenshots: string[] } (data URLs or http URLs).
  * Sets window.__GLINT_EXPORT_READY__ = { ok, zipBase64, filenames, error }.
  */
 export default function HeadlessExport() {
   const [params] = useSearchParams();
   const templateId = params.get('template') || 'blink-play';
-  const layout = params.get('layout') === 'fastlane' ? 'fastlane' : 'flat';
-  const locale = params.get('locale') || 'en-US';
   const appName = params.get('app') || 'glint';
   const [status, setStatus] = useState('Waiting for screenshots…');
 
@@ -73,11 +71,7 @@ export default function HeadlessExport() {
           }
         }
 
-        const filenames = buildExportFilenames(dataUrls.length, {
-          exportPreset: store,
-          layout,
-          locale,
-        });
+        const filenames = buildExportFilenames(dataUrls.length, { format: 'png' });
         const blob = await buildZipBlob(dataUrls, filenames);
         const buf = await blob.arrayBuffer();
         const bytes = new Uint8Array(buf);
@@ -127,11 +121,11 @@ export default function HeadlessExport() {
       cancelled = true;
       window.removeEventListener('message', onMessage);
     };
-  }, [templateId, layout, locale, appName]);
+  }, [templateId, appName]);
 
   const hint = useMemo(
-    () => `template=${templateId} layout=${layout} locale=${locale}`,
-    [templateId, layout, locale],
+    () => `template=${templateId} · Frame_1.png …`,
+    [templateId],
   );
 
   return (

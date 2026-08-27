@@ -55,10 +55,7 @@ export default function ExportManager({
           payloads.push(dataUrl);
         }
       }
-      const filenames = buildExportFilenames(payloads.length, {
-        exportPreset,
-        format,
-      });
+      const filenames = buildExportFilenames(payloads.length, { format });
       await downloadBatchZip(payloads, filenames, zipFileName(appName, format));
       setProgress(`Exported ${payloads.length} ${format.toUpperCase()} file(s) as ZIP`);
     } catch (err) {

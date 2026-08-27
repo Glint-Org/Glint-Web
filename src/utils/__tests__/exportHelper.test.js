@@ -20,37 +20,22 @@ describe('exportHelper', () => {
     expect(zipFileName('', 'svg')).toBe('glint-svg.zip');
   });
 
-  it('builds flat store filenames', () => {
-    expect(buildExportFilenames(3, { exportPreset: 'play/phone' })).toEqual([
-      'screen_1.png',
-      'screen_2.png',
-      'screen_3.png',
+  it('builds Frame_N filenames', () => {
+    expect(buildExportFilenames(3)).toEqual([
+      'Frame_1.png',
+      'Frame_2.png',
+      'Frame_3.png',
     ]);
   });
 
-  it('builds SVG filenames', () => {
-    expect(
-      buildExportFilenames(2, { exportPreset: 'play/phone', format: 'svg' }),
-    ).toEqual(['screen_1.svg', 'screen_2.svg']);
-  });
-
-  it('builds Fastlane layout paths with locale', () => {
-    expect(
-      buildExportFilenames(2, {
-        exportPreset: 'ios/iphone',
-        layout: 'fastlane',
-        locale: 'en-US',
-      }),
-    ).toEqual([
-      'phoneScreenshots/en-US/ios_screen_1.png',
-      'phoneScreenshots/en-US/ios_screen_2.png',
+  it('builds SVG Frame_N filenames', () => {
+    expect(buildExportFilenames(2, { format: 'svg' })).toEqual([
+      'Frame_1.svg',
+      'Frame_2.svg',
     ]);
   });
 
   it('resolves legacy export presets', () => {
-    expect(buildExportFilenames(1, { exportPreset: 'ios-tablet' })[0]).toBe(
-      'ipad_screen_1.png',
-    );
     expect(EXPORT_PRESETS.play.width).toBe(1080);
     expect(EXPORT_PRESETS['ios-tablet'].filename).toBe('ipad_screen');
   });

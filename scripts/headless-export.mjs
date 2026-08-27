@@ -7,9 +7,10 @@
  *     --session ../path/to/glint_screenshots \
  *     --template blink-play \
  *     --out ./out.zip \
- *     [--layout flat|fastlane] [--locale en-US] [--app MyApp] \
+ *     [--app MyApp] \
  *     [--base http://127.0.0.1:4173]
  *
+ * ZIP entries are always Frame_1.png, Frame_2.png, …
  * Requires a running Glint Web build (`npm run build && npm run preview`)
  * and Playwright (`npx playwright install chromium`).
  */
@@ -71,8 +72,6 @@ async function main() {
   const sessionDir = arg('session');
   const template = arg('template', 'blink-play');
   const out = arg('out', 'glint.zip');
-  const layout = arg('layout', 'flat');
-  const locale = arg('locale', 'en-US');
   const app = arg('app', 'glint');
   const base = arg('base', process.env.GLINT_WEB_BASE || 'http://127.0.0.1:4173');
 
@@ -97,8 +96,6 @@ async function main() {
 
   const qs = new URLSearchParams({
     template,
-    layout,
-    locale,
     app,
   });
   const url = `${base.replace(/\/$/, '')}/export?${qs}`;

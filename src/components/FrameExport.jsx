@@ -9,8 +9,8 @@ import {
 } from '../utils/exportHelper';
 
 /**
- * Preview frames, then export as PNG or SVG — each export downloads a ZIP of all frames.
- * Prefers live Fabric canvases so in-editor edits stick.
+ * Preview frames, then export as PNG or SVG — each export downloads a ZIP of every frame
+ * as Frame_1.png / Frame_2.svg / …
  */
 export default function FrameExport({
   frames,
@@ -21,12 +21,10 @@ export default function FrameExport({
   canvasWidth = 1080,
   canvasHeight = 1920,
   onPreviewsReady,
-  locale = 'en-US',
 }) {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState('');
   const [previews, setPreviews] = useState([]);
-  const [layout, setLayout] = useState('flat');
 
   const preset = EXPORT_PRESETS[exportPreset] ?? EXPORT_PRESETS['play/phone'];
 
@@ -108,15 +106,10 @@ export default function FrameExport({
       setProgress(`Rendering ${format.toUpperCase()}...`);
       const results = await renderFrames(format);
       if (format === 'png') publishPreviews(results);
-      const filenames = buildExportFilenames(results.length, {
-        exportPreset,
-        layout,
-        locale,
-        format,
-      });
+      const filenames = buildExportFilenames(results.length, { format });
       await downloadBatchZip(results, filenames, zipFileName(appName, format));
       setProgress(
-        `Exported ${results.length} ${format.toUpperCase()} file(s) as ZIP (${preset.label}${layout === 'fastlane' ? ', Fastlane' : ''})`,
+        `Exported ${results.length} ${format.toUpperCase()} file(s) as ZIP (${preset.label})`,
       );
     } catch (err) {
       setProgress(`Error: ${err.message}`);
@@ -132,19 +125,8 @@ export default function FrameExport({
         {frames.length} frame(s) · {preset.label}
       </p>
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Preview first, then export. PNG and SVG each download a ZIP of every frame.
+        Preview, then export. ZIP contains Frame_1.{'{png|svg}'}, Frame_2, …
       </p>
-      <label className="flex items-center justify-between gap-2 text-xs text-glint-text-secondary">
-        <span>ZIP layout</span>
-        <select
-          value={layout}
-          onChange={(e) => setLayout(e.target.value)}
-          className="px-2 py-1 rounded-lg border border-glint-border bg-glint-surface text-glint-text"
-        >
-          <option value="flat">Flat (screen_N)</option>
-          <option value="fastlane">Fastlane folders</option>
-        </select>
-      </label>
       <button
         type="button"
         onClick={handlePreview}
