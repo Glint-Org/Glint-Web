@@ -46,6 +46,10 @@ JSON packs in `public/templates/`. Device layers composite screenshots inside SV
 | **Bridge** | `ws://127.0.0.1:7700` + pairing token; captures arrive as data URLs |
 | **View** | Export → Copy for Glint View (full screenshots). QR = metadata only |
 
+## Future work
+
+Community marketplace / contribute-via-`.glintpack` is planned but **not** in scope yet — see [docs/FUTURE-marketplace-glintpack.md](docs/FUTURE-marketplace-glintpack.md).
+
 ## License
 
 MIT

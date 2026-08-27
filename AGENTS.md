@@ -21,3 +21,7 @@ Glint-Web is the frames editor (AppLaunchpad-style board).
 3. Store sizes: Play `1080x1920`, iOS phone `1290x2796`, iPad `2048x2732`
 4. ZIP `{AppName}.zip` or `glint.zip`
 5. View handoff via Copy for Glint View (`data:` screens)
+
+## Future (do not implement unless asked)
+
+Marketplace / contribute `.glintpack` → community gallery: `docs/FUTURE-marketplace-glintpack.md`.
