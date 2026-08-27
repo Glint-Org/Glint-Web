@@ -164,11 +164,23 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <footer className="text-center text-sm text-glint-text-tertiary py-8 border-t border-glint-border">
-          <p>Part of the <a href="https://github.com/Glint-Org" className="text-glint-accent hover:text-glint-accent-hover">Glint</a> ecosystem</p>
-        </footer>
       </main>
+
+      <footer className="border-t border-glint-border/60">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-center gap-2 text-xs text-glint-text-tertiary">
+          <img src="/logo.png" alt="" className="w-4 h-4 rounded opacity-70" />
+          <span>
+            Part of the{' '}
+            <a
+              href="https://github.com/Glint-Org"
+              className="text-glint-text-secondary hover:text-glint-accent transition-colors"
+            >
+              Glint
+            </a>{' '}
+            ecosystem
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
