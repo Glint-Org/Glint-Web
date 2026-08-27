@@ -8,7 +8,13 @@ import {
 } from './frameMeta';
 import { GLINT_CLONE_PROPS } from './glintCloneProps';
 import { isProtectedLayer } from './layerGuards';
-import { drawStatusBar, statusBarChromeChanged } from './statusBar';
+import {
+  drawStatusBar,
+  statusBarChromeChanged,
+  screenContentRect,
+  coverFitRect,
+  resolveStatusBarKind,
+} from './statusBar';
 
 export { GLINT_CLONE_PROPS } from './glintCloneProps';
 export { isProtectedLayer } from './layerGuards';
@@ -99,25 +105,147 @@ export function setSolidBackground(canvas, color) {
   canvas.requestRenderAll();
 }
 
+function pathRoundRect(ctx, x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r || 0, w / 2, h / 2));
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, w, h, rr);
+  } else {
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
+}
+
+/**
+ * Outer chrome border: stroke sits fully outside the content box on all four sides.
+ * Content stays at (pad, pad); ring expands as strokeWidth grows.
+ */
+function outerBorderPad(strokeW) {
+  return Math.max(0, strokeW || 0);
+}
+
+function makeOuterBorderRect(contentW, contentH, contentRx, strokeW, strokeColor) {
+  const s = outerBorderPad(strokeW);
+  const pad = s;
+  return new Rect({
+    left: pad / 2,
+    top: pad / 2,
+    width: contentW + s,
+    height: contentH + s,
+    rx: Math.min((contentRx || 0) + s / 2, (contentW + s) / 2, (contentH + s) / 2),
+    ry: Math.min((contentRx || 0) + s / 2, (contentW + s) / 2, (contentH + s) / 2),
+    fill: 'transparent',
+    stroke: s > 0 ? (strokeColor || '#FFFFFF') : 'rgba(0,0,0,0)',
+    strokeWidth: s,
+    strokeUniform: true,
+    paintFirst: 'stroke',
+    originX: 'left',
+    originY: 'top',
+    selectable: false,
+    evented: false,
+    objectCaching: false,
+    glintRole: 'chrome-border',
+  });
+}
+
+function findChromeBorder(group) {
+  const kids = group.getObjects?.() || [];
+  return kids.find((o) => o.glintRole === 'chrome-border') || kids.find((o) => o.type === 'rect') || null;
+}
+
+function findChromeContent(group) {
+  const kids = group.getObjects?.() || [];
+  return kids.find((o) => o.glintRole !== 'chrome-border' && o.type !== 'rect') || kids[0] || null;
+}
+
+/** Sync outward border + content inset; keeps content pixel size, grows ring outside. */
+function applyOuterBorderStroke(group, chrome = {}) {
+  if (!group) return false;
+  const strokeW = Math.max(0, chrome.strokeWidth ?? 0);
+  const strokeColor = chrome.strokeColor || '#FFFFFF';
+  const pad = outerBorderPad(strokeW);
+
+  let contentW;
+  let contentH;
+  let contentRx;
+  if (group.glintRole === 'screenshot') {
+    contentW = group.glintTargetW || group.width || 0;
+    contentH = group.glintTargetH || group.height || 0;
+    contentRx = Math.max(0, Math.min(chrome.cornerRadius ?? 0, contentW / 2, contentH / 2));
+  } else if (group.glintRole === 'framed-screenshot') {
+    const content = findChromeContent(group);
+    contentW = (content?.width || group.width || 0) * (content?.scaleX || 1);
+    contentH = (content?.height || group.height || 0) * (content?.scaleY || 1);
+    contentRx = Math.min(contentW, contentH) * 0.08;
+  } else {
+    return false;
+  }
+
+  const content = findChromeContent(group);
+  let border = findChromeBorder(group);
+  const prevPad = Math.max(0, content?.left || 0);
+  const dPad = pad - prevPad;
+
+  if (content) {
+    content.set({ left: pad, top: pad, dirty: true });
+    content.setCoords?.();
+  }
+
+  const borderProps = {
+    left: pad / 2,
+    top: pad / 2,
+    width: contentW + strokeW,
+    height: contentH + strokeW,
+    rx: Math.min(contentRx + strokeW / 2, (contentW + strokeW) / 2, (contentH + strokeW) / 2),
+    ry: Math.min(contentRx + strokeW / 2, (contentW + strokeW) / 2, (contentH + strokeW) / 2),
+    strokeWidth: strokeW,
+    stroke: strokeW > 0 ? strokeColor : 'rgba(0,0,0,0)',
+    dirty: true,
+  };
+
+  if (border && typeof border.set === 'function') {
+    border.set(borderProps);
+    border.setCoords?.();
+  } else if (strokeW > 0) {
+    border = makeOuterBorderRect(contentW, contentH, contentRx, strokeW, strokeColor);
+    group.add?.(border);
+  }
+
+  // Grow/shrink around the content so the shot stays put in canvas space.
+  group.set({
+    left: (group.left || 0) - dPad,
+    top: (group.top || 0) - dPad,
+    dirty: true,
+    glintChrome: { ...(group.glintChrome || {}), ...chrome },
+    width: contentW + pad * 2,
+    height: contentH + pad * 2,
+  });
+  border?.setCoords?.();
+  group.setCoords?.();
+  return true;
+}
+
 /**
  * Cover-fit a screenshot into an exact screen-sized bitmap (white fill + clipped image).
- * Guarantees the hole is fully opaque white where the shot doesn't cover, and the shot
- * always completely fills the frame (object-fit: cover).
+ * Disabled status bar → shot fills the full hole. Enabled → opaque status strip on top,
+ * shot cover-fills only the remaining content rect. Status bar chrome matches the device family.
  */
-async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {}) {
+async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {}, frameId = null) {
   const w = Math.max(1, Math.round(screenW));
   const h = Math.max(1, Math.round(screenH));
   const r = Math.max(0, Math.min(rx || 0, w / 2, h / 2));
+  const content = screenContentRect(w, h, chrome, frameId);
+  const kind = content.kind || resolveStatusBarKind(chrome, frameId);
 
   const src = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
   const el = src.getElement?.() || src._element;
   const iw = Math.max(1, el?.naturalWidth || el?.width || src.width || 1);
   const ih = Math.max(1, el?.naturalHeight || el?.height || src.height || 1);
-  const cover = Math.max(w / iw, h / ih);
-  const dw = iw * cover;
-  const dh = ih * cover;
-  const dx = (w - dw) / 2;
-  const dy = (h - dh) / 2;
+  const { dx, dy, dw, dh } = coverFitRect(iw, ih, content.w, content.h, content.x, content.y);
 
   const off = document.createElement('canvas');
   off.width = w;
@@ -126,46 +254,34 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Full white fill first (letterbox / pillarbox areas stay white).
+  // Default device fill — white everywhere the shot doesn't cover.
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
 
-  // Rounded clip, then cover-draw the screenshot.
   ctx.save();
-  ctx.beginPath();
-  if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(0, 0, w, h, r);
-  } else {
-    ctx.moveTo(r, 0);
-    ctx.arcTo(w, 0, w, h, r);
-    ctx.arcTo(w, h, 0, h, r);
-    ctx.arcTo(0, h, 0, 0, r);
-    ctx.arcTo(0, 0, w, 0, r);
-    ctx.closePath();
-  }
+  pathRoundRect(ctx, 0, 0, w, h, r);
   ctx.clip();
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
+  // Clip to content rect so cover-crop never paints into the status-bar band.
+  ctx.beginPath();
+  ctx.rect(content.x, content.y, content.w, content.h);
+  ctx.clip();
   if (el) ctx.drawImage(el, dx, dy, dw, dh);
-  if (chrome.statusBarEnabled) {
-    drawStatusBar(ctx, w, chrome.statusBarTheme || 'dark');
-  }
   ctx.restore();
+
+  if (chrome.statusBarEnabled) {
+    ctx.save();
+    pathRoundRect(ctx, 0, 0, w, h, r);
+    ctx.clip();
+    drawStatusBar(ctx, w, chrome.statusBarTheme || 'dark', kind, frameId);
+    ctx.restore();
+  }
 
   // Soft outer mask so corners stay transparent outside the round rect (for bare frames).
   if (r > 0) {
     ctx.globalCompositeOperation = 'destination-in';
-    ctx.beginPath();
-    if (typeof ctx.roundRect === 'function') {
-      ctx.roundRect(0, 0, w, h, r);
-    } else {
-      ctx.moveTo(r, 0);
-      ctx.arcTo(w, 0, w, h, r);
-      ctx.arcTo(w, h, 0, h, r);
-      ctx.arcTo(0, h, 0, 0, r);
-      ctx.arcTo(0, 0, w, 0, r);
-      ctx.closePath();
-    }
+    pathRoundRect(ctx, 0, 0, w, h, r);
     ctx.fillStyle = '#000';
     ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
@@ -190,7 +306,7 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
 const BARE_SCREEN_ASPECT = 9 / 19.5;
 
 /**
- * Bare screenshot: white-filled rounded frame + cover-fit shot + optional border stroke.
+ * Bare screenshot: white-filled rounded frame + cover-fit shot + optional outer border.
  * Uses the same bitmap pipeline as device screens so imports always fill correctly.
  */
 export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
@@ -213,45 +329,45 @@ export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
   const left = opts.left ?? (canvasW - targetW) / 2;
   const top = opts.top ?? canvasH * 0.14;
   const rx = Math.max(0, Math.min(style.cornerRadius ?? 0, targetW / 2, targetH / 2));
-
-  // White fill + cover-fit screenshot (exact frame size).
-  const screenImg = await buildScreenBitmap(screenshotUrl, targetW, targetH, rx, style);
-  screenImg.set({ left: 0, top: 0, originX: 'left', originY: 'top' });
-
   const strokeW = Math.max(0, style.strokeWidth ?? 0);
-  // Always attach a border ring — invisible when width is 0 — so the frame edge stays defined.
-  const border = new Rect({
-    left: 0,
-    top: 0,
-    width: targetW,
-    height: targetH,
+  const pad = outerBorderPad(strokeW);
+
+  // White fill + cover-fit screenshot (exact frame size). Bare → android-family bar.
+  const screenImg = await buildScreenBitmap(
+    screenshotUrl,
+    targetW,
+    targetH,
     rx,
-    ry: rx,
-    fill: 'transparent',
-    stroke: strokeW > 0 ? (style.strokeColor || '#FFFFFF') : 'rgba(0,0,0,0)',
-    strokeWidth: strokeW,
-    strokeUniform: true,
-    originX: 'left',
-    originY: 'top',
-    selectable: false,
-    evented: false,
-  });
+    style,
+    opts.frameId || null,
+  );
+  screenImg.set({ left: pad, top: pad, originX: 'left', originY: 'top' });
+
+  const border = makeOuterBorderRect(
+    targetW,
+    targetH,
+    rx,
+    strokeW,
+    style.strokeColor || '#FFFFFF',
+  );
 
   const group = new Group([screenImg, border], {
-    left,
-    top,
+    left: left - pad,
+    top: top - pad,
     originX: 'left',
     originY: 'top',
     selectable: opts.selectable !== false,
     evented: opts.selectable !== false,
     subTargetCheck: false,
-    objectCaching: true,
+    objectCaching: false,
     layoutManager: new LayoutManager(new FixedLayout()),
     glintRole: 'screenshot',
     glintScreenshotUrl: screenshotUrl,
     glintChrome: style,
     glintTargetW: targetW,
     glintTargetH: targetH,
+    width: targetW + pad * 2,
+    height: targetH + pad * 2,
   });
 
   applyChromeShadow(group, style);
@@ -320,26 +436,10 @@ export async function stripDeviceFrame(group, style = {}) {
 }
 
 /**
- * Update bare-screenshot border stroke in place (no bitmap rebuild).
+ * Update outward chrome border (no bitmap rebuild). Works for bare + framed devices.
  */
 function applyBareBorderStroke(group, chrome) {
-  const kids = group.getObjects?.() || [];
-  const border = kids.find((o) => o.type === 'rect') || kids[1];
-  if (!border || typeof border.set !== 'function') return false;
-  const strokeW = Math.max(0, chrome.strokeWidth ?? 0);
-  const tw = group.glintTargetW || group.width || 0;
-  const th = group.glintTargetH || group.height || 0;
-  const rx = Math.max(0, Math.min(chrome.cornerRadius ?? 0, tw / 2, th / 2));
-  border.set({
-    strokeWidth: strokeW,
-    stroke: strokeW > 0 ? (chrome.strokeColor || '#FFFFFF') : 'rgba(0,0,0,0)',
-    rx,
-    ry: rx,
-    dirty: true,
-  });
-  group.set({ dirty: true, glintChrome: chrome });
-  border.setCoords?.();
-  return true;
+  return applyOuterBorderStroke(group, chrome);
 }
 
 /**
@@ -355,6 +455,7 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
     const needsRebuild = opts.forceRebuild || statusBarChromeChanged(prev, chrome);
     if (!needsRebuild) {
       applyChromeShadow(group, chrome);
+      applyOuterBorderStroke(group, chrome);
       group.set({ glintChrome: chrome });
       group.canvas?.requestRenderAll?.();
       return true;
@@ -452,6 +553,7 @@ export async function loadFrameBezel(frameId) {
 /**
  * Composite screenshot + bezel into one native-resolution bitmap, then scale.
  * Avoids Fabric Group layout drift that misaligns the shot inside the hole.
+ * Shot is clipped to the rounded screen rect so pixels never bleed past the bezel.
  */
 async function buildFramedDeviceBitmap(screenshotUrl, frameId, chrome = {}) {
   const meta = getFrameMeta(frameId);
@@ -459,9 +561,10 @@ async function buildFramedDeviceBitmap(screenshotUrl, frameId, chrome = {}) {
   const H = meta.height;
   const screenW = W - meta.left - meta.right;
   const screenH = H - meta.top - meta.bottom;
+  const rx = meta.rx || 0;
 
-  // Sharp rect fill — the bezel PNG/SVG masks the rounded hole on top.
-  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0, chrome);
+  // Sharp fill — clipped to the hole; bezel PNG/SVG masks remaining chrome.
+  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0, chrome, frameId);
   const screenEl = screen.getElement?.() || screen._element;
 
   const bezel = await loadFrameBezel(frameId);
@@ -481,17 +584,20 @@ async function buildFramedDeviceBitmap(screenshotUrl, frameId, chrome = {}) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Screen slightly inset so anti-aliased bezel edges never leak the shot outside the hole.
-  const bleed = 2;
+  const sx = meta.left;
+  const sy = meta.top;
+
+  // White pad in the hole first (default empty device look).
+  ctx.save();
+  pathRoundRect(ctx, sx, sy, screenW, screenH, rx);
+  ctx.clip();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(sx, sy, screenW, screenH);
   if (screenEl) {
-    ctx.drawImage(
-      screenEl,
-      meta.left + bleed,
-      meta.top + bleed,
-      Math.max(1, screenW - bleed * 2),
-      Math.max(1, screenH - bleed * 2),
-    );
+    ctx.drawImage(screenEl, sx, sy, screenW, screenH);
   }
+  ctx.restore();
+
   if (bezelEl) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(bezelEl, 0, 0, W, H);
@@ -670,6 +776,7 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     };
     if (!statusBarChromeChanged(prev, chrome)) {
       applyChromeShadow(group, chrome);
+      applyOuterBorderStroke(group, chrome);
       group.set({ glintChrome: chrome });
       return true;
     }
@@ -764,28 +871,38 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
   const { frameW, frameH } = computeFrameLayout(frameId, targetScale);
   const meta = getFrameMeta(frameId);
   const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...(opts.chrome || {}) };
+  const strokeW = Math.max(0, chrome.strokeWidth ?? 0);
+  const pad = outerBorderPad(strokeW);
 
   const deviceImg = await buildFramedDeviceBitmap(screenshotUrl, frameId, chrome);
   deviceImg.set({
     scaleX: frameW / meta.width,
     scaleY: frameH / meta.height,
-    left: 0,
-    top: 0,
+    left: pad,
+    top: pad,
     originX: 'left',
     originY: 'top',
     selectable: false,
     evented: false,
   });
 
-  const group = new Group([deviceImg], {
-    left: opts.left ?? 0,
-    top: opts.top ?? 0,
+  const border = makeOuterBorderRect(
+    frameW,
+    frameH,
+    Math.min(frameW, frameH) * 0.08,
+    strokeW,
+    chrome.strokeColor || '#FFFFFF',
+  );
+
+  const group = new Group([deviceImg, border], {
+    left: (opts.left ?? 0) - pad,
+    top: (opts.top ?? 0) - pad,
     originX: 'left',
     originY: 'top',
     selectable: opts.selectable !== false,
     evented: opts.selectable !== false,
     subTargetCheck: false,
-    objectCaching: true,
+    objectCaching: false,
     layoutManager: new LayoutManager(new FixedLayout()),
     glintRole: 'framed-screenshot',
     glintFrameId: frameId,
@@ -793,6 +910,8 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     glintCoverage: opts.coverage ?? MIN_DEVICE_COVERAGE,
     glintScreenshotUrl: screenshotUrl,
     glintChrome: chrome,
+    width: frameW + pad * 2,
+    height: frameH + pad * 2,
   });
 
   applyDeviceTransformLocks(group);

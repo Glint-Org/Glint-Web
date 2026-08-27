@@ -230,9 +230,9 @@ export const DEFAULT_SCREENSHOT_STYLE = {
   shadowOffsetY: 22,
   shadowOpacity: 0.4,
   shadowColor: '#000000',
-  /** Fake OS status bar overlaid on the screen content. */
+  /** Fake OS status bar: reserved top strip; shot fills the remaining hole. */
   statusBarEnabled: false,
-  /** "dark" = white icons (dark UI); "light" = dark icons (light UI). */
+  /** "dark" = light icons on dark strip; "light" = dark icons on light strip. */
   statusBarTheme: 'dark',
 };
 
