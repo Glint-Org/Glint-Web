@@ -120,12 +120,11 @@ export default function FrameExport({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-glint-text">Export Frames</h3>
-      <p className="text-xs text-glint-text-secondary">
+      <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
+        Export
+      </h3>
+      <p className="text-[11px] text-glint-text-secondary">
         {frames.length} frame(s) · {preset.label}
-      </p>
-      <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Preview, then export. ZIP contains Frame_1.{'{png|svg}'}, Frame_2, …
       </p>
       <button
         type="button"
@@ -142,7 +141,7 @@ export default function FrameExport({
           disabled={!frames.length || processing}
           className="px-3 py-2.5 glint-btn-primary rounded-xl text-sm font-semibold disabled:opacity-50"
         >
-          Export as PNG
+          PNG
         </button>
         <button
           type="button"
@@ -150,7 +149,7 @@ export default function FrameExport({
           disabled={!frames.length || processing}
           className="px-3 py-2.5 bg-glint-success text-white rounded-xl hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
         >
-          Export as SVG
+          SVG
         </button>
       </div>
       {progress && <p className="text-xs text-glint-text-secondary">{progress}</p>}

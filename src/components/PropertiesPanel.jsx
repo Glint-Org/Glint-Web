@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Type, Trash2, AlignLeft, AlignCenter, AlignRight, Bold, Square } from 'lucide-react';
+import { Type, Trash2, AlignLeft, AlignCenter, AlignRight, Bold } from 'lucide-react';
+import { Shadow } from 'fabric';
 import ColorPicker from './ColorPicker';
 import FontPicker from './FontPicker';
 import ThemeSelector from './ThemeSelector';
@@ -9,7 +10,7 @@ import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
 import { getGraphicBySrc } from '../utils/graphicsCatalog';
 
-const FONT_SIZES = [24, 32, 40, 48, 56, 64, 72, 80, 96, 120];
+const FONT_SIZES = [20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 120, 140, 160, 180, 200, 220];
 const WEIGHTS = [
   { value: '400', label: 'Regular' },
   { value: '500', label: 'Medium' },
@@ -89,6 +90,11 @@ export default function PropertiesPanel({
     fontWeight: '700',
     fontFamily: 'Space Grotesk',
     textAlign: 'center',
+    shadowEnabled: false,
+    shadowBlur: 8,
+    shadowOffsetX: 4,
+    shadowOffsetY: 4,
+    shadowColor: '#000000',
   });
   const [shapeFill, setShapeFill] = useState('#FFFFFF');
 
@@ -119,6 +125,7 @@ export default function PropertiesPanel({
       }
 
       if (isText) {
+        const sh = obj.shadow;
         setTextProps({
           text: obj.text || '',
           fontSize: Math.round(obj.fontSize || 48),
@@ -126,6 +133,11 @@ export default function PropertiesPanel({
           fontWeight: String(obj.fontWeight || '400'),
           fontFamily: (obj.fontFamily || 'Space Grotesk').replace(/,.*/, '').replace(/"/g, '').trim() || 'Space Grotesk',
           textAlign: obj.textAlign || 'center',
+          shadowEnabled: !!(sh && (sh.blur > 0 || sh.offsetX || sh.offsetY)),
+          shadowBlur: sh?.blur ?? 8,
+          shadowOffsetX: sh?.offsetX ?? 4,
+          shadowOffsetY: sh?.offsetY ?? 4,
+          shadowColor: typeof sh?.color === 'string' ? sh.color : '#000000',
         });
       } else if (typeof obj.fill === 'string') {
         setShapeFill(obj.fill);
@@ -150,9 +162,44 @@ export default function PropertiesPanel({
   const applyToSelection = (patch) => {
     if (!canvas || !selection?.obj) return;
     const obj = selection.obj;
-    obj.set(patch);
-    if (patch.fontFamily) obj.set('fontFamily', `${patch.fontFamily}, sans-serif`);
-    if (patch.fill != null) setShapeFill(patch.fill);
+    const next = { ...textProps, ...patch };
+    const {
+      shadowEnabled,
+      shadowBlur,
+      shadowOffsetX,
+      shadowOffsetY,
+      shadowColor,
+      ...fabricPatch
+    } = patch;
+
+    if (Object.keys(fabricPatch).length) {
+      obj.set(fabricPatch);
+      if (fabricPatch.fontFamily) obj.set('fontFamily', `${fabricPatch.fontFamily}, sans-serif`);
+      if (fabricPatch.fill != null) setShapeFill(fabricPatch.fill);
+    }
+
+    if (
+      shadowEnabled !== undefined
+      || shadowBlur !== undefined
+      || shadowOffsetX !== undefined
+      || shadowOffsetY !== undefined
+      || shadowColor !== undefined
+    ) {
+      if (next.shadowEnabled) {
+        obj.set(
+          'shadow',
+          new Shadow({
+            color: next.shadowColor || '#000000',
+            blur: next.shadowBlur ?? 8,
+            offsetX: next.shadowOffsetX ?? 0,
+            offsetY: next.shadowOffsetY ?? 0,
+          }),
+        );
+      } else {
+        obj.set('shadow', null);
+      }
+    }
+
     obj.setCoords();
     canvas.requestRenderAll();
     setTextProps((p) => ({ ...p, ...patch }));
@@ -160,7 +207,6 @@ export default function PropertiesPanel({
 
   const isText = selection?.type === 'text';
   const isGraphic = selection?.obj?.glintRole === 'graphic' || selection?.type === 'graphic';
-  const isDevice = selection?.obj?.glintRole === 'framed-screenshot';
   const hasShapeFill =
     selection?.obj &&
     !isText &&
@@ -222,12 +268,49 @@ export default function PropertiesPanel({
       <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-4">
         {rightTab === 'device' && (
           <>
-            <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-              {isDevice
-                ? 'Selected device on canvas — pick a bezel to replace it.'
-                : 'Pick a device bezel for every shot on the board, or None to remove bezels.'}
-            </p>
             <FrameSelector selected={frame} onChange={onFrameChange} store={store} />
+
+            <Section title="Status bar">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] text-glint-text-secondary">Show</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!!style.statusBarEnabled}
+                  onClick={() => patchStyle({ statusBarEnabled: !style.statusBarEnabled })}
+                  className={`relative w-9 h-5 rounded-full transition-colors ${
+                    style.statusBarEnabled ? 'bg-glint-accent' : 'bg-glint-border'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                      style.statusBarEnabled ? 'translate-x-4' : ''
+                    }`}
+                  />
+                </button>
+              </div>
+              {style.statusBarEnabled ? (
+                <div className="flex gap-1.5">
+                  {[
+                    { id: 'light', label: 'Light' },
+                    { id: 'dark', label: 'Dark' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => patchStyle({ statusBarTheme: opt.id })}
+                      className={`flex-1 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                        (style.statusBarTheme || 'dark') === opt.id
+                          ? 'bg-glint-accent text-glint-text-on-accent'
+                          : 'bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </Section>
           </>
         )}
 
@@ -265,14 +348,6 @@ export default function PropertiesPanel({
         {rightTab === 'design' && (
           <>
             <Section title="Screenshot chrome">
-              <p className="text-[10px] text-glint-text-tertiary leading-relaxed -mt-1">
-                Shadow works on device frames and bare shots. Radius and border shape bare screenshots (Device → None).
-              </p>
-
-              <div className="flex items-center gap-2 text-glint-text-secondary text-[10px]">
-                <Square size={12} />
-                <span>Custom frame</span>
-              </div>
               <RangeRow
                 label="Corner radius"
                 value={style.cornerRadius ?? 0}
@@ -407,18 +482,28 @@ export default function PropertiesPanel({
                 <div className="grid grid-cols-2 gap-2">
                   <label className="space-y-1">
                     <span className="text-[10px] text-glint-text-tertiary">Size</span>
-                    <select
-                      value={textProps.fontSize}
-                      onChange={(e) => applyToSelection({ fontSize: Number(e.target.value) })}
-                      className="w-full px-2 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
-                    >
-                      {!FONT_SIZES.includes(textProps.fontSize) && (
-                        <option value={textProps.fontSize}>{textProps.fontSize}</option>
-                      )}
-                      {FONT_SIZES.map((s) => (
-                        <option key={s} value={s}>{s}px</option>
-                      ))}
-                    </select>
+                    <div className="flex gap-1">
+                      <input
+                        type="number"
+                        min={8}
+                        max={320}
+                        value={textProps.fontSize}
+                        onChange={(e) => applyToSelection({ fontSize: Number(e.target.value) || 8 })}
+                        className="w-16 px-1.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text tabular-nums"
+                      />
+                      <select
+                        value={FONT_SIZES.includes(textProps.fontSize) ? textProps.fontSize : ''}
+                        onChange={(e) => applyToSelection({ fontSize: Number(e.target.value) })}
+                        className="flex-1 min-w-0 px-1.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-surface text-glint-text"
+                      >
+                        {!FONT_SIZES.includes(textProps.fontSize) && (
+                          <option value="">Custom</option>
+                        )}
+                        {FONT_SIZES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
                   </label>
                   <label className="space-y-1">
                     <span className="text-[10px] text-glint-text-tertiary">Weight</span>
@@ -482,13 +567,58 @@ export default function PropertiesPanel({
                     applyToSelection({ fontFamily: name });
                   }}
                 />
+                <label className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-[10px] text-glint-text-tertiary">Text shadow</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!!textProps.shadowEnabled}
+                    onClick={() => applyToSelection({ shadowEnabled: !textProps.shadowEnabled })}
+                    className={`relative w-9 h-5 rounded-full transition-colors ${
+                      textProps.shadowEnabled ? 'bg-glint-accent' : 'bg-glint-border'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                        textProps.shadowEnabled ? 'translate-x-4' : ''
+                      }`}
+                    />
+                  </button>
+                </label>
+                {textProps.shadowEnabled && (
+                  <>
+                    <RangeRow
+                      label="Blur"
+                      value={textProps.shadowBlur ?? 0}
+                      min={0}
+                      max={40}
+                      onChange={(v) => applyToSelection({ shadowBlur: v })}
+                    />
+                    <RangeRow
+                      label="Offset X"
+                      value={textProps.shadowOffsetX ?? 0}
+                      min={-30}
+                      max={30}
+                      onChange={(v) => applyToSelection({ shadowOffsetX: v })}
+                    />
+                    <RangeRow
+                      label="Offset Y"
+                      value={textProps.shadowOffsetY ?? 0}
+                      min={-30}
+                      max={30}
+                      onChange={(v) => applyToSelection({ shadowOffsetY: v })}
+                    />
+                    <CField
+                      label="Shadow color"
+                      value={textProps.shadowColor || '#000000'}
+                      onChange={(v) => applyToSelection({ shadowColor: v })}
+                    />
+                  </>
+                )}
               </Section>
             ) : (
               <Section title="Font">
                 <FontPicker compact selected={fontFamily} onChange={onFontFamilyChange} />
-                <p className="text-[10px] text-glint-text-tertiary">
-                  Select text on the canvas to edit it, or add a new text layer.
-                </p>
               </Section>
             )}
           </>

@@ -41,6 +41,12 @@ export function recolorGraphic(obj, patch = {}) {
   if (patch.opacity != null) obj.set('opacity', patch.opacity);
 }
 
+export function graphicScale(layer = {}, nativeW = 1080, nativeH = nativeW) {
+  const scaleX = layer.width != null ? layer.width / nativeW : (layer.scale ?? 1);
+  const scaleY = layer.height != null ? layer.height / nativeH : scaleX;
+  return { scaleX, scaleY };
+}
+
 export async function addGraphicLayer(canvas, layer = {}, opts = {}) {
   const file = layer.src || 'blob-cluster.svg';
   const src = file.startsWith('/') ? file : `/graphics/${file}`;
@@ -58,15 +64,16 @@ export async function addGraphicLayer(canvas, layer = {}, opts = {}) {
   tagAndTintGraphic(group, fills);
 
   const nativeW = group.width || 1080;
-  const scale = layer.width != null ? layer.width / nativeW : (layer.scale ?? 1);
+  const nativeH = group.height || nativeW;
+  const { scaleX, scaleY } = graphicScale(layer, nativeW, nativeH);
 
   group.set({
     left: layer.left ?? 0,
     top: layer.top ?? 0,
     originX: 'left',
     originY: 'top',
-    scaleX: scale,
-    scaleY: scale,
+    scaleX,
+    scaleY,
     opacity: layer.opacity ?? 1,
     angle: layer.angle ?? 0,
     selectable: opts.selectable !== false,

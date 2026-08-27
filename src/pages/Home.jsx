@@ -27,8 +27,7 @@ export default function Home() {
     browseFilterId(platform, device),
   );
 
-  const handleUpload = (files) => {
-    const urls = files.map((f) => URL.createObjectURL(f));
+  const handleUpload = (urls) => {
     navigate('/editor', { state: { screenshots: urls } });
   };
 

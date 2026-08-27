@@ -1,5 +1,7 @@
 /**
- * Pixel-matched Blink templates from Figma SVG measurements (1080x2400).
+ * Pixel-matched Blink templates from template-refs/own/blink-android.svg (1080×2400).
+ * Editable Montserrat text (not SVG outlines) so users can change copy.
+ * Device frame stays simple-dark at measured placements.
  * Run: node scripts/gen-blink.mjs
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -11,21 +13,21 @@ const OUT = join(__dirname, '../public/templates');
 
 const TARGETS = {
   play: {
-    store: 'play',
-    canvas: { width: 1080, height: 2400 },
+    store: 'play/phone',
+    canvas: { width: 1080, height: 1920 },
     frame: 'simple-dark',
     suffix: 'play',
     lockFrame: true,
   },
   ios: {
-    store: 'ios',
+    store: 'ios/iphone',
     canvas: { width: 1290, height: 2796 },
     frame: 'iphone16-pro-max',
     suffix: 'ios',
     lockFrame: false,
   },
   'ios-tablet': {
-    store: 'ios-tablet',
+    store: 'ios/ipad',
     canvas: { width: 2048, height: 2732 },
     frame: 'ipad-pro-13',
     suffix: 'tablet',
@@ -35,11 +37,26 @@ const TARGETS = {
 
 const X_KEYS = new Set(['left', 'width', 'marginLeft', 'rx']);
 const Y_KEYS = new Set(['top', 'height', 'marginTop', 'ry', 'radius']);
+const FONT = 'Montserrat';
+
+function scaleShadow(shadow, sx, sy, sf) {
+  if (!shadow || typeof shadow !== 'object') return shadow;
+  return {
+    ...shadow,
+    blur: shadow.blur != null ? Math.round(shadow.blur * sf) : shadow.blur,
+    offsetX: shadow.offsetX != null ? Math.round(shadow.offsetX * sx) : shadow.offsetX,
+    offsetY: shadow.offsetY != null ? Math.round(shadow.offsetY * sy) : shadow.offsetY,
+  };
+}
 
 function scaleLayer(layer, sx, sy, sf, defaultFrame, lockFrame) {
   if (!layer || typeof layer !== 'object') return layer;
   const out = { ...layer };
   for (const [key, value] of Object.entries(out)) {
+    if (key === 'shadow') {
+      out.shadow = scaleShadow(value, sx, sy, sf);
+      continue;
+    }
     if (typeof value !== 'number') {
       if (
         key === 'frame' &&
@@ -52,7 +69,14 @@ function scaleLayer(layer, sx, sy, sf, defaultFrame, lockFrame) {
       continue;
     }
     if (key === 'fontSize') out[key] = Math.round(value * sf);
-    else if (key === 'angle' || key === 'scale' || key === 'opacity' || key === 'minCoverage') {
+    else if (
+      key === 'angle' ||
+      key === 'scale' ||
+      key === 'opacity' ||
+      key === 'minCoverage' ||
+      key === 'charSpacing' ||
+      key === 'lineHeight'
+    ) {
       /* keep */
     } else if (X_KEYS.has(key)) out[key] = Math.round(value * sx * 10) / 10;
     else if (Y_KEYS.has(key)) out[key] = Math.round(value * sy * 10) / 10;
@@ -60,7 +84,10 @@ function scaleLayer(layer, sx, sy, sf, defaultFrame, lockFrame) {
   return out;
 }
 
-/** Exact coords from template-refs/own/blink-android.svg */
+const TEXT_SHADOW = { color: 'rgba(0,0,0,0.25)', blur: 5, offsetX: 10, offsetY: 10 };
+const TEXT_SHADOW_HEAVY = { color: 'rgba(0,0,0,0.25)', blur: 10, offsetX: 20, offsetY: 20 };
+
+/** Exact geometry from blink-android.svg panels (local 1080×2400). */
 const BLINK = {
   familyId: 'blink',
   name: 'Blink',
@@ -91,20 +118,25 @@ const BLINK = {
         {
           type: 'headline',
           position: 'top',
-          fontSize: 96,
+          fontSize: 215,
           fontWeight: '800',
+          fontFamily: FONT,
+          charSpacing: 33,
           color: '#611AB4',
           placeholder: 'BLINK',
-          marginTop: 180,
+          marginTop: 221,
+          shadow: TEXT_SHADOW,
         },
         {
           type: 'subheadline',
           position: 'top',
-          fontSize: 36,
-          fontWeight: '600',
+          fontSize: 97,
+          fontWeight: '800',
+          fontFamily: FONT,
           color: '#8030DD',
-          placeholder: 'Share Files in a Flash',
-          marginTop: 300,
+          placeholder: 'Share Files in a\nFlash',
+          marginTop: 477,
+          lineHeight: 1.16,
         },
         {
           type: 'device',
@@ -142,23 +174,25 @@ const BLINK = {
         },
         {
           type: 'headline',
-          position: 'left',
-          fontSize: 72,
+          position: 'top',
+          fontSize: 146,
           fontWeight: '800',
+          fontFamily: FONT,
           color: '#FFFFFF',
           placeholder: '100% Free',
-          marginLeft: 145,
-          marginTop: 1980,
+          marginTop: 1891,
+          shadow: TEXT_SHADOW_HEAVY,
         },
         {
           type: 'subheadline',
-          position: 'left',
-          fontSize: 40,
-          fontWeight: '700',
+          position: 'top',
+          fontSize: 86,
+          fontWeight: '800',
+          fontFamily: FONT,
           color: '#FFFFFF',
           placeholder: 'No Login. No Tracking',
-          marginLeft: 145,
-          marginTop: 2085,
+          marginTop: 2073,
+          shadow: TEXT_SHADOW,
         },
       ],
     },
@@ -169,11 +203,14 @@ const BLINK = {
         {
           type: 'headline',
           position: 'top',
-          fontSize: 52,
+          fontSize: 117,
           fontWeight: '800',
+          fontFamily: FONT,
           color: '#8A2BE2',
-          placeholder: 'Select & Share Instantly',
-          marginTop: 160,
+          placeholder: 'Select & Share\nInstantly',
+          marginTop: 140,
+          lineHeight: 1.16,
+          shadow: TEXT_SHADOW,
         },
         {
           type: 'device',
@@ -193,11 +230,14 @@ const BLINK = {
         {
           type: 'headline',
           position: 'top',
-          fontSize: 56,
+          fontSize: 118,
           fontWeight: '800',
+          fontFamily: FONT,
           color: '#FFFFFF',
-          placeholder: 'Scan & Download',
-          marginTop: 160,
+          placeholder: 'Scan &\nDownload',
+          marginTop: 153,
+          lineHeight: 1.16,
+          shadow: TEXT_SHADOW,
         },
         {
           type: 'device',
@@ -217,11 +257,14 @@ const BLINK = {
         {
           type: 'headline',
           position: 'top',
-          fontSize: 56,
+          fontSize: 155,
           fontWeight: '800',
+          fontFamily: FONT,
           color: '#FFFFFF',
-          placeholder: 'Download Securely',
-          marginTop: 140,
+          placeholder: 'Download\nSecurely',
+          marginTop: 205,
+          lineHeight: 1.16,
+          shadow: TEXT_SHADOW,
         },
         {
           type: 'device',

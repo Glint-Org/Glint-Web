@@ -4,8 +4,7 @@ import { generateSessionJson } from '../utils/exportHelper';
 
 /**
  * Handoff to Glint View.
- * Full PNG data URLs are too large for QR - clipboard paste is the reliable path.
- * QR carries compact metadata so the phone knows which store / app to preview.
+ * Session JSON = ordered screenshot list (1 → 2 → 3…). QR is metadata only.
  */
 export default function QRExporter({ session, exportedUrls }) {
   const [qrDataUrl, setQrDataUrl] = useState(null);
@@ -26,7 +25,6 @@ export default function QRExporter({ session, exportedUrls }) {
     store: session?.store ?? 'play/phone',
     version: '1.0',
     screens: [],
-    hint: 'Paste the full session from Glint Web (Copy for Glint View) to load screenshots.',
   });
 
   useEffect(() => {
@@ -38,7 +36,7 @@ export default function QRExporter({ session, exportedUrls }) {
 
   const handleCopyJson = async () => {
     if (!hasFrames) {
-      alert('Preview or export frames first so Glint View gets real screenshots.');
+      alert('Preview or export first.');
       return;
     }
     try {
@@ -55,15 +53,14 @@ export default function QRExporter({ session, exportedUrls }) {
   return (
     <div className="space-y-3">
       <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
-        Glint View preview
+        Session JSON
       </h3>
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Preview or export frames first, then copy the session into Glint View (Paste Session JSON).
-        QR only carries app metadata - screenshots are too large for a QR code.
+        Ordered screenshots for Glint View — which shot comes after which.
       </p>
       {qrDataUrl && (
         <div className="flex justify-center">
-          <img src={qrDataUrl} alt="Session QR Code" className="rounded border border-glint-border w-40 h-40" />
+          <img src={qrDataUrl} alt="Session QR" className="rounded border border-glint-border w-40 h-40" />
         </div>
       )}
       <button
@@ -72,7 +69,7 @@ export default function QRExporter({ session, exportedUrls }) {
         disabled={!hasFrames}
         className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary disabled:opacity-40"
       >
-        {copied ? 'Copied!' : hasFrames ? 'Copy for Glint View' : 'Render frames to enable copy'}
+        {copied ? 'Copied!' : hasFrames ? 'Copy session JSON' : 'Preview first'}
       </button>
     </div>
   );

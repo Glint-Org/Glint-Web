@@ -56,20 +56,30 @@
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 113,
+          "fontSize": 254,
           "fontWeight": "800",
+          "fontFamily": "Montserrat",
+          "charSpacing": 33,
           "color": "#611AB4",
           "placeholder": "BLINK",
-          "marginTop": 209.7
+          "marginTop": 257.5,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 6,
+            "offsetX": 12,
+            "offsetY": 12
+          }
         },
         {
           "type": "subheadline",
           "position": "top",
-          "fontSize": 42,
-          "fontWeight": "600",
+          "fontSize": 114,
+          "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#8030DD",
-          "placeholder": "Share Files in a Flash",
-          "marginTop": 349.5
+          "placeholder": "Share Files in a\nFlash",
+          "marginTop": 555.7,
+          "lineHeight": 1.16
         },
         {
           "type": "device",
@@ -111,23 +121,35 @@
         },
         {
           "type": "headline",
-          "position": "left",
-          "fontSize": 85,
+          "position": "top",
+          "fontSize": 172,
           "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#FFFFFF",
           "placeholder": "100% Free",
-          "marginLeft": 173.2,
-          "marginTop": 2306.7
+          "marginTop": 2203,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 12,
+            "offsetX": 24,
+            "offsetY": 23
+          }
         },
         {
           "type": "subheadline",
-          "position": "left",
-          "fontSize": 47,
-          "fontWeight": "700",
+          "position": "top",
+          "fontSize": 101,
+          "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#FFFFFF",
           "placeholder": "No Login. No Tracking",
-          "marginLeft": 173.2,
-          "marginTop": 2429
+          "marginTop": 2415,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 6,
+            "offsetX": 12,
+            "offsetY": 12
+          }
         }
       ]
     },
@@ -142,11 +164,19 @@
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 61,
+          "fontSize": 138,
           "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#8A2BE2",
-          "placeholder": "Select & Share Instantly",
-          "marginTop": 186.4
+          "placeholder": "Select & Share\nInstantly",
+          "marginTop": 163.1,
+          "lineHeight": 1.16,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 6,
+            "offsetX": 12,
+            "offsetY": 12
+          }
         },
         {
           "type": "device",
@@ -170,11 +200,19 @@
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 66,
+          "fontSize": 139,
           "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#FFFFFF",
-          "placeholder": "Scan & Download",
-          "marginTop": 186.4
+          "placeholder": "Scan &\nDownload",
+          "marginTop": 178.2,
+          "lineHeight": 1.16,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 6,
+            "offsetX": 12,
+            "offsetY": 12
+          }
         },
         {
           "type": "device",
@@ -198,11 +236,19 @@
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 66,
+          "fontSize": 183,
           "fontWeight": "800",
+          "fontFamily": "Montserrat",
           "color": "#FFFFFF",
-          "placeholder": "Download Securely",
-          "marginTop": 163.1
+          "placeholder": "Download\nSecurely",
+          "marginTop": 238.8,
+          "lineHeight": 1.16,
+          "shadow": {
+            "color": "rgba(0,0,0,0.25)",
+            "blur": 6,
+            "offsetX": 12,
+            "offsetY": 12
+          }
         },
         {
           "type": "device",

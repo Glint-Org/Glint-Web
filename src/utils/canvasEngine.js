@@ -8,6 +8,7 @@ import {
 } from './frameMeta';
 import { GLINT_CLONE_PROPS } from './glintCloneProps';
 import { isProtectedLayer } from './layerGuards';
+import { drawStatusBar, statusBarChromeChanged } from './statusBar';
 
 export { GLINT_CLONE_PROPS } from './glintCloneProps';
 export { isProtectedLayer } from './layerGuards';
@@ -103,7 +104,7 @@ export function setSolidBackground(canvas, color) {
  * Guarantees the hole is fully opaque white where the shot doesn't cover, and the shot
  * always completely fills the frame (object-fit: cover).
  */
-async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
+async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {}) {
   const w = Math.max(1, Math.round(screenW));
   const h = Math.max(1, Math.round(screenH));
   const r = Math.max(0, Math.min(rx || 0, w / 2, h / 2));
@@ -146,6 +147,9 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
   if (el) ctx.drawImage(el, dx, dy, dw, dh);
+  if (chrome.statusBarEnabled) {
+    drawStatusBar(ctx, w, chrome.statusBarTheme || 'dark');
+  }
   ctx.restore();
 
   // Soft outer mask so corners stay transparent outside the round rect (for bare frames).
@@ -211,7 +215,7 @@ export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
   const rx = Math.max(0, Math.min(style.cornerRadius ?? 0, targetW / 2, targetH / 2));
 
   // White fill + cover-fit screenshot (exact frame size).
-  const screenImg = await buildScreenBitmap(screenshotUrl, targetW, targetH, rx);
+  const screenImg = await buildScreenBitmap(screenshotUrl, targetW, targetH, rx, style);
   screenImg.set({ left: 0, top: 0, originX: 'left', originY: 'top' });
 
   const strokeW = Math.max(0, style.strokeWidth ?? 0);
@@ -339,15 +343,28 @@ function applyBareBorderStroke(group, chrome) {
 }
 
 /**
- * Apply screenshot chrome. Cheap path for shadow/stroke; rebuild only when radius
- * (or forceRebuild) requires a new cover-fill bitmap.
+ * Apply screenshot chrome. Cheap path for shadow/stroke; rebuild when radius or
+ * status-bar chrome (or forceRebuild) requires a new cover-fill bitmap.
  */
 export async function restyleScreenshot(group, style = {}, opts = {}) {
   if (!group) return false;
 
   if (group.glintRole === 'framed-screenshot') {
-    applyChromeShadow(group, style);
-    return true;
+    const prev = group.glintChrome || {};
+    const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...prev, ...style };
+    const needsRebuild = opts.forceRebuild || statusBarChromeChanged(prev, chrome);
+    if (!needsRebuild) {
+      applyChromeShadow(group, chrome);
+      group.set({ glintChrome: chrome });
+      group.canvas?.requestRenderAll?.();
+      return true;
+    }
+    return replaceDeviceFrame(
+      group,
+      group.glintFrameId,
+      opts.screenshotUrl || group.glintScreenshotUrl,
+      chrome,
+    );
   }
   if (group.glintRole !== 'screenshot') return false;
 
@@ -355,7 +372,8 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
   const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...prev, ...style };
   const radiusChanged =
     (chrome.cornerRadius ?? 0) !== (prev.cornerRadius ?? DEFAULT_SCREENSHOT_STYLE.cornerRadius);
-  const needsBitmapRebuild = opts.forceRebuild || radiusChanged;
+  const needsBitmapRebuild =
+    opts.forceRebuild || radiusChanged || statusBarChromeChanged(prev, chrome);
 
   if (!needsBitmapRebuild) {
     applyBareBorderStroke(group, chrome);
@@ -435,7 +453,7 @@ export async function loadFrameBezel(frameId) {
  * Composite screenshot + bezel into one native-resolution bitmap, then scale.
  * Avoids Fabric Group layout drift that misaligns the shot inside the hole.
  */
-async function buildFramedDeviceBitmap(screenshotUrl, frameId) {
+async function buildFramedDeviceBitmap(screenshotUrl, frameId, chrome = {}) {
   const meta = getFrameMeta(frameId);
   const W = meta.width;
   const H = meta.height;
@@ -443,7 +461,7 @@ async function buildFramedDeviceBitmap(screenshotUrl, frameId) {
   const screenH = H - meta.top - meta.bottom;
 
   // Sharp rect fill — the bezel PNG/SVG masks the rounded hole on top.
-  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0);
+  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0, chrome);
   const screenEl = screen.getElement?.() || screen._element;
 
   const bezel = await loadFrameBezel(frameId);
@@ -638,14 +656,23 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
   const screenshotUrl = screenshotUrlOverride || group.glintScreenshotUrl;
   if (!screenshotUrl) return false;
 
-  // Same bezel + same shot → skip rebuild (stops top-right drift on repeated clicks).
+  // Same bezel + same shot + no status-bar chrome change → skip rebuild.
   if (
     role === 'framed-screenshot'
     && group.glintFrameId === nextFrameId
     && screenshotUrl === group.glintScreenshotUrl
   ) {
-    if (styleOverride) applyChromeShadow(group, styleOverride);
-    return true;
+    const prev = group.glintChrome || {};
+    const chrome = {
+      ...DEFAULT_SCREENSHOT_STYLE,
+      ...prev,
+      ...(styleOverride || {}),
+    };
+    if (!statusBarChromeChanged(prev, chrome)) {
+      applyChromeShadow(group, chrome);
+      group.set({ glintChrome: chrome });
+      return true;
+    }
   }
 
   const canvas = group.canvas;
@@ -736,8 +763,9 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
   const targetScale = opts.scale ?? 0.55;
   const { frameW, frameH } = computeFrameLayout(frameId, targetScale);
   const meta = getFrameMeta(frameId);
+  const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...(opts.chrome || {}) };
 
-  const deviceImg = await buildFramedDeviceBitmap(screenshotUrl, frameId);
+  const deviceImg = await buildFramedDeviceBitmap(screenshotUrl, frameId, chrome);
   deviceImg.set({
     scaleX: frameW / meta.width,
     scaleY: frameH / meta.height,
@@ -764,11 +792,11 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     glintBaseScale: targetScale,
     glintCoverage: opts.coverage ?? MIN_DEVICE_COVERAGE,
     glintScreenshotUrl: screenshotUrl,
-    glintChrome: opts.chrome || DEFAULT_SCREENSHOT_STYLE,
+    glintChrome: chrome,
   });
 
   applyDeviceTransformLocks(group);
-  applyChromeShadow(group, opts.chrome || DEFAULT_SCREENSHOT_STYLE);
+  applyChromeShadow(group, chrome);
 
   canvas.add(group);
   canvas.requestRenderAll();

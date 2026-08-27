@@ -1,4 +1,4 @@
-import { FabricImage, Rect, IText } from 'fabric';
+import { FabricImage, Rect, IText, Shadow } from 'fabric';
 import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS, loadFrameBezel } from './canvasEngine';
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
@@ -181,7 +181,29 @@ async function addDeviceLayer(canvas, screenshotUrl, layer, canvasW, canvasH, ed
   return group;
 }
 
-function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX = 0) {
+const loadedTemplateFonts = new Set(['Inter', 'Space Grotesk']);
+
+function ensureGoogleFont(fontName) {
+  if (typeof document === 'undefined' || !fontName || loadedTemplateFonts.has(fontName)) return;
+  const link = document.createElement('link');
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g, '+')}:wght@400;500;600;700;800&display=swap`;
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+  loadedTemplateFonts.add(fontName);
+}
+
+async function ensureFontReady(fontFamily, fontWeight = '700') {
+  const name = (fontFamily || 'Inter').replace(/,.*/, '').trim();
+  ensureGoogleFont(name);
+  if (typeof document === 'undefined' || !document.fonts?.load) return;
+  try {
+    await document.fonts.load(`${fontWeight} 64px "${name}"`);
+  } catch {
+    /* fall through with system fallback */
+  }
+}
+
+async function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX = 0) {
   const useGlobal =
     layer.type === 'subheadline'
       ? metadata.subheadline || metadata.tagline
@@ -190,18 +212,37 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, origi
   if (!text) return null;
 
   const alignLeft = layer.position === 'left';
+  const fontFamily = layer.fontFamily || 'Space Grotesk';
+  const fontWeight = layer.fontWeight ?? 'normal';
+  await ensureFontReady(fontFamily, fontWeight);
+
   const fb = new IText(text, {
     fontSize: layer.fontSize ?? 36,
-    fontFamily: `${layer.fontFamily || 'Space Grotesk'}, sans-serif`,
-    fontWeight: layer.fontWeight ?? 'normal',
+    fontFamily: `${fontFamily}, sans-serif`,
+    fontWeight,
     fill: layer.color ?? '#ffffff',
     textAlign: alignLeft ? 'left' : 'center',
     originX: alignLeft ? 'left' : 'center',
+    charSpacing: layer.charSpacing ?? 0,
+    lineHeight: layer.lineHeight ?? 1.16,
     evented: editable,
     selectable: editable,
     editable: editable,
     glintRole: 'text',
   });
+
+  if (layer.shadow) {
+    const s = layer.shadow;
+    fb.set(
+      'shadow',
+      new Shadow({
+        color: s.color || 'rgba(0,0,0,0.25)',
+        blur: s.blur ?? 5,
+        offsetX: s.offsetX ?? 0,
+        offsetY: s.offsetY ?? 0,
+      }),
+    );
+  }
 
   const pos = resolvePosition(layer.position ?? 'top', canvasW, canvasH, fb.width, fb.height, layer);
   fb.set({ left: (alignLeft ? pos.left : canvasW / 2) + originX, top: pos.top });
@@ -535,7 +576,7 @@ async function paintLayers(canvas, template, screenshotUrls, metadata, themes, e
         break;
       case 'headline':
       case 'subheadline':
-        addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX);
+        await addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX);
         break;
       case 'screenshot': {
         const url = shotUrl(layer.slot ?? 0);

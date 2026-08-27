@@ -14,6 +14,7 @@ import ExportPanel from '../components/ExportPanel';
 import PropertiesPanel from '../components/PropertiesPanel';
 import UploadZone from '../components/UploadZone';
 import DeviceContextMenu from '../components/DeviceContextMenu';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useGLINTBridge } from '../hooks/useGlintBridge';
 import {
   useFrames,
@@ -35,6 +36,7 @@ import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
+import { restoreCachedScreenshots } from '../utils/screenshotStore';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
@@ -79,6 +81,17 @@ export default function Editor() {
   const [exportPreset, setExportPreset] = useState(
     resolveStoreKey(session?.store ?? initialTemplate?.store ?? 'play/phone'),
   );
+  const [dirty, setDirty] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState(null);
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const dirtyRef = useRef(false);
+  const bootstrappingRef = useRef(true);
+
+  const markDirty = useCallback(() => {
+    if (bootstrappingRef.current) return;
+    dirtyRef.current = true;
+    setDirty(true);
+  }, []);
   const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
   const [bridgeToken, setBridgeToken] = useState('');
@@ -147,8 +160,35 @@ export default function Editor() {
 
   const handleSelectTemplate = (t) => {
     if (!t) return;
-    // Always replace — screenshots stay; designs swap to the new pack.
+    if (template?.id && t.id !== template.id) {
+      setPendingTemplate(t);
+      return;
+    }
     loadTemplate(t);
+    markDirty();
+  };
+
+  const confirmReplaceTemplate = () => {
+    if (pendingTemplate) {
+      loadTemplate(pendingTemplate);
+      markDirty();
+    }
+    setPendingTemplate(null);
+  };
+
+  const requestLeaveEditor = () => {
+    if (dirtyRef.current) {
+      setLeaveOpen(true);
+      return;
+    }
+    navigate('/');
+  };
+
+  const confirmLeaveEditor = () => {
+    dirtyRef.current = false;
+    setDirty(false);
+    setLeaveOpen(false);
+    navigate('/');
   };
 
   // Reload / bare /editor: restore last pack or first enabled gallery template.
@@ -160,9 +200,13 @@ export default function Editor() {
       } catch {
         /* ignore */
       }
+      bootstrappingRef.current = false;
       return;
     }
-    if (location.state?.glintPack || location.state?.screenshots?.length) return;
+    if (location.state?.glintPack || location.state?.screenshots?.length) {
+      bootstrappingRef.current = false;
+      return;
+    }
 
     let cancelled = false;
     (async () => {
@@ -180,8 +224,14 @@ export default function Editor() {
           packs.find((t) => resolveStoreKey(t.store) === 'play/phone') ||
           packs[0];
         if (!cancelled && pick) loadTemplate(pick);
+        const cached = await restoreCachedScreenshots(10);
+        if (!cancelled && cached.length) {
+          mapScreenshots(cached.map((c) => c.url));
+        }
       } catch {
         /* keep blank board */
+      } finally {
+        if (!cancelled) bootstrappingRef.current = false;
       }
     })();
     return () => {
@@ -191,12 +241,37 @@ export default function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
+
+  // Trap browser back while dirty — confirm before leaving editor.
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const push = () => window.history.pushState({ glintEditorGuard: 1 }, '');
+    push();
+    const onPop = () => {
+      push();
+      setLeaveOpen(true);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [dirty]);
+
   const handleBackgroundChange = (bg) => {
     setBackgroundState(bg);
     if (activeCanvas && bg) setBackground(activeCanvas, bg.type, bg.value);
+    markDirty();
   };
 
   const handleScreenshotStyleChange = useCallback((patch) => {
+    markDirty();
     setScreenshotStyle((prev) => {
       const next = { ...prev, ...patch };
       // Debounce canvas work — slider ticks must not stack full-board restyles.
@@ -235,13 +310,14 @@ export default function Editor() {
       }
       return next;
     });
-  }, []);
+  }, [markDirty]);
 
   const handleDeviceFrameChange = useCallback(async (nextId) => {
     const target = getStoreTarget(exportPreset);
     const frameId = resolveFrameForStore(nextId, target, null);
     if (nextId != null && frameId !== nextId) return;
     setDeviceFrame(frameId);
+    markDirty();
 
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
@@ -303,7 +379,7 @@ export default function Editor() {
         activeCanvas.requestRenderAll();
       }
     }
-  }, [activeCanvas, exportPreset, frames, screenshotStyle]);
+  }, [activeCanvas, exportPreset, frames, screenshotStyle, markDirty]);
 
   /** Drop illegal bezels when store size changes (e.g. iPhone → Play TV). */
   useEffect(() => {
@@ -323,12 +399,14 @@ export default function Editor() {
       fontFamily,
       fontSize: 48,
     });
-  }, [activeCanvas, tagline, background, fontFamily]);
+    markDirty();
+  }, [activeCanvas, tagline, background, fontFamily, markDirty]);
 
   const handleDelete = useCallback(() => {
     if (!activeCanvas) return;
     deleteActiveObjects(activeCanvas);
-  }, [activeCanvas]);
+    markDirty();
+  }, [activeCanvas, markDirty]);
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
@@ -336,6 +414,7 @@ export default function Editor() {
     setTagline(importedSession.tagline ?? '');
     setExportPreset(resolveStoreKey(importedSession.store ?? 'play/phone'));
     mapScreenshots(imported);
+    markDirty();
   };
 
   const handleProjectImport = (pack) => {
@@ -369,6 +448,7 @@ export default function Editor() {
     );
     setActiveIndex(0);
     setLeftTab('frames');
+    markDirty();
   };
 
   useEffect(() => {
@@ -380,9 +460,9 @@ export default function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleUpload = (files) => {
-    const urls = files.map((f) => URL.createObjectURL(f));
+  const handleUpload = (urls) => {
     mapScreenshots(urls);
+    markDirty();
   };
 
   const swapFrameDevices = async (index, url) => {
@@ -407,12 +487,15 @@ export default function Editor() {
     }
   };
 
-  const handleReplaceScreenshot = async (index, file) => {
-    await swapFrameDevices(index, URL.createObjectURL(file));
+  const handleReplaceScreenshot = async (index, urlOrFile) => {
+    const url = typeof urlOrFile === 'string' ? urlOrFile : URL.createObjectURL(urlOrFile);
+    await swapFrameDevices(index, url);
+    markDirty();
   };
 
   const handleClearScreenshot = async (index) => {
     await swapFrameDevices(index, getWhiteScreenshot());
+    markDirty();
   };
 
   const screenshotList = frames.map((f) => f.screenshotUrl).filter(Boolean);
@@ -515,6 +598,7 @@ export default function Editor() {
     const idx = frames.findIndex((f) => f.id === ctx.frameId);
     await replaceDeviceScreenshot(ctx.device, url);
     if (idx >= 0) updateFrame(idx, { screenshotUrl: url });
+    markDirty();
   };
 
   const handleDeviceClear = async () => {
@@ -524,6 +608,7 @@ export default function Editor() {
     await replaceDeviceScreenshot(deviceMenu.device, url);
     if (idx >= 0) updateFrame(idx, { screenshotUrl: url });
     closeDeviceMenu();
+    markDirty();
   };
 
   const handleDeviceResetTransform = () => {
@@ -533,6 +618,7 @@ export default function Editor() {
     device.setCoords?.();
     device.canvas?.requestRenderAll?.();
     closeDeviceMenu();
+    markDirty();
   };
 
   useEffect(() => {
@@ -570,7 +656,7 @@ export default function Editor() {
     <div className="h-screen w-screen overflow-hidden bg-glint-bg flex flex-col">
       <header className="h-12 bg-glint-surface border-b border-glint-border px-3 flex items-center justify-between shrink-0 z-40">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/')} className="hover:opacity-80 transition-opacity" title="Home">
+          <button onClick={requestLeaveEditor} className="hover:opacity-80 transition-opacity" title="Home">
             <img src="/logo.png" alt="Glint" className="w-7 h-7 rounded-md" />
           </button>
           <div className="w-px h-4 bg-glint-border-strong" />
@@ -731,9 +817,6 @@ export default function Editor() {
               )}
               {leftTab === 'assets' && (
                 <>
-                  <p className="text-[10px] text-glint-text-tertiary">
-                    Import a .glintpack for editable restore, or Capture/Bridge session folders.
-                  </p>
                   <div className="space-y-2">
                     <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
                       Import
@@ -850,6 +933,27 @@ export default function Editor() {
         onChange={handleDeviceFileChange}
       />
 
+      <ConfirmDialog
+        open={!!pendingTemplate}
+        title="Replace template?"
+        message="Frame layouts and text from the current pack will be replaced. Your screenshots stay on the board."
+        confirmLabel="Replace"
+        cancelLabel="Cancel"
+        enterConfirms
+        onConfirm={confirmReplaceTemplate}
+        onCancel={() => setPendingTemplate(null)}
+      />
+
+      <ConfirmDialog
+        open={leaveOpen}
+        title="Leave editor?"
+        message="Unsaved changes will be lost. Download a .glintpack first if you want to keep editing later."
+        confirmLabel="Leave"
+        cancelLabel="Stay"
+        danger
+        onConfirm={confirmLeaveEditor}
+        onCancel={() => setLeaveOpen(false)}
+      />
     </div>
   );
 }

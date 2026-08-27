@@ -230,6 +230,10 @@ export const DEFAULT_SCREENSHOT_STYLE = {
   shadowOffsetY: 22,
   shadowOpacity: 0.4,
   shadowColor: '#000000',
+  /** Fake OS status bar overlaid on the screen content. */
+  statusBarEnabled: false,
+  /** "dark" = white icons (dark UI); "light" = dark icons (light UI). */
+  statusBarTheme: 'dark',
 };
 
 export function computeFrameLayout(frameId, targetScale) {
