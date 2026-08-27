@@ -91,6 +91,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+a,
+button,
+[role="button"],
+summary,
+label[for],
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="color"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"],
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
 .glint-gradient-bg {
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 208, 111, 0.06), transparent),
