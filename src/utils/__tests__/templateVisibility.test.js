@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   TEMPLATE_ENABLED,
   isTemplateEnabled,
+  visibleTemplateIds,
+  filterVisibleTemplates,
 } from '../templateLoader.js';
 
 describe('template visibility', () => {
@@ -18,6 +20,7 @@ describe('template visibility', () => {
       'glint-gold-ipad',
       'glint-gold-play',
     ]);
+    expect(visibleTemplateIds().sort()).toEqual(on);
   });
 
   it('defaults unknown ids to hidden', () => {
@@ -29,5 +32,20 @@ describe('template visibility', () => {
   it('lets JSON enabled override the map', () => {
     expect(isTemplateEnabled({ id: 'warm-glow-play', enabled: true })).toBe(true);
     expect(isTemplateEnabled({ id: 'glint-gold-play', enabled: false })).toBe(false);
+  });
+
+  it('hides disabled packs from browse lists', () => {
+    const list = [
+      { id: 'glint-gold-play', store: 'play/phone' },
+      { id: 'warm-glow-play', store: 'play/phone' },
+      { id: 'blink-ios', store: 'ios/iphone' },
+    ];
+    expect(filterVisibleTemplates(list, 'all').map((t) => t.id)).toEqual([
+      'glint-gold-play',
+      'blink-ios',
+    ]);
+    expect(filterVisibleTemplates(list, 'play').map((t) => t.id)).toEqual([
+      'glint-gold-play',
+    ]);
   });
 });

@@ -4,7 +4,7 @@ import { Sun, Moon } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
-import { loadAllTemplates, filterTemplatesByStore, browseFilterId } from '../utils/templateLoader';
+import { loadAllTemplates, filterVisibleTemplates, browseFilterId } from '../utils/templateLoader';
 import TemplateSetPreview from '../components/TemplateSetPreview';
 import StoreBrowseFilters from '../components/StoreBrowseFilters';
 
@@ -17,12 +17,12 @@ export default function Home() {
   const { theme, toggle } = useTheme();
 
   useEffect(() => {
-    loadAllTemplates()
+    loadAllTemplates({ enabledOnly: true })
       .then(setTemplates)
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredTemplates = filterTemplatesByStore(
+  const filteredTemplates = filterVisibleTemplates(
     templates,
     browseFilterId(platform, device),
   );

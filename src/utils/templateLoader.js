@@ -1,3 +1,5 @@
+import { filterTemplatesByStore } from './storeCatalog';
+
 const THEME_CACHE = {};
 
 export async function loadThemePresets() {
@@ -94,6 +96,22 @@ export function isTemplateEnabled(templateOrId) {
   return TEMPLATE_ENABLED[templateOrId] === true;
 }
 
+/** IDs that appear in Home / gallery (respects TEMPLATE_ENABLED + JSON override after load). */
+export function visibleTemplateIds() {
+  return TEMPLATE_IDS.filter((id) => isTemplateEnabled(id));
+}
+
+/**
+ * Drop disabled packs, then apply store browse filter.
+ * Use this anywhere templates are listed (Home, TemplateGallery).
+ */
+export function filterVisibleTemplates(templates, filter) {
+  return filterTemplatesByStore(
+    (templates || []).filter(isTemplateEnabled),
+    filter,
+  );
+}
+
 export async function loadTemplate(templateId) {
   const res = await fetch(`/templates/${templateId}.json`);
   if (!res.ok) throw new Error(`Template not found: ${templateId}`);
@@ -101,11 +119,12 @@ export async function loadTemplate(templateId) {
 }
 
 /**
- * @param {{ enabledOnly?: boolean }} [opts] - gallery default hides disabled packs
+ * @param {{ enabledOnly?: boolean }} [opts] - gallery/home default hides disabled packs
  */
 export async function loadAllTemplates({ enabledOnly = true } = {}) {
+  const ids = enabledOnly ? visibleTemplateIds() : TEMPLATE_IDS;
   const templates = await Promise.all(
-    TEMPLATE_IDS.map(async (id) => {
+    ids.map(async (id) => {
       try {
         return await loadTemplate(id);
       } catch {
@@ -114,5 +133,6 @@ export async function loadAllTemplates({ enabledOnly = true } = {}) {
     }),
   );
   const loaded = templates.filter(Boolean);
+  // Second pass: JSON `"enabled": false` can still hide a map-enabled id.
   return enabledOnly ? loaded.filter(isTemplateEnabled) : loaded;
 }

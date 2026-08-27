@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   loadAllTemplates,
-  filterTemplatesByStore,
+  filterVisibleTemplates,
   browseFilterId,
   getStoreTarget,
 } from '../utils/templateLoader';
@@ -19,7 +19,7 @@ export default function TemplateGallery({ onChange, activeStore }) {
   const [device, setDevice] = useState('all');
 
   useEffect(() => {
-    loadAllTemplates().then(setTemplates).finally(() => setLoading(false));
+    loadAllTemplates({ enabledOnly: true }).then(setTemplates).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function TemplateGallery({ onChange, activeStore }) {
     setDevice(target.id);
   }, [activeStore]);
 
-  const filtered = filterTemplatesByStore(templates, browseFilterId(platform, device));
+  const filtered = filterVisibleTemplates(templates, browseFilterId(platform, device));
 
   if (loading) {
     return <p className="text-sm text-glint-text-tertiary">Loading templates…</p>;
