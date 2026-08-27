@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, Gradient, Text, Rect, Group, Shadow, LayoutManager, FixedLayout, loadSVGFromString, util } from 'fabric';
+import { Canvas, FabricImage, Gradient, IText, Rect, Group, Shadow, LayoutManager, FixedLayout, loadSVGFromString, util } from 'fabric';
 import {
   getFrameMeta,
   computeFrameLayout,
@@ -774,7 +774,7 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
 }
 
 export function addTextOverlay(canvas, text, opts = {}) {
-  const fb = new Text(text || 'Double-click to edit', {
+  const fb = new IText(text || 'Double-click to edit', {
     left: opts.left ?? canvas.getWidth() / 2,
     top: opts.top ?? 120,
     fontSize: opts.fontSize ?? 48,

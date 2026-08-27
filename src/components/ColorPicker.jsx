@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pipette } from 'lucide-react';
+import { openCanvasEyedropper } from '../utils/eyedropper';
 
 /** Figma-like presets for fills, text, and strokes. */
 export const COLOR_PRESETS = [
@@ -10,35 +11,45 @@ export const COLOR_PRESETS = [
 
 function toHex(value) {
   if (!value || typeof value !== 'string') return '#FFFFFF';
-  if (value.startsWith('#') && value.length === 7) return value;
+  if (value.startsWith('#') && value.length === 7) return value.toUpperCase();
   if (value.startsWith('#') && value.length === 4) {
     const r = value[1], g = value[2], b = value[3];
-    return `#${r}${r}${g}${g}${b}${b}`;
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
   }
   return '#FFFFFF';
 }
 
 /**
- * Figma-style color control: presets, hex, native picker, eyedropper (from screen/images).
+ * Figma-style color control: presets, hex, native picker, canvas eyedropper.
+ * @param {() => any[]} [getCanvases] — live Fabric canvases to sample from
  */
-export default function ColorPicker({ label, value, onChange }) {
+export default function ColorPicker({ label, value, onChange, getCanvases }) {
   const hex = toHex(value);
   const [picking, setPicking] = useState(false);
+  const inputId = `glint-color-${String(label || 'color').replace(/\s+/g, '-')}`;
 
-  const pickFromScreen = async () => {
-    if (typeof window !== 'undefined' && window.EyeDropper) {
-      try {
-        setPicking(true);
-        const result = await new window.EyeDropper().open();
-        if (result?.sRGBHex) onChange(result.sRGBHex.toUpperCase());
-      } catch {
-        /* user cancelled */
-      } finally {
-        setPicking(false);
+  const pickColor = async () => {
+    setPicking(true);
+    try {
+      // Prefer sampling the editor board (screenshots + frames) like Figma.
+      if (typeof getCanvases === 'function') {
+        const hexPick = await openCanvasEyedropper({ getCanvases });
+        if (hexPick) onChange(hexPick);
+        return;
       }
-      return;
+      if (typeof window !== 'undefined' && window.EyeDropper) {
+        try {
+          const result = await new window.EyeDropper().open();
+          if (result?.sRGBHex) onChange(result.sRGBHex.toUpperCase());
+        } catch {
+          /* cancelled */
+        }
+        return;
+      }
+      document.getElementById(inputId)?.click();
+    } finally {
+      setPicking(false);
     }
-    document.getElementById(`glint-color-${label}`)?.click();
   };
 
   return (
@@ -46,7 +57,7 @@ export default function ColorPicker({ label, value, onChange }) {
       {label && <span className="text-[10px] text-glint-text-tertiary">{label}</span>}
       <div className="flex items-center gap-1.5">
         <input
-          id={`glint-color-${label}`}
+          id={inputId}
           type="color"
           value={hex}
           onChange={(e) => onChange(e.target.value.toUpperCase())}
@@ -65,9 +76,10 @@ export default function ColorPicker({ label, value, onChange }) {
         />
         <button
           type="button"
-          onClick={pickFromScreen}
-          title="Pick color from canvas or any image (eyedropper)"
-          className={`p-1.5 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-accent hover:border-glint-accent ${picking ? 'border-glint-accent text-glint-accent' : ''}`}
+          onClick={pickColor}
+          disabled={picking}
+          title="Eyedropper — move over the canvas and click a color"
+          className={`p-1.5 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-accent hover:border-glint-accent disabled:opacity-50 ${picking ? 'border-glint-accent text-glint-accent' : ''}`}
         >
           <Pipette size={14} />
         </button>

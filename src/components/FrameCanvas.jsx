@@ -102,8 +102,32 @@ export default function FrameCanvas({
     c.on('mouse:down', onMouseDown);
     c.wrapperEl?.addEventListener('contextmenu', blockBrowserMenu);
 
+    const onDblClick = (opt) => {
+      if (!editableRef.current) return;
+      const t = opt.target;
+      if (!t) return;
+      const isText =
+        t.glintRole === 'text' ||
+        typeof t.enterEditing === 'function' ||
+        t.type === 'i-text' ||
+        t.type === 'textbox';
+      if (!isText) return;
+      // Fabric enters editing on dblclick; force full text selection like Figma.
+      requestAnimationFrame(() => {
+        try {
+          if (typeof t.enterEditing === 'function' && !t.isEditing) t.enterEditing();
+          if (typeof t.selectAll === 'function') t.selectAll();
+          c.requestRenderAll();
+        } catch {
+          /* ignore */
+        }
+      });
+    };
+    c.on('mouse:dblclick', onDblClick);
+
     return () => {
       c.off('mouse:down', onMouseDown);
+      c.off('mouse:dblclick', onDblClick);
       c.wrapperEl?.removeEventListener('contextmenu', blockBrowserMenu);
       onCanvasReady?.(frameId, null);
       c.dispose();

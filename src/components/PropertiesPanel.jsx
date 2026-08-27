@@ -36,8 +36,8 @@ function Section({ title, children }) {
   );
 }
 
-function ColorField({ label, value, onChange }) {
-  return <ColorPicker label={label} value={value} onChange={onChange} />;
+function ColorField({ label, value, onChange, getCanvases }) {
+  return <ColorPicker label={label} value={value} onChange={onChange} getCanvases={getCanvases} />;
 }
 
 function RangeRow({ label, value, min, max, suffix = '', onChange }) {
@@ -66,6 +66,7 @@ function RangeRow({ label, value, min, max, suffix = '', onChange }) {
  */
 export default function PropertiesPanel({
   canvas,
+  getCanvases,
   background,
   onBackgroundChange,
   frame,
@@ -86,9 +87,10 @@ export default function PropertiesPanel({
     fontSize: 48,
     fill: '#FFFFFF',
     fontWeight: '700',
-    fontFamily: 'Inter',
+    fontFamily: 'Space Grotesk',
     textAlign: 'center',
   });
+  const [shapeFill, setShapeFill] = useState('#FFFFFF');
 
   useEffect(() => {
     if (!canvas) return;
@@ -112,6 +114,8 @@ export default function PropertiesPanel({
         setRightTab('graphics');
       } else if (isText) {
         setRightTab('design');
+      } else if (typeof obj.fill === 'string') {
+        setRightTab('design');
       }
 
       if (isText) {
@@ -120,9 +124,11 @@ export default function PropertiesPanel({
           fontSize: Math.round(obj.fontSize || 48),
           fill: typeof obj.fill === 'string' ? obj.fill : '#FFFFFF',
           fontWeight: String(obj.fontWeight || '400'),
-          fontFamily: (obj.fontFamily || 'Inter').replace(/,.*/, '').replace(/"/g, '').trim() || 'Inter',
+          fontFamily: (obj.fontFamily || 'Space Grotesk').replace(/,.*/, '').replace(/"/g, '').trim() || 'Space Grotesk',
           textAlign: obj.textAlign || 'center',
         });
+      } else if (typeof obj.fill === 'string') {
+        setShapeFill(obj.fill);
       }
     };
 
@@ -130,12 +136,14 @@ export default function PropertiesPanel({
     canvas.on('selection:updated', sync);
     canvas.on('selection:cleared', () => setSelection(null));
     canvas.on('object:modified', sync);
+    canvas.on('text:changed', sync);
 
     return () => {
       canvas.off('selection:created', sync);
       canvas.off('selection:updated', sync);
       canvas.off('selection:cleared');
       canvas.off('object:modified', sync);
+      canvas.off('text:changed', sync);
     };
   }, [canvas, onFrameHighlight]);
 
@@ -144,6 +152,7 @@ export default function PropertiesPanel({
     const obj = selection.obj;
     obj.set(patch);
     if (patch.fontFamily) obj.set('fontFamily', `${patch.fontFamily}, sans-serif`);
+    if (patch.fill != null) setShapeFill(patch.fill);
     obj.setCoords();
     canvas.requestRenderAll();
     setTextProps((p) => ({ ...p, ...patch }));
@@ -152,6 +161,11 @@ export default function PropertiesPanel({
   const isText = selection?.type === 'text';
   const isGraphic = selection?.obj?.glintRole === 'graphic' || selection?.type === 'graphic';
   const isDevice = selection?.obj?.glintRole === 'framed-screenshot';
+  const hasShapeFill =
+    selection?.obj &&
+    !isText &&
+    !isGraphic &&
+    typeof selection.obj.fill === 'string';
   const graphicFills = selection?.obj?.glintFills || { a: '#FF6B4A', b: '#FFD166', c: '#FFFFFF' };
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
 
@@ -181,6 +195,10 @@ export default function PropertiesPanel({
   };
 
   const patchStyle = (patch) => onScreenshotStyleChange?.(patch);
+
+  const CField = ({ label, value, onChange }) => (
+    <ColorField label={label} value={value} onChange={onChange} getCanvases={getCanvases} />
+  );
 
   return (
     <div className="h-full flex flex-col">
@@ -218,9 +236,9 @@ export default function PropertiesPanel({
             <GraphicPicker onInsert={handleInsertGraphic} />
             {isGraphic && (
               <Section title="Selected graphic colors">
-                <ColorField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
-                <ColorField label="Fill B" value={graphicFills.b || '#FFD166'} onChange={(v) => handleGraphicFill('b', v)} />
-                <ColorField label="Fill C" value={graphicFills.c || '#FFFFFF'} onChange={(v) => handleGraphicFill('c', v)} />
+                <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
+                <CField label="Fill B" value={graphicFills.b || '#FFD166'} onChange={(v) => handleGraphicFill('b', v)} />
+                <CField label="Fill C" value={graphicFills.c || '#FFFFFF'} onChange={(v) => handleGraphicFill('c', v)} />
                 <label className="space-y-1 block">
                   <span className="text-[10px] text-glint-text-tertiary">Opacity</span>
                   <input
@@ -271,7 +289,7 @@ export default function PropertiesPanel({
                 onChange={(v) => patchStyle({ strokeWidth: v })}
               />
               {(style.strokeWidth ?? 0) > 0 && (
-                <ColorField
+                <CField
                   label="Border color"
                   value={style.strokeColor}
                   onChange={(v) => patchStyle({ strokeColor: v })}
@@ -328,7 +346,7 @@ export default function PropertiesPanel({
                     suffix="%"
                     onChange={(v) => patchStyle({ shadowOpacity: v / 100 })}
                   />
-                  <ColorField
+                  <CField
                     label="Shadow color"
                     value={style.shadowColor || '#000000'}
                     onChange={(v) => patchStyle({ shadowColor: v })}
@@ -336,6 +354,25 @@ export default function PropertiesPanel({
                 </>
               )}
             </Section>
+
+            {(hasShapeFill || isGraphic) && (
+              <Section title="Selected fill">
+                {hasShapeFill && (
+                  <CField
+                    label="Fill"
+                    value={shapeFill}
+                    onChange={(v) => applyToSelection({ fill: v })}
+                  />
+                )}
+                {isGraphic && (
+                  <>
+                    <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
+                    <CField label="Fill B" value={graphicFills.b || '#FFD166'} onChange={(v) => handleGraphicFill('b', v)} />
+                    <CField label="Fill C" value={graphicFills.c || '#FFFFFF'} onChange={(v) => handleGraphicFill('c', v)} />
+                  </>
+                )}
+              </Section>
+            )}
 
             <Section title="Insert">
               <div className="flex gap-1.5">
@@ -396,7 +433,7 @@ export default function PropertiesPanel({
                     </select>
                   </label>
                 </div>
-                <ColorField
+                <CField
                   label="Fill"
                   value={textProps.fill}
                   onChange={(v) => applyToSelection({ fill: v })}

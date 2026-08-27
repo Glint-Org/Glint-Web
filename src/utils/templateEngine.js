@@ -1,4 +1,4 @@
-import { FabricImage, Rect, Text } from 'fabric';
+import { FabricImage, Rect, IText } from 'fabric';
 import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS, loadFrameBezel } from './canvasEngine';
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
@@ -187,7 +187,7 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, origi
   if (!text) return null;
 
   const alignLeft = layer.position === 'left';
-  const fb = new Text(text, {
+  const fb = new IText(text, {
     fontSize: layer.fontSize ?? 36,
     fontFamily: `${layer.fontFamily || 'Space Grotesk'}, sans-serif`,
     fontWeight: layer.fontWeight ?? 'normal',
@@ -202,6 +202,7 @@ function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, origi
 
   const pos = resolvePosition(layer.position ?? 'top', canvasW, canvasH, fb.width, fb.height, layer);
   fb.set({ left: (alignLeft ? pos.left : canvasW / 2) + originX, top: pos.top });
+  applySelectionStyle(fb);
   canvas.add(fb);
   return fb;
 }
@@ -210,13 +211,14 @@ function addBadgeLayer(canvas, layer, canvasW, editable, originX = 0) {
   const text = layer.text ?? 'NEW';
   const paddingX = layer.paddingX ?? 20;
   const paddingY = layer.paddingY ?? 12;
-  const fb = new Text(text, {
+  const fb = new IText(text, {
     fontSize: layer.fontSize ?? 20,
     fontFamily: `${layer.fontFamily || 'Space Grotesk'}, sans-serif`,
     fontWeight: layer.fontWeight ?? 'bold',
     fill: layer.color ?? '#ffffff',
     evented: editable,
     selectable: editable,
+    editable: editable,
     glintRole: 'text',
   });
 
@@ -239,13 +241,15 @@ function addBadgeLayer(canvas, layer, canvasW, editable, originX = 0) {
   const top = layer.top ?? layer.marginTop ?? 60;
   bg.set({ left, top });
   fb.set({ left: left + paddingX, top: top + paddingY });
+  applySelectionStyle(bg);
+  applySelectionStyle(fb);
   canvas.add(bg, fb);
 }
 
 function addBulletsLayer(canvas, layer, editable, originX = 0) {
   const items = layer.items ?? [];
   items.forEach((item, i) => {
-    const fb = new Text(`• ${item}`, {
+    const fb = new IText(`• ${item}`, {
       left: (layer.marginLeft ?? 80) + originX,
       top: (layer.marginTop ?? 200) + i * 48,
       fontSize: layer.fontSize ?? 28,
@@ -254,7 +258,9 @@ function addBulletsLayer(canvas, layer, editable, originX = 0) {
       evented: editable,
       selectable: editable,
       editable: editable,
+      glintRole: 'text',
     });
+    applySelectionStyle(fb);
     canvas.add(fb);
   });
 }
@@ -654,7 +660,11 @@ export function setFrameEditable(canvas, editable) {
       obj.set({ selectable: editable, evented: true });
       applyDeviceTransformLocks(obj);
     } else {
-      obj.set({ selectable: editable, evented: editable });
+      const patch = { selectable: editable, evented: editable };
+      if (obj.glintRole === 'text' || typeof obj.enterEditing === 'function') {
+        patch.editable = editable;
+      }
+      obj.set(patch);
       applySelectionStyle(obj);
     }
   });

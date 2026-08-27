@@ -765,6 +765,7 @@ export default function Editor() {
           <div className="w-[300px] h-full">
             <PropertiesPanel
               canvas={activeCanvas}
+              getCanvases={getLiveCanvases}
               background={background}
               onBackgroundChange={handleBackgroundChange}
               frame={deviceFrame}
