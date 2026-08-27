@@ -96,6 +96,14 @@
           "marginTop": 520
         },
         {
+          "type": "device",
+          "frame": "pixel9",
+          "slot": 0,
+          "scale": 0.55,
+          "position": "center",
+          "marginTop": 900
+        },
+        {
           "type": "shape",
           "shape": "rect",
           "left": 290,

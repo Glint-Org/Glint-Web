@@ -23,8 +23,14 @@ describe('frameMeta', () => {
     expect(ids).not.toContain('pixel9');
   });
 
-  it('allows only None for wear until dedicated bezels exist', () => {
-    expect(framesForStore('play/wear').map((f) => f.id)).toEqual([null]);
+  it('offers Simple Dark for Wear OS listings', () => {
+    expect(framesForStore('play/wear').map((f) => f.id)).toEqual([null, 'simple-dark']);
+  });
+
+  it('offers tablet bezels for Play tablets', () => {
+    const ids = framesForStore('play/tablet-7').map((f) => f.id);
+    expect(ids).toContain(null);
+    expect(ids).toContain('ipad-pro');
   });
 
   it('validates and resolves frames for a store', () => {

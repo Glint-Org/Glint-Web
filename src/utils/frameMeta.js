@@ -118,14 +118,14 @@ export const DEVICE_FRAME_OPTIONS = [
   { id: null, label: 'None' },
   { id: 'pixel9', label: 'Pixel 9', platforms: ['play'], formFactors: ['phone'] },
   { id: 'galaxy-s24', label: 'Galaxy', platforms: ['play'], formFactors: ['phone'] },
-  { id: 'simple-dark', label: 'Simple Dark', platforms: ['play'], formFactors: ['phone'] },
+  { id: 'simple-dark', label: 'Simple Dark', platforms: ['play'], formFactors: ['phone', 'wear'] },
   { id: 'tv', label: 'TV', platforms: ['play'], formFactors: ['tv'] },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', platforms: ['ios'], formFactors: ['iphone'] },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro', platforms: ['ios'], formFactors: ['iphone'] },
   { id: 'phone-3d', label: 'Phone Shadow', platforms: ['ios'], formFactors: ['iphone'] },
-  { id: 'ipad-pro-13', label: 'iPad Pro 13"', platforms: ['ios'], formFactors: ['ipad'] },
-  { id: 'ipad-pro', label: 'iPad Pro 11"', platforms: ['ios'], formFactors: ['ipad'] },
-  { id: 'tablet-3d', label: 'Tablet Shadow', platforms: ['ios'], formFactors: ['ipad'] },
+  { id: 'ipad-pro-13', label: 'iPad Pro 13"', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet', 'chromebook'] },
+  { id: 'ipad-pro', label: 'iPad Pro 11"', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet'] },
+  { id: 'tablet-3d', label: 'Tablet Shadow', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet'] },
 ];
 
 /** Map store target device → form factor used by DEVICE_FRAME_OPTIONS. */
@@ -153,10 +153,8 @@ export function getFrameMeta(frameId) {
 
 /**
  * Device bezels allowed for a store target (platform/device).
- * Always includes None. TV → TV + None; Wear/Chromebook/Play tablet → None only
- * until we add dedicated bezels.
- *
- * @param {{ platform?: string, device?: string } | string | null} storeOrTarget
+ * Always includes None (user can still clear chrome in Design).
+ * Play tablets / Chromebook share iPad-class bezels; Wear uses Simple Dark.
  */
 export function framesForStore(storeOrTarget) {
   let platform = null;

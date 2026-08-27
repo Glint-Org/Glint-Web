@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getTemplateSlides } from '../utils/templateEngine';
+import { bindSlideToFrameShot } from '../utils/templateDevices';
 import { getPlaceholderScreenshots } from '../utils/placeholderScreenshots';
 
 export const MIN_FRAMES = 1;
@@ -29,7 +30,7 @@ export function framesFromTemplate(template, userScreenshots = []) {
   for (let i = 0; i < count; i++) {
     frames.push({
       id: newFrameId(),
-      design: slides[i] || null,
+      design: bindSlideToFrameShot(slides[i]) || null,
       screenshotUrl: userScreenshots[i] || placeholders[i] || null,
     });
   }
@@ -134,7 +135,7 @@ export function useFrames(initialFrames) {
       for (let i = 0; i < targetCount; i++) {
         next.push({
           id: prev[i]?.id || newFrameId(),
-          design: slides[i] || null,
+          design: bindSlideToFrameShot(slides[i]) || null,
           screenshotUrl: keepUrls[i] || placeholders[i] || null,
           fabricJson: null,
           fabricRestoreKey: null,

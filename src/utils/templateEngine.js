@@ -3,6 +3,9 @@ import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformL
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
+import { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
+
+export { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
 
 const DEFAULT_WIDTH = 1080;
 const DEFAULT_HEIGHT = 1920;
@@ -298,18 +301,22 @@ function isLight(hex) {
 /**
  * Expand a single-canvas template into 5 Blink-style store slides.
  * Uses template.slides when present; otherwise derives layout variants.
+ * Every returned slide is guaranteed to include a device bezel layer.
  */
 export function getTemplateSlides(template) {
   if (!template) return [];
-  if (Array.isArray(template.slides) && template.slides.length) {
-    return template.slides.map((slide, i) => ({
-      id: slide.id || `${template.id}-frame-${i + 1}`,
-      name: slide.name || `Frame ${i + 1}`,
-      layers: slide.layers || [],
-      preview: slide.preview || null,
-    }));
-  }
-  return expandToFiveSlides(template);
+  const frameId = resolveTemplateFrame(template);
+  const canvas = template.canvas || {};
+  const raw =
+    Array.isArray(template.slides) && template.slides.length
+      ? template.slides.map((slide, i) => ({
+          id: slide.id || `${template.id}-frame-${i + 1}`,
+          name: slide.name || `Frame ${i + 1}`,
+          layers: slide.layers || [],
+          preview: slide.preview || null,
+        }))
+      : expandToFiveSlides(template);
+  return raw.map((slide) => ensureSlideHasDevice(slide, frameId, canvas));
 }
 
 function expandToFiveSlides(template) {
@@ -404,7 +411,17 @@ function expandToFiveSlides(template) {
       deviceLayer.width != null &&
       deviceLayer.height != null;
 
-    if (absShot) {
+    // Always use a bezeled device when a frame id is known (store templates).
+    if (frame && frame !== 'none') {
+      layers.push({
+        type: 'device',
+        frame,
+        slot: i % 5,
+        scale: layout.phoneScale,
+        position: 'center',
+        marginTop: layout.phoneTop,
+      });
+    } else if (absShot) {
       layers.push({
         type: 'screenshot',
         slot: i % 5,
@@ -426,7 +443,7 @@ function expandToFiveSlides(template) {
     } else {
       layers.push({
         type: 'device',
-        frame,
+        frame: frame || 'pixel9',
         slot: i % 5,
         scale: layout.phoneScale,
         position: 'center',
@@ -488,6 +505,13 @@ async function paintLayers(canvas, template, screenshotUrls, metadata, themes, e
   const canvasW = template.canvas?.width ?? DEFAULT_WIDTH;
   const canvasH = template.canvas?.height ?? DEFAULT_HEIGHT;
 
+  const shotUrl = (slotIndex) => {
+    if (!screenshotUrls) return null;
+    if (!Array.isArray(screenshotUrls)) return screenshotUrls;
+    // Per-frame paint passes a single URL; template JSON still uses pack-wide slots (0..4).
+    return screenshotUrls[slotIndex] ?? screenshotUrls[0] ?? null;
+  };
+
   for (const layer of layers) {
     switch (layer.type) {
       case 'background': {
@@ -514,14 +538,12 @@ async function paintLayers(canvas, template, screenshotUrls, metadata, themes, e
         addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX);
         break;
       case 'screenshot': {
-        const slotIndex = layer.slot ?? 0;
-        const url = Array.isArray(screenshotUrls) ? screenshotUrls[slotIndex] : screenshotUrls;
+        const url = shotUrl(layer.slot ?? 0);
         if (url) await addScreenshotLayer(canvas, url, layer, canvasW, canvasH, editable, originX);
         break;
       }
       case 'device': {
-        const slotIndex = layer.slot ?? 0;
-        const url = Array.isArray(screenshotUrls) ? screenshotUrls[slotIndex] : screenshotUrls;
+        const url = shotUrl(layer.slot ?? 0);
         if (url) await addDeviceLayer(canvas, url, { ...layer }, canvasW, canvasH, editable, originX);
         break;
       }

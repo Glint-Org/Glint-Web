@@ -32,7 +32,7 @@ export const STORE_TARGETS = {
     height: 1920,
     filename: 'tablet7_screen',
     fastlaneFolder: 'sevenInchScreenshots',
-    defaultFrame: null,
+    defaultFrame: 'ipad-pro',
   },
   'play/tablet-10': {
     id: 'play/tablet-10',
@@ -44,7 +44,7 @@ export const STORE_TARGETS = {
     height: 2560,
     filename: 'tablet10_screen',
     fastlaneFolder: 'tenInchScreenshots',
-    defaultFrame: null,
+    defaultFrame: 'ipad-pro-13',
   },
   'play/tv': {
     id: 'play/tv',
@@ -69,7 +69,7 @@ export const STORE_TARGETS = {
     height: 450,
     filename: 'wear_screen',
     fastlaneFolder: 'wearOsScreenshots',
-    defaultFrame: null,
+    defaultFrame: 'simple-dark',
     square: true,
   },
   'play/chromebook': {
@@ -82,7 +82,7 @@ export const STORE_TARGETS = {
     height: 1080,
     filename: 'chromebook_screen',
     fastlaneFolder: 'tenInchScreenshots',
-    defaultFrame: null,
+    defaultFrame: 'ipad-pro-13',
     landscape: true,
   },
   'ios/iphone': {

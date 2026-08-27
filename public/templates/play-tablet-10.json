@@ -16,7 +16,8 @@
       "Side-by-side flow",
       "Immersive reading",
       "10″ ready"
-    ]
+    ],
+    "frame": "ipad-pro-13"
   },
   "layers": [
     {
@@ -66,13 +67,12 @@
           "marginTop": 260
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "ipad-pro-13",
           "slot": 0,
-          "left": 160,
-          "top": 420,
-          "width": 1280,
-          "height": 1920,
-          "rx": 28
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 358
         }
       ]
     },
@@ -95,13 +95,12 @@
           "marginTop": 140
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "ipad-pro-13",
           "slot": 1,
-          "left": 160,
-          "top": 380,
-          "width": 1280,
-          "height": 1920,
-          "rx": 28
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 358
         }
       ]
     },
@@ -124,13 +123,12 @@
           "marginTop": 140
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "ipad-pro-13",
           "slot": 2,
-          "left": 160,
-          "top": 380,
-          "width": 1280,
-          "height": 1920,
-          "rx": 28
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 358
         }
       ]
     },
@@ -153,13 +151,12 @@
           "marginTop": 140
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "ipad-pro-13",
           "slot": 3,
-          "left": 160,
-          "top": 380,
-          "width": 1280,
-          "height": 1920,
-          "rx": 28
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 358
         }
       ]
     },
@@ -192,13 +189,12 @@
           "marginTop": 140
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "ipad-pro-13",
           "slot": 4,
-          "left": 160,
-          "top": 380,
-          "width": 1280,
-          "height": 1920,
-          "rx": 28
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 358
         }
       ]
     }

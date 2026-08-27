@@ -97,6 +97,14 @@
           "marginTop": 740
         },
         {
+          "type": "device",
+          "frame": "ipad-pro-13",
+          "slot": 0,
+          "scale": 0.55,
+          "position": "center",
+          "marginTop": 1200
+        },
+        {
           "type": "shape",
           "shape": "rect",
           "left": 550,

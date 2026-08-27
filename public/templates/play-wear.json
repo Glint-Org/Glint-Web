@@ -16,7 +16,8 @@
       "Always with you",
       "Tap to act",
       "Wear it well"
-    ]
+    ],
+    "frame": "simple-dark"
   },
   "layers": [
     {
@@ -44,13 +45,12 @@
           "marginTop": 28
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "simple-dark",
           "slot": 0,
-          "left": 85,
-          "top": 90,
-          "width": 280,
-          "height": 280,
-          "rx": 140
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 63
         }
       ]
     },
@@ -73,13 +73,12 @@
           "marginTop": 28
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "simple-dark",
           "slot": 1,
-          "left": 85,
-          "top": 90,
-          "width": 280,
-          "height": 280,
-          "rx": 140
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 63
         }
       ]
     },
@@ -102,13 +101,12 @@
           "marginTop": 28
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "simple-dark",
           "slot": 2,
-          "left": 85,
-          "top": 90,
-          "width": 280,
-          "height": 280,
-          "rx": 140
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 63
         }
       ]
     },
@@ -131,13 +129,12 @@
           "marginTop": 28
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "simple-dark",
           "slot": 3,
-          "left": 85,
-          "top": 90,
-          "width": 280,
-          "height": 280,
-          "rx": 140
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 63
         }
       ]
     },
@@ -170,13 +167,12 @@
           "marginTop": 28
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "simple-dark",
           "slot": 4,
-          "left": 85,
-          "top": 90,
-          "width": 280,
-          "height": 280,
-          "rx": 140
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 63
         }
       ]
     }

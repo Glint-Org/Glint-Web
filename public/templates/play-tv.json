@@ -99,13 +99,12 @@
           "marginLeft": 80
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "tv",
           "slot": 1,
-          "left": 620,
-          "top": 160,
-          "width": 1200,
-          "height": 780,
-          "rx": 16
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 151
         }
       ]
     },
@@ -139,13 +138,12 @@
           "marginLeft": 80
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "tv",
           "slot": 2,
-          "left": 620,
-          "top": 160,
-          "width": 1200,
-          "height": 780,
-          "rx": 16
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 151
         }
       ]
     },
@@ -169,13 +167,12 @@
           "marginLeft": 80
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "tv",
           "slot": 3,
-          "left": 620,
-          "top": 160,
-          "width": 1200,
-          "height": 780,
-          "rx": 16
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 151
         }
       ]
     },
@@ -210,13 +207,12 @@
           "marginLeft": 80
         },
         {
-          "type": "screenshot",
+          "type": "device",
+          "frame": "tv",
           "slot": 4,
-          "left": 620,
-          "top": 160,
-          "width": 1200,
-          "height": 780,
-          "rx": 16
+          "scale": 0.72,
+          "position": "center",
+          "marginTop": 151
         }
       ]
     }
