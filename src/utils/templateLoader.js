@@ -71,13 +71,39 @@ export const TEMPLATE_IDS = [
   'play-chromebook',
 ];
 
+/**
+ * Gallery visibility. Flip to true to show a pack again.
+ * JSON `"enabled": true|false` on a template overrides this map.
+ * Currently: 2 Play phone + 2 iPhone + 2 iPad.
+ */
+export const TEMPLATE_ENABLED = {
+  'glint-gold-play': true,
+  'blink-play': true,
+  'glint-gold-ios': true,
+  'blink-ios': true,
+  'glint-gold-ipad': true,
+  'blink-tablet': true,
+};
+
+/** @param {string|{id?: string, enabled?: boolean}} templateOrId */
+export function isTemplateEnabled(templateOrId) {
+  if (templateOrId && typeof templateOrId === 'object') {
+    if (typeof templateOrId.enabled === 'boolean') return templateOrId.enabled;
+    return TEMPLATE_ENABLED[templateOrId.id] === true;
+  }
+  return TEMPLATE_ENABLED[templateOrId] === true;
+}
+
 export async function loadTemplate(templateId) {
   const res = await fetch(`/templates/${templateId}.json`);
   if (!res.ok) throw new Error(`Template not found: ${templateId}`);
   return res.json();
 }
 
-export async function loadAllTemplates() {
+/**
+ * @param {{ enabledOnly?: boolean }} [opts] - gallery default hides disabled packs
+ */
+export async function loadAllTemplates({ enabledOnly = true } = {}) {
   const templates = await Promise.all(
     TEMPLATE_IDS.map(async (id) => {
       try {
@@ -87,5 +113,6 @@ export async function loadAllTemplates() {
       }
     }),
   );
-  return templates.filter(Boolean);
+  const loaded = templates.filter(Boolean);
+  return enabledOnly ? loaded.filter(isTemplateEnabled) : loaded;
 }

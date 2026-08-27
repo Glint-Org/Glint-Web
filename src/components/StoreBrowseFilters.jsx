@@ -10,7 +10,7 @@ export default function StoreBrowseFilters({
   onDeviceChange,
   size = 'md',
 }) {
-  const devices = platform && platform !== 'all' ? devicesForPlatform(platform) : [];
+  const devices = platform && platform !== 'all' ? devicesForPlatform(platform, { browse: true }) : [];
   const chip =
     size === 'sm'
       ? 'px-2 py-1 rounded-md text-[10px] font-medium'

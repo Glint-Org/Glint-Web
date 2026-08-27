@@ -125,10 +125,15 @@ export const LEGACY_STORE_ALIASES = {
 
 export const STORE_TARGET_IDS = Object.keys(STORE_TARGETS);
 
-export function devicesForPlatform(platformId) {
-  return STORE_TARGET_IDS.filter((id) => STORE_TARGETS[id].platform === platformId).map(
-    (id) => STORE_TARGETS[id],
-  );
+/** Device sizes shown in Home / TemplateGallery browse chips. */
+export const BROWSE_STORE_IDS = ['play/phone', 'ios/iphone', 'ios/ipad'];
+
+export function devicesForPlatform(platformId, { browse = false } = {}) {
+  return STORE_TARGET_IDS.filter((id) => {
+    if (STORE_TARGETS[id].platform !== platformId) return false;
+    if (browse && !BROWSE_STORE_IDS.includes(id)) return false;
+    return true;
+  }).map((id) => STORE_TARGETS[id]);
 }
 
 /** Normalize any store string to a canonical catalog id. */

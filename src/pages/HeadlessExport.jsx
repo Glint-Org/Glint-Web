@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { loadAllTemplates, loadThemePresets } from '../utils/templateLoader';
+import { loadAllTemplates, loadThemePresets, loadTemplate } from '../utils/templateLoader';
 import { framesFromTemplate } from '../hooks/useFrames';
 import { applyDesignToFrame } from '../utils/templateEngine';
 import { createCanvas } from '../utils/canvasEngine';
@@ -38,8 +38,13 @@ export default function HeadlessExport() {
       try {
         setStatus('Loading template…');
         const themes = await loadThemePresets();
-        const templates = await loadAllTemplates();
-        const template = templates.find((t) => t.id === templateId) || templates[0];
+        let template;
+        try {
+          template = await loadTemplate(templateId);
+        } catch {
+          const templates = await loadAllTemplates({ enabledOnly: false });
+          template = templates.find((t) => t.id === templateId) || templates[0];
+        }
         if (!template) throw new Error(`Template not found: ${templateId}`);
 
         const store = resolveStoreKey(template.store || 'play/phone');

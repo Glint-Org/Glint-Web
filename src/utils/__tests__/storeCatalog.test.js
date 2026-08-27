@@ -59,6 +59,16 @@ describe('storeCatalog', () => {
     expect(ios.map((d) => d.id)).toEqual(['ios/iphone', 'ios/ipad']);
   });
 
+  it('limits browse devices to phone / iPhone / iPad', () => {
+    expect(devicesForPlatform('play', { browse: true }).map((d) => d.id)).toEqual([
+      'play/phone',
+    ]);
+    expect(devicesForPlatform('ios', { browse: true }).map((d) => d.id)).toEqual([
+      'ios/iphone',
+      'ios/ipad',
+    ]);
+  });
+
   it('builds export labels with canvas override size', () => {
     expect(storeExportLabel('play/phone')).toContain('1080×1920');
     expect(storeExportLabel('ios/ipad', { width: 100, height: 200 })).toBe(
