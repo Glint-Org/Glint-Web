@@ -42,7 +42,6 @@ export function applyChromeShadow(obj, style = {}) {
   const merged = { ...DEFAULT_SCREENSHOT_STYLE, ...(obj.glintChrome || {}), ...style };
   obj.set('shadow', buildChromeShadow(merged));
   obj.set({ glintChrome: merged });
-  obj.setCoords?.();
   obj.canvas?.requestRenderAll?.();
   return obj;
 }
@@ -225,7 +224,6 @@ function applyOuterBorderStroke(group, chrome = {}) {
     height: contentH + pad * 2,
   });
   border?.setCoords?.();
-  group.setCoords?.();
   return true;
 }
 
@@ -370,10 +368,11 @@ export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
     height: targetH + pad * 2,
   });
 
-  applyChromeShadow(group, style);
   applyDeviceTransformLocks(group);
 
   canvas.add(group);
+  // Apply shadow AFTER canvas.add — same reason as addFramedScreenshot.
+  applyChromeShadow(group, style);
   canvas.requestRenderAll();
   return group;
 }
@@ -427,7 +426,6 @@ export async function stripDeviceFrame(group, style = {}) {
     glintScreenshotUrl: screenshotUrl,
   });
   applyDeviceTransformLocks(next);
-  next.setCoords?.();
 
   canvas.remove(group);
   group.dispose?.();
@@ -436,7 +434,8 @@ export async function stripDeviceFrame(group, style = {}) {
 }
 
 /**
- * Update outward chrome border (no bitmap rebuild). Works for bare + framed devices.
+ * Apply screenshot chrome. Cheap path for shadow/stroke; rebuild when radius or
+ * status-bar chrome (or forceRebuild) requires a new cover-fill bitmap.
  */
 function applyBareBorderStroke(group, chrome) {
   return applyOuterBorderStroke(group, chrome);
@@ -525,7 +524,6 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
     glintScreenshotUrl: screenshotUrl,
   });
   applyDeviceTransformLocks(next);
-  next.setCoords?.();
 
   canvas.remove(group);
   group.dispose?.();
@@ -698,7 +696,6 @@ function placeGroupAtCenter(group, cx, cy) {
     originX: 'left',
     originY: 'top',
   });
-  group.setCoords?.();
 }
 
 /**
@@ -915,9 +912,11 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
   });
 
   applyDeviceTransformLocks(group);
-  applyChromeShadow(group, chrome);
 
   canvas.add(group);
+  // Apply shadow AFTER canvas.add — Fabric calls setCoords() on add, and setting
+  // shadow before that makes the bounding rect grow, shifting the group position.
+  applyChromeShadow(group, chrome);
   canvas.requestRenderAll();
   return group;
 }
