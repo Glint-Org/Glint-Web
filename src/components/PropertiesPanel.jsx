@@ -351,27 +351,31 @@ export default function PropertiesPanel({
         {rightTab === 'design' && (
           <>
             <Section title="Screenshot chrome">
-              <RangeRow
-                label="Corner radius"
-                value={style.cornerRadius ?? 0}
-                min={0}
-                max={80}
-                onChange={(v) => patchStyle({ cornerRadius: v })}
-              />
-              <RangeRow
-                label="Border width"
-                value={style.strokeWidth ?? 0}
-                min={0}
-                max={24}
-                suffix="px"
-                onChange={(v) => patchStyle({ strokeWidth: v })}
-              />
-              {(style.strokeWidth ?? 0) > 0 && (
-                <CField
-                  label="Border color"
-                  value={style.strokeColor}
-                  onChange={(v) => patchStyle({ strokeColor: v })}
-                />
+              {selection?.type !== 'framed-screenshot' && (
+                <>
+                  <RangeRow
+                    label="Corner radius"
+                    value={style.cornerRadius ?? 0}
+                    min={0}
+                    max={80}
+                    onChange={(v) => patchStyle({ cornerRadius: v })}
+                  />
+                  <RangeRow
+                    label="Border width"
+                    value={style.strokeWidth ?? 0}
+                    min={0}
+                    max={24}
+                    suffix="px"
+                    onChange={(v) => patchStyle({ strokeWidth: v })}
+                  />
+                  {(style.strokeWidth ?? 0) > 0 && (
+                    <CField
+                      label="Border color"
+                      value={style.strokeColor}
+                      onChange={(v) => patchStyle({ strokeColor: v })}
+                    />
+                  )}
+                </>
               )}
 
               <label className="flex items-center justify-between gap-2 py-0.5">

@@ -639,6 +639,8 @@ export function applyDeviceTransformLocks(group) {
     lockRotation: false,
     lockMovementX: false,
     lockMovementY: false,
+    hasControls: false,
+    borderColor: 'transparent',
   });
   group.setControlsVisibility?.({
     mt: false,
