@@ -118,7 +118,7 @@ export const DEVICE_FRAME_OPTIONS = [
   { id: null, label: 'None' },
   { id: 'pixel9', label: 'Pixel 9', platforms: ['play'], formFactors: ['phone'] },
   { id: 'galaxy-s24', label: 'Galaxy', platforms: ['play'], formFactors: ['phone'] },
-  { id: 'simple-dark', label: 'Simple Dark', platforms: ['play'], formFactors: ['phone', 'wear'] },
+  { id: 'simple-dark', label: 'Simple Dark', platforms: ['play'], formFactors: ['wear'] },
   { id: 'tv', label: 'TV', platforms: ['play'], formFactors: ['tv'] },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', platforms: ['ios'], formFactors: ['iphone'] },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro', platforms: ['ios'], formFactors: ['iphone'] },

@@ -16,7 +16,6 @@ describe('statusBar', () => {
     expect(statusBarKindForFrame('ipad-pro-13')).toBe('ipados');
     expect(statusBarKindForFrame('tablet-3d')).toBe('ipados');
     expect(statusBarKindForFrame('pixel9')).toBe('android');
-    expect(statusBarKindForFrame('simple-dark')).toBe('android');
   });
 
   it('enables Dynamic Island only on modern iPhone frames', () => {

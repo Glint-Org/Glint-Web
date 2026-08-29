@@ -6,7 +6,6 @@ const ICONS = {
   null: Minus,
   pixel9: Smartphone,
   'galaxy-s24': Smartphone,
-  'simple-dark': Smartphone,
   tv: Tv,
   'iphone16-pro-max': Smartphone,
   'iphone16-pro': Smartphone,
