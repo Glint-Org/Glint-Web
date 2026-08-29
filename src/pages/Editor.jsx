@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  ZoomIn, ZoomOut, RotateCcw, Type, Trash2, Download,
+  ZoomIn, ZoomOut, RotateCcw, Type, Trash2, Download, Upload,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -37,6 +37,7 @@ import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
 import { restoreCachedScreenshots } from '../utils/screenshotStore';
+import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
@@ -107,6 +108,7 @@ export default function Editor() {
   const styleApplyGenRef = useRef(0);
   const [activeCanvas, setActiveCanvas] = useState(null);
   const deviceFileRef = useRef(null);
+  const glintFileRef = useRef(null);
   const boardRef = useRef(null);
   const bridge = useGLINTBridge();
   const { theme, toggle } = useTheme();
@@ -459,6 +461,40 @@ export default function Editor() {
     markDirty();
   };
 
+  const handleGlintFileImport = async (file) => {
+    if (!file || !isGlintFile(file)) {
+      alert('Not a valid .glint file');
+      return;
+    }
+    try {
+      const pack = await parseGlint(file);
+      handleProjectImport(pack);
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert(`Import failed: ${err.message || err}`);
+    }
+  };
+
+  const handleGlintFileInput = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleGlintFileImport(file);
+    e.target.value = '';
+  };
+
+  const handleGlintDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer?.files?.[0];
+    if (file && isGlintFile(file)) {
+      handleGlintFileImport(file);
+    }
+  }, []);
+
+  const handleGlintDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
   const swapFrameDevices = async (index, url) => {
     updateFrame(index, { screenshotUrl: url });
     const frame = frames[index];
@@ -722,7 +758,11 @@ export default function Editor() {
         </div>
       </header>
 
-      <div className="flex-1 min-h-0 relative overflow-hidden">
+      <div
+        className="flex-1 min-h-0 relative overflow-hidden"
+        onDrop={handleGlintDrop}
+        onDragOver={handleGlintDragOver}
+      >
         <main ref={boardRef} className="absolute inset-0 overflow-hidden bg-glint-bg">
           <FrameBoard
             frames={frames}
@@ -816,6 +856,20 @@ export default function Editor() {
                       Import
                     </h3>
                     <UploadZone onUpload={handleUpload} compact />
+                    <button
+                      onClick={() => glintFileRef.current?.click()}
+                      className="w-full px-3 py-1.5 border border-glint-border rounded-lg text-xs text-glint-text-secondary hover:text-glint-text hover:border-glint-accent transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Upload size={12} />
+                      Import .glint
+                    </button>
+                    <input
+                      ref={glintFileRef}
+                      type="file"
+                      accept=".glint,.glintpack,.glint.zip"
+                      onChange={handleGlintFileInput}
+                      className="hidden"
+                    />
                   </div>
                   <SessionImporter
                     onImport={handleSessionImport}

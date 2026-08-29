@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Upload } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
 import { loadAllTemplates, filterVisibleTemplates, browseFilterId } from '../utils/templateLoader';
 import TemplateSetPreview from '../components/TemplateSetPreview';
 import StoreBrowseFilters from '../components/StoreBrowseFilters';
+import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 export default function Home() {
   const [templates, setTemplates] = useState([]);
@@ -37,6 +38,28 @@ export default function Home() {
 
   const handleProjectImport = (pack) => {
     navigate('/editor', { state: { glintPack: pack } });
+  };
+
+  const glintFileRef = useRef(null);
+
+  const handleGlintFileImport = async (file) => {
+    if (!file || !isGlintFile(file)) {
+      alert('Not a valid .glint file');
+      return;
+    }
+    try {
+      const pack = await parseGlint(file);
+      navigate('/editor', { state: { glintPack: pack } });
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert(`Import failed: ${err.message || err}`);
+    }
+  };
+
+  const handleGlintFileInput = (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleGlintFileImport(file);
+    e.target.value = '';
   };
 
   const handleStartFromTemplate = (template) => {
@@ -142,24 +165,36 @@ export default function Home() {
             <h3 className="text-2xl font-bold text-glint-text">Or start from your screenshots</h3>
             <p className="text-glint-text-secondary">Upload PNGs or import a Capture / Bridge session folder.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div className="glint-card rounded-2xl p-6">
-              <h4 className="font-semibold text-glint-text mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-glint-accent-muted text-glint-accent text-xs flex items-center justify-center font-bold">1</span>
-                Upload Screenshots
-              </h4>
+              <h4 className="font-semibold text-glint-text mb-4">Upload Screenshots</h4>
               <UploadZone onUpload={handleUpload} />
             </div>
             <div className="glint-card rounded-2xl p-6">
-              <h4 className="font-semibold text-glint-text mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-glint-accent-muted text-glint-accent text-xs flex items-center justify-center font-bold">2</span>
-                Import session folder
-              </h4>
+              <h4 className="font-semibold text-glint-text mb-4">Import session folder</h4>
               <SessionImporter
                 onImport={handleSessionImport}
                 onProjectImport={handleProjectImport}
               />
-              <p className="text-xs text-glint-text-tertiary mt-3">Folder with session.json + PNGs from glint capture or Bridge</p>
+              <p className="text-xs text-glint-text-tertiary mt-3">session.json + PNGs from Capture or Bridge</p>
+            </div>
+            <div className="glint-card rounded-2xl p-6">
+              <h4 className="font-semibold text-glint-text mb-4">Open .glint project</h4>
+              <button
+                onClick={() => glintFileRef.current?.click()}
+                className="w-full px-4 py-3 border-2 border-dashed border-glint-border rounded-xl text-sm text-glint-text-secondary hover:text-glint-text hover:border-glint-accent transition-colors flex items-center justify-center gap-2"
+              >
+                <Upload size={16} />
+                Import .glint file
+              </button>
+              <input
+                ref={glintFileRef}
+                type="file"
+                accept=".glint,.glintpack,.glint.zip"
+                onChange={handleGlintFileInput}
+                className="hidden"
+              />
+              <p className="text-xs text-glint-text-tertiary mt-3">Resume editing from a saved .glint project</p>
             </div>
           </div>
         </section>

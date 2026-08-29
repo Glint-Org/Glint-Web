@@ -1,26 +1,38 @@
 /**
- * Glint project pack (.glintpack) — editable round-trip between Web and View.
+ * Glint project pack — time-capsule round-trip for the editor.
+ *
+ * .glint format:
+ *   [GLINT magic 5B][version 1B][ZIP payload]
  *
  * ZIP layout:
- *   project.json
- *   assets/shots/frame-N.png          raw device screenshots
- *   assets/previews/frame-N.png       rendered store frames (View + QA)
- *   assets/fabric/frame-N/*.png       bitmaps extracted from Fabric JSON
- *
- * Store PNG ZIP stays separate (Play/App Store delivery).
- * View session JSON stays separate (rendered data: handoff).
+ *   project.json                  metadata + editor state
+ *   assets/screenshots/frame-N.png   embedded raw screenshots
+ *   assets/previews/frame-N.png      rendered store frames
+ *   assets/fabric/frame-N/*.png      bitmaps extracted from Fabric JSON
+ *   canvas/frame-N.json              full Fabric canvas JSON
  */
 
 import JSZip from 'jszip';
 import { GLINT_CLONE_PROPS } from './glintCloneProps';
 
-export const GLINTPACK_FORMAT = 'glintpack';
-export const GLINTPACK_VERSION = 1;
-export const GLINTPACK_EXT = '.glintpack';
+export const GLINT_FORMAT = 'glint';
+export const GLINT_VERSION = 1;
+export const GLINT_EXT = '.glint';
+export const GLINT_MAGIC = new Uint8Array([0x47, 0x4C, 0x49, 0x4E, 0x54]); // "GLINT"
 
-export function glintPackFileName() {
-  return `Glint-ss${GLINTPACK_EXT}`;
+/** @deprecated Use GLINT_EXT */
+export const GLINTPACK_EXT = GLINT_EXT;
+/** @deprecated Use GLINT_FORMAT */
+export const GLINTPACK_FORMAT = GLINT_FORMAT;
+/** @deprecated Use GLINT_VERSION */
+export const GLINTPACK_VERSION = GLINT_VERSION;
+
+export function glintFileName() {
+  return `Glint-ss${GLINT_EXT}`;
 }
+
+/** @deprecated Use glintFileName */
+export const glintPackFileName = glintFileName;
 
 function dataUrlToBase64(dataUrl) {
   if (!dataUrl || typeof dataUrl !== 'string') return null;
@@ -64,9 +76,10 @@ function canvasToJson(canvas) {
 }
 
 /**
- * Build a .glintpack Blob from live editor state.
+ * Build a .glint Blob from live editor state.
+ * Format: [GLINT magic 5B][version 1B][ZIP payload]
  */
-export async function buildGlintPackBlob({
+export async function buildGlintBlob({
   frames = [],
   liveCanvases = [],
   template = null,
@@ -79,21 +92,25 @@ export async function buildGlintPackBlob({
 } = {}) {
   const zip = new JSZip();
   const assets = zip.folder('assets');
-  const shots = assets.folder('shots');
+  const screenshots = assets.folder('screenshots');
   const previews = assets.folder('previews');
   const fabricRoot = assets.folder('fabric');
+  const canvasFolder = zip.folder('canvas');
 
   const packFrames = [];
 
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
     const canvas = liveCanvases[i] || null;
-    const shotPath = `assets/shots/frame-${i}.png`;
+    const shotPath = `assets/screenshots/frame-${i}.png`;
     const previewPath = `assets/previews/frame-${i}.png`;
+    const canvasPath = `canvas/frame-${i}.json`;
 
+    // Embed screenshot as PNG
     const shotB64 = await urlToPngBase64(frame.screenshotUrl);
-    if (shotB64) shots.file(`frame-${i}.png`, shotB64, { base64: true });
+    if (shotB64) screenshots.file(`frame-${i}.png`, shotB64, { base64: true });
 
+    // Embed preview render as PNG
     let previewB64 = dataUrlToBase64(previewDataUrls[i]);
     if (!previewB64 && canvas?.toDataURL) {
       try {
@@ -106,9 +123,12 @@ export async function buildGlintPackBlob({
     }
     if (previewB64) previews.file(`frame-${i}.png`, previewB64, { base64: true });
 
+    // Capture full Fabric canvas JSON
     let fabric = canvasToJson(canvas);
     if (fabric) {
       fabric = JSON.parse(JSON.stringify(fabric));
+
+      // Extract embedded images from Fabric objects
       const frameFolder = fabricRoot.folder(`frame-${i}`);
       let imgIdx = 0;
       const extractSrc = async (obj) => {
@@ -131,6 +151,8 @@ export async function buildGlintPackBlob({
       });
       if (fabric.backgroundImage) jobs.push(extractSrc(fabric.backgroundImage));
       await Promise.all(jobs);
+
+      // Rewrite screenshot URLs to asset paths
       if (shotB64) {
         walkFabricObjects(fabric.objects, (obj) => {
           if (obj.glintRole === 'framed-screenshot' || obj.glintRole === 'screenshot') {
@@ -140,6 +162,9 @@ export async function buildGlintPackBlob({
           }
         });
       }
+
+      // Save full canvas JSON
+      canvasFolder.file(`frame-${i}.json`, JSON.stringify(fabric, null, 2));
     }
 
     packFrames.push({
@@ -148,12 +173,13 @@ export async function buildGlintPackBlob({
       preview: previewB64 ? previewPath : null,
       design: frame.design || null,
       fabric,
+      canvas: canvasPath,
     });
   }
 
   const project = {
-    format: GLINTPACK_FORMAT,
-    schemaVersion: GLINTPACK_VERSION,
+    format: GLINT_FORMAT,
+    schemaVersion: GLINT_VERSION,
     store: store || 'play/phone',
     exportedAt: new Date().toISOString(),
     editor: {
@@ -174,12 +200,25 @@ export async function buildGlintPackBlob({
   };
 
   zip.file('project.json', JSON.stringify(project, null, 2));
-  return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+
+  // Generate ZIP payload as arraybuffer
+  const zipArrayBuffer = await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+  const zipBytes = new Uint8Array(zipArrayBuffer);
+
+  // Build .glint binary: [MAGIC 5B][VERSION 1B][ZIP]
+  const header = new Uint8Array(6);
+  header.set(GLINT_MAGIC, 0);
+  header[5] = GLINT_VERSION;
+
+  return new Blob([header, zipBytes], { type: 'application/octet-stream' });
 }
 
-export async function downloadGlintPack(blob) {
+/** @deprecated Use buildGlintBlob */
+export const buildGlintPackBlob = buildGlintBlob;
+
+export async function downloadGlint(blob) {
   const link = document.createElement('a');
-  link.download = glintPackFileName();
+  link.download = glintFileName();
   link.href = URL.createObjectURL(blob);
   document.body.appendChild(link);
   link.click();
@@ -187,19 +226,70 @@ export async function downloadGlintPack(blob) {
   URL.revokeObjectURL(link.href);
 }
 
+/** @deprecated Use downloadGlint */
+export const downloadGlintPack = downloadGlint;
+
 /**
- * Parse a .glintpack (or zip containing project.json) File/Blob/ArrayBuffer.
+ * Check if a Uint8Array starts with the GLINT magic header.
+ */
+export function isGlintMagic(bytes) {
+  if (!bytes || bytes.length < 5) return false;
+  return (
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x4C &&
+    bytes[2] === 0x49 &&
+    bytes[3] === 0x4E &&
+    bytes[4] === 0x54
+  );
+}
+
+/**
+ * Parse a .glint file (magic header + ZIP).
+ * Falls back to raw ZIP for backward compatibility with .glintpack.
  * Returns restored editor payload with blob: URLs.
  */
-export async function parseGlintPack(input) {
-  const zip = await JSZip.loadAsync(input);
+async function readBlobAsArrayBuffer(blob) {
+  if (blob.arrayBuffer) return blob.arrayBuffer();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+export async function parseGlint(input) {
+  let buffer;
+
+  if (input instanceof Blob) {
+    buffer = await readBlobAsArrayBuffer(input);
+  } else if (input instanceof ArrayBuffer) {
+    buffer = input;
+  } else if (input?.buffer instanceof ArrayBuffer) {
+    buffer = input.buffer;
+  } else {
+    throw new Error('Invalid input: expected Blob or ArrayBuffer');
+  }
+
+  const bytes = new Uint8Array(buffer);
+
+  let zipInput;
+  if (isGlintMagic(bytes)) {
+    // .glint format: skip 6-byte header
+    zipInput = buffer.slice(6);
+  } else {
+    // Legacy .glintpack or raw ZIP
+    zipInput = buffer;
+  }
+
+  const zip = await JSZip.loadAsync(zipInput);
   const projectFile = zip.file('project.json');
   if (!projectFile) {
-    throw new Error('Not a Glint project pack (missing project.json)');
+    throw new Error('Not a Glint file (missing project.json)');
   }
   const project = JSON.parse(await projectFile.async('string'));
-  if (project.format && project.format !== GLINTPACK_FORMAT) {
-    throw new Error(`Unsupported pack format: ${project.format}`);
+  if (project.format && project.format !== GLINT_FORMAT && project.format !== 'glintpack') {
+    throw new Error(`Unsupported format: ${project.format}`);
   }
 
   const blobUrlFor = async (relPath) => {
@@ -259,7 +349,7 @@ export async function parseGlintPack(input) {
   }
 
   return {
-    kind: 'glintpack',
+    kind: GLINT_FORMAT,
     project,
     frames,
     screenshots,
@@ -275,8 +365,14 @@ export async function parseGlintPack(input) {
   };
 }
 
-export function isGlintPackFile(file) {
+/** @deprecated Use parseGlint */
+export const parseGlintPack = parseGlint;
+
+export function isGlintFile(file) {
   if (!file?.name) return false;
   const n = file.name.toLowerCase();
-  return n.endsWith('.glintpack') || n.endsWith('.glint.zip');
+  return n.endsWith('.glint') || n.endsWith('.glintpack') || n.endsWith('.glint.zip');
 }
+
+/** @deprecated Use isGlintFile */
+export const isGlintPackFile = isGlintFile;

@@ -3,7 +3,7 @@ import FrameExport from './FrameExport';
 import QRExporter from './QRExporter';
 import ExportManager from './ExportManager';
 import { storeExportLabel } from '../utils/exportHelper';
-import { buildGlintPackBlob, downloadGlintPack } from '../utils/projectPack';
+import { buildGlintBlob, downloadGlint } from '../utils/projectPack';
 
 /**
  * Export panel — store size is locked to the selected template.
@@ -33,11 +33,11 @@ export default function ExportPanel({
     template?.canvas || { width: canvasWidth, height: canvasHeight },
   );
 
-  const handleDownloadPack = async () => {
+  const handleDownloadGlint = async () => {
     setPacking(true);
     try {
       const live = getLiveCanvases?.() || [];
-      const blob = await buildGlintPackBlob({
+      const blob = await buildGlintBlob({
         frames,
         liveCanvases: live,
         template,
@@ -48,10 +48,10 @@ export default function ExportPanel({
         fontFamily,
         previewDataUrls: exportedUrls,
       });
-      await downloadGlintPack(blob);
+      await downloadGlint(blob);
     } catch (err) {
       console.error(err);
-      alert(`Project pack failed: ${err.message || err}`);
+      alert(`Export failed: ${err.message || err}`);
     } finally {
       setPacking(false);
     }
@@ -69,10 +69,10 @@ export default function ExportPanel({
       <button
         type="button"
         disabled={packing || !frames?.length}
-        onClick={handleDownloadPack}
+        onClick={handleDownloadGlint}
         className="w-full px-3 py-2 glint-btn-primary rounded-lg text-xs disabled:opacity-50"
       >
-        {packing ? 'Building…' : 'Download .glintpack'}
+        {packing ? 'Building…' : 'Download .glint'}
       </button>
 
       <FrameExport
