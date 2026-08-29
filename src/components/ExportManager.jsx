@@ -17,7 +17,6 @@ export default function ExportManager({
   screenshotStyle,
   textOverlay,
   exportPreset = 'play/phone',
-  appName = '',
 }) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState('');
@@ -56,7 +55,7 @@ export default function ExportManager({
         }
       }
       const filenames = buildExportFilenames(payloads.length, { format });
-      await downloadBatchZip(payloads, filenames, zipFileName(appName, format));
+      await downloadBatchZip(payloads, filenames, `Glint-ss.zip`);
       setProgress(`Exported ${payloads.length} ${format.toUpperCase()} file(s) as ZIP`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);

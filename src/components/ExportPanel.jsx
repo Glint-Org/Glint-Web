@@ -12,11 +12,7 @@ export default function ExportPanel({
   frames,
   getLiveCanvases,
   exportPreset,
-  appName,
-  setAppName,
-  tagline,
-  setTagline,
-  setTextOverlay,
+  setExportPreset,
   themes,
   canvasWidth,
   canvasHeight,
@@ -45,8 +41,6 @@ export default function ExportPanel({
         frames,
         liveCanvases: live,
         template,
-        appName,
-        tagline,
         store: exportPreset,
         background,
         deviceFrame,
@@ -54,7 +48,7 @@ export default function ExportPanel({
         fontFamily,
         previewDataUrls: exportedUrls,
       });
-      await downloadGlintPack(blob, appName);
+      await downloadGlintPack(blob);
     } catch (err) {
       console.error(err);
       alert(`Project pack failed: ${err.message || err}`);
@@ -67,25 +61,8 @@ export default function ExportPanel({
     <div className="space-y-5">
       <div className="space-y-1.5">
         <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
-          Metadata
+          Export
         </h3>
-        <input
-          type="text"
-          placeholder="App name"
-          value={appName}
-          onChange={(e) => setAppName(e.target.value)}
-          className="w-full px-2.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-bg text-glint-text"
-        />
-        <input
-          type="text"
-          placeholder="Tagline"
-          value={tagline}
-          onChange={(e) => {
-            setTagline(e.target.value);
-            setTextOverlay((p) => ({ ...p, text: e.target.value }));
-          }}
-          className="w-full px-2.5 py-1.5 border border-glint-border rounded-lg text-xs bg-glint-bg text-glint-text"
-        />
         <p className="text-[11px] text-glint-text-secondary px-0.5">{sizeLabel}</p>
       </div>
 
@@ -102,7 +79,6 @@ export default function ExportPanel({
         frames={frames}
         getLiveCanvases={getLiveCanvases}
         exportPreset={exportPreset}
-        appName={appName}
         themes={themes}
         canvasWidth={canvasWidth}
         canvasHeight={canvasHeight}
@@ -117,7 +93,6 @@ export default function ExportPanel({
           frame={deviceFrame}
           screenshotStyle={screenshotStyle}
           textOverlay={textOverlay}
-          appName={appName}
           exportPreset={exportPreset}
         />
       )}
@@ -125,8 +100,6 @@ export default function ExportPanel({
       <QRExporter
         session={{
           ...(session ?? {}),
-          app: appName || session?.app || 'My App',
-          tagline: tagline ?? session?.tagline ?? '',
           store: exportPreset,
         }}
         exportedUrls={exportedUrls}

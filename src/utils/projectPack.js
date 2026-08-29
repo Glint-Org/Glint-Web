@@ -18,17 +18,8 @@ export const GLINTPACK_FORMAT = 'glintpack';
 export const GLINTPACK_VERSION = 1;
 export const GLINTPACK_EXT = '.glintpack';
 
-function slugApp(appName) {
-  const slug = String(appName || '')
-    .trim()
-    .replace(/[^\w\s-]+/g, '')
-    .replace(/\s+/g, '-')
-    .slice(0, 48);
-  return slug || 'glint-project';
-}
-
-export function glintPackFileName(appName) {
-  return `${slugApp(appName)}${GLINTPACK_EXT}`;
+export function glintPackFileName() {
+  return `Glint-ss${GLINTPACK_EXT}`;
 }
 
 function dataUrlToBase64(dataUrl) {
@@ -79,8 +70,6 @@ export async function buildGlintPackBlob({
   frames = [],
   liveCanvases = [],
   template = null,
-  appName = 'My App',
-  tagline = '',
   store = 'play/phone',
   background = null,
   deviceFrame = null,
@@ -165,8 +154,6 @@ export async function buildGlintPackBlob({
   const project = {
     format: GLINTPACK_FORMAT,
     schemaVersion: GLINTPACK_VERSION,
-    app: appName || 'My App',
-    tagline: tagline || '',
     store: store || 'play/phone',
     exportedAt: new Date().toISOString(),
     editor: {
@@ -190,9 +177,9 @@ export async function buildGlintPackBlob({
   return zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
 }
 
-export async function downloadGlintPack(blob, appName) {
+export async function downloadGlintPack(blob) {
   const link = document.createElement('a');
-  link.download = glintPackFileName(appName);
+  link.download = glintPackFileName();
   link.href = URL.createObjectURL(blob);
   document.body.appendChild(link);
   link.click();
@@ -278,8 +265,6 @@ export async function parseGlintPack(input) {
     screenshots,
     previews,
     session: {
-      app: project.app,
-      tagline: project.tagline,
       store: project.store,
       version: '1.0',
       exportedAt: project.exportedAt,

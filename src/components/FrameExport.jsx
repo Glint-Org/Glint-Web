@@ -16,7 +16,6 @@ export default function FrameExport({
   frames,
   getLiveCanvases,
   exportPreset = 'play/phone',
-  appName = '',
   themes = {},
   canvasWidth = 1080,
   canvasHeight = 1920,
@@ -107,7 +106,7 @@ export default function FrameExport({
       const results = await renderFrames(format);
       if (format === 'png') publishPreviews(results);
       const filenames = buildExportFilenames(results.length, { format });
-      await downloadBatchZip(results, filenames, zipFileName(appName, format));
+      await downloadBatchZip(results, filenames, `Glint-ss.zip`);
       setProgress(
         `Exported ${results.length} ${format.toUpperCase()} file(s) as ZIP (${preset.label})`,
       );

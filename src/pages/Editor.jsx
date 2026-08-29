@@ -76,8 +76,6 @@ export default function Editor() {
   const [screenshotStyle, setScreenshotStyle] = useState({ ...DEFAULT_SCREENSHOT_STYLE });
   const [template, setTemplate] = useState(initialTemplate);
   const [textOverlay, setTextOverlay] = useState({ text: '', style: {} });
-  const [appName, setAppName] = useState(session?.app ?? '');
-  const [tagline, setTagline] = useState(session?.tagline ?? '');
   const [exportPreset, setExportPreset] = useState(
     resolveStoreKey(session?.store ?? initialTemplate?.store ?? 'play/phone'),
   );
@@ -394,13 +392,13 @@ export default function Editor() {
 
   const handleAddText = useCallback(() => {
     if (!activeCanvas) return;
-    addTextOverlay(activeCanvas, tagline || 'Your headline', {
+    addTextOverlay(activeCanvas, 'Your headline', {
       fill: background?.type === 'solid' && isLight(background.value) ? '#1A1A1A' : '#FFFFFF',
       fontFamily,
       fontSize: 48,
     });
     markDirty();
-  }, [activeCanvas, tagline, background, fontFamily, markDirty]);
+  }, [activeCanvas, background, fontFamily, markDirty]);
 
   const handleDelete = useCallback(() => {
     if (!activeCanvas) return;
@@ -410,8 +408,6 @@ export default function Editor() {
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
-    setAppName(importedSession.app ?? '');
-    setTagline(importedSession.tagline ?? '');
     setExportPreset(resolveStoreKey(importedSession.store ?? 'play/phone'));
     mapScreenshots(imported);
     markDirty();
@@ -419,8 +415,6 @@ export default function Editor() {
 
   const handleProjectImport = (pack) => {
     setSession(pack.session);
-    setAppName(pack.session?.app ?? '');
-    setTagline(pack.session?.tagline ?? '');
     setExportPreset(resolveStoreKey(pack.session?.store ?? 'play/phone'));
     if (pack.editor?.background) setBackgroundState(pack.editor.background);
     if (pack.editor?.deviceFrame !== undefined) {
@@ -863,11 +857,7 @@ export default function Editor() {
                   frames={frames}
                   getLiveCanvases={getLiveCanvases}
                   exportPreset={exportPreset}
-                  appName={appName}
-                  setAppName={setAppName}
-                  tagline={tagline}
-                  setTagline={setTagline}
-                  setTextOverlay={setTextOverlay}
+                  setExportPreset={setExportPreset}
                   themes={themes}
                   canvasWidth={canvasW}
                   canvasHeight={canvasH}

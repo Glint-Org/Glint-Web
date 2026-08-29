@@ -71,10 +71,8 @@ export async function buildZipBlob(payloads, filenames) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-export function generateSessionJson(screens, appName, tagline, store = 'play/phone', extra = {}) {
+export function generateSessionJson(screens, store = 'play/phone', extra = {}) {
   return JSON.stringify({
-    app: appName,
-    tagline,
     screens,
     store: resolveStoreKey(store),
     version: '1.0',

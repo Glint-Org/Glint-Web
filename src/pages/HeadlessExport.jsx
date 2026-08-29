@@ -14,14 +14,14 @@ import {
 
 /**
  * Headless / agent export page.
- * Query: ?template=blink-play&app=MyApp
+ * Query: ?template=blink-play
  * PostMessage or window.__GLINT_HEADLESS__ with { screenshots: string[] } (data URLs or http URLs).
  * Sets window.__GLINT_EXPORT_READY__ = { ok, zipBase64, filenames, error }.
  */
 export default function HeadlessExport() {
   const [params] = useSearchParams();
   const templateId = params.get('template') || 'blink-play';
-  const appName = params.get('app') || 'glint';
+  const exportName = params.get('name') || 'glint';
   const [status, setStatus] = useState('Waiting for screenshots…');
 
   const done = (payload) => {
@@ -80,11 +80,11 @@ export default function HeadlessExport() {
         const zipBase64 = btoa(binary);
 
         if (cancelled) return;
-        setStatus(`OK · ${dataUrls.length} PNGs · ${zipFileName(appName)}`);
+        setStatus(`OK · ${dataUrls.length} PNGs · Glint-ss.zip`);
         done({
           ok: true,
           zipBase64,
-          zipName: zipFileName(appName),
+          zipName: 'Glint-ss.zip',
           filenames,
           count: dataUrls.length,
           store,
@@ -121,7 +121,7 @@ export default function HeadlessExport() {
       cancelled = true;
       window.removeEventListener('message', onMessage);
     };
-  }, [templateId, appName]);
+  }, [templateId, exportName]);
 
   const hint = useMemo(
     () => `template=${templateId} · Frame_1.png …`,

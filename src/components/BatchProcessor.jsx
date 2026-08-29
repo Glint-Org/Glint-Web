@@ -9,7 +9,6 @@ export default function BatchProcessor({
   template,
   metadata,
   exportPreset = 'play/phone',
-  appName = '',
 }) {
   const [processing, setProcessing] = useState(false);
   const [previews, setPreviews] = useState([]);
@@ -54,7 +53,7 @@ export default function BatchProcessor({
       }
       const prefix = preset.filename ?? 'screen';
       const filenames = results.map((_, i) => `${prefix}_${i + 1}.png`);
-      await downloadBatchZip(results, filenames, zipFileName(appName || metadata?.app));
+      await downloadBatchZip(results, filenames, `Glint-ss.zip`);
       setProgress(`Exported ${results.length} screenshot(s) as ZIP (${preset.label})`);
     } catch (err) {
       setProgress(`Error: ${err.message}`);

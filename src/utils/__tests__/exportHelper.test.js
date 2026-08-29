@@ -43,13 +43,9 @@ describe('exportHelper', () => {
   it('generates session JSON with canonical store key', () => {
     const raw = generateSessionJson(
       ['a.png', 'b.png'],
-      'Demo',
-      'Ship it',
       'ios-tablet',
     );
     const session = JSON.parse(raw);
-    expect(session.app).toBe('Demo');
-    expect(session.tagline).toBe('Ship it');
     expect(session.store).toBe('ios/ipad');
     expect(session.version).toBe('1.0');
     expect(session.screens).toEqual(['a.png', 'b.png']);

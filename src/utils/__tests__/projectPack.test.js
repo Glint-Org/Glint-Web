@@ -15,8 +15,7 @@ const TINY_PNG =
 
 describe('projectPack helpers', () => {
   it('builds safe .glintpack filenames', () => {
-    expect(glintPackFileName('Cool App!!')).toBe(`Cool-App${GLINTPACK_EXT}`);
-    expect(glintPackFileName('')).toBe(`glint-project${GLINTPACK_EXT}`);
+    expect(glintPackFileName()).toBe(`Glint-ss${GLINTPACK_EXT}`);
   });
 
   it('detects pack file extensions', () => {
@@ -74,8 +73,6 @@ describe('projectPack round-trip', () => {
         },
       ],
       liveCanvases: [mockCanvas],
-      appName: 'Pack Demo',
-      tagline: 'Round trip',
       store: 'play/phone',
       template: { id: 't1', name: 'Template', store: 'play/phone', canvas: { w: 1080, h: 1920 } },
       background: { type: 'solid', value: '#0B0D10' },
@@ -92,7 +89,6 @@ describe('projectPack round-trip', () => {
     const project = JSON.parse(await zip.file('project.json').async('string'));
     expect(project.format).toBe(GLINTPACK_FORMAT);
     expect(project.schemaVersion).toBe(GLINTPACK_VERSION);
-    expect(project.app).toBe('Pack Demo');
     expect(project.store).toBe('play/phone');
     expect(project.frames).toHaveLength(1);
     expect(project.frames[0].screenshot).toBe('assets/shots/frame-0.png');
@@ -105,7 +101,6 @@ describe('projectPack round-trip', () => {
 
     const parsed = await parseGlintPack(blob);
     expect(parsed.kind).toBe('glintpack');
-    expect(parsed.project.app).toBe('Pack Demo');
     expect(parsed.frames).toHaveLength(1);
     expect(parsed.frames[0].id).toBe('frame-home');
     expect(parsed.frames[0].design).toEqual({ headline: 'Hello' });

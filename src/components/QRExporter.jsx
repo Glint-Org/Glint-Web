@@ -14,14 +14,10 @@ export default function QRExporter({ session, exportedUrls }) {
 
   const buildFullSession = () => generateSessionJson(
     hasFrames ? exportedUrls : (session?.screens ?? []),
-    session?.app ?? 'My App',
-    session?.tagline ?? '',
     session?.store ?? 'play/phone',
   );
 
   const buildCompactSession = () => JSON.stringify({
-    app: session?.app ?? 'My App',
-    tagline: session?.tagline ?? '',
     store: session?.store ?? 'play/phone',
     version: '1.0',
     screens: [],
@@ -32,7 +28,7 @@ export default function QRExporter({ session, exportedUrls }) {
     QRCode.toDataURL(buildCompactSession(), { width: 220, margin: 2, errorCorrectionLevel: 'M' })
       .then(setQrDataUrl)
       .catch(console.error);
-  }, [session?.app, session?.tagline, session?.store]);
+  }, [session?.store]);
 
   const handleCopyJson = async () => {
     if (!hasFrames) {
