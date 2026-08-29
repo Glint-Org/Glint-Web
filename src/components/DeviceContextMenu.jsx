@@ -1,4 +1,4 @@
-import { ImagePlus, RotateCcw, Trash2 } from 'lucide-react';
+import { ImagePlus, Trash2 } from 'lucide-react';
 
 /**
  * Right-click menu for a device frame on the canvas.
@@ -8,32 +8,32 @@ export default function DeviceContextMenu({
   y,
   onImport,
   onClear,
-  onResetTransform,
   onClose,
 }) {
   if (x == null || y == null) return null;
 
-  const menuW = 190;
-  const menuH = 120;
+  const menuW = 180;
+  const menuH = 80;
   const left = Math.min(x, window.innerWidth - menuW - 8);
   const top = Math.min(y, window.innerHeight - menuH - 8);
 
   return (
     <>
-      <div className="fixed inset-0 z-[60]" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose?.(); }} />
       <div
-        className="fixed z-[70] min-w-[180px] rounded-xl border border-glint-border bg-glint-surface shadow-2xl py-1 overflow-hidden"
+        className="fixed inset-0 z-[60]"
+        onMouseDown={(e) => { if (e.button === 0) onClose?.(); }}
+        onContextMenu={(e) => { e.preventDefault(); onClose?.(); }}
+      />
+      <div
+        className="fixed z-[70] min-w-[160px] rounded-xl border border-glint-border bg-glint-surface shadow-2xl py-1 overflow-hidden"
         style={{ left: Math.max(8, left), top: Math.max(8, top) }}
         role="menu"
       >
         <MenuItem icon={<ImagePlus size={14} />} onClick={onImport}>
           Import screenshot
         </MenuItem>
-        <MenuItem icon={<RotateCcw size={14} />} onClick={onResetTransform}>
-          Reset size & rotation
-        </MenuItem>
         <MenuItem icon={<Trash2 size={14} />} onClick={onClear} danger>
-          Clear to white
+          Clear
         </MenuItem>
       </div>
     </>

@@ -965,7 +965,6 @@ export default function Editor() {
           y={deviceMenu.clientY}
           onImport={handleDeviceImportClick}
           onClear={handleDeviceClear}
-          onResetTransform={handleDeviceResetTransform}
           onClose={closeDeviceMenu}
         />
       )}

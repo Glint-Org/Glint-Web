@@ -94,12 +94,19 @@ export default function FrameCanvas({
       });
     };
 
+    const onMouseUp = (opt) => {
+      if (opt.e?.button === 2) {
+        opt.e.stopPropagation();
+      }
+    };
+
     const blockBrowserMenu = (e) => {
       const target = c.findTarget?.(e, false);
       if (findDeviceTarget(target)) e.preventDefault();
     };
 
     c.on('mouse:down', onMouseDown);
+    c.on('mouse:up', onMouseUp);
     c.wrapperEl?.addEventListener('contextmenu', blockBrowserMenu);
 
     const onDblClick = (opt) => {
@@ -127,6 +134,7 @@ export default function FrameCanvas({
 
     return () => {
       c.off('mouse:down', onMouseDown);
+      c.off('mouse:up', onMouseUp);
       c.off('mouse:dblclick', onDblClick);
       c.wrapperEl?.removeEventListener('contextmenu', blockBrowserMenu);
       onCanvasReady?.(frameId, null);
