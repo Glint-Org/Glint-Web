@@ -53,3 +53,13 @@ Community marketplace / contribute-via-`.glintpack` is planned but **not** in sc
 ## License
 
 MIT
+
+---
+
+<div align="center">
+
+<a href="https://github.com/darkmintis">
+  <img src="https://img.shields.io/badge/follow-%40Darkmintis-1DA1F2?style=social&logo=github" alt="Follow @Darkmintis"/>
+</a>
+
+</div>
