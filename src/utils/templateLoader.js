@@ -56,7 +56,6 @@ export const TEMPLATE_IDS = [
   // Legacy curated packs — Play phone
   'play-hero',
   'play-pop',
-  'play-feature',
   'play-dual',
   'play-minimal',
   // App Store iPhone

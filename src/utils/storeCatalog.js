@@ -120,7 +120,6 @@ export const LEGACY_STORE_ALIASES = {
   'ios-tablet': 'ios/ipad',
   ipad: 'ios/ipad',
   feature: 'play/phone',
-  'feature-graphic': 'play/phone',
 };
 
 export const STORE_TARGET_IDS = Object.keys(STORE_TARGETS);
