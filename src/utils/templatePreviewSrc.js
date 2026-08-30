@@ -1,36 +1,23 @@
-/** Resolve a static gallery strip URL for a template id, if the file exists. */
-const EXT = ['webp', 'png', 'jpg', 'jpeg'];
-
-const cache = new Map();
+/** Resolve a static gallery strip URL for a template id. */
+export function getStaticPreviewUrl(templateId) {
+  if (!templateId) return null;
+  return `/templates/previews/${templateId}.png`;
+}
 
 export function previewCandidates(templateId) {
   if (!templateId) return [];
-  return EXT.map((ext) => `/templates/previews/${templateId}.${ext}`);
+  return [`/templates/previews/${templateId}.png`, `/templates/previews/${templateId}.webp`];
 }
 
 /**
- * Probe which static preview exists (HEAD). Cached per id.
+ * Probe / resolve which static preview exists.
  * @returns {Promise<string|null>}
  */
 export async function resolveStaticPreview(templateId) {
   if (!templateId) return null;
-  if (cache.has(templateId)) return cache.get(templateId);
-
-  for (const url of previewCandidates(templateId)) {
-    try {
-      const res = await fetch(url, { method: 'HEAD' });
-      if (res.ok) {
-        cache.set(templateId, url);
-        return url;
-      }
-    } catch {
-      // try next
-    }
-  }
-  cache.set(templateId, null);
-  return null;
+  return getStaticPreviewUrl(templateId);
 }
 
 export function clearPreviewCache() {
-  cache.clear();
+  // no-op
 }
