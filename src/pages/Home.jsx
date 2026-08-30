@@ -16,16 +16,15 @@ import {
 import { useTheme } from '../hooks/useTheme';
 import UploadZone from '../components/UploadZone';
 import SessionImporter from '../components/SessionImporter';
-import { loadAllTemplates, filterVisibleTemplates, browseFilterId } from '../utils/templateLoader';
+import { loadAllTemplates, filterVisibleTemplates } from '../utils/templateLoader';
 import TemplateSetPreview from '../components/TemplateSetPreview';
-import StoreBrowseFilters from '../components/StoreBrowseFilters';
+import DeviceBrowseFilters, { filterByDevice } from '../components/StoreBrowseFilters';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 export default function Home() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [platform, setPlatform] = useState('all');
-  const [device, setDevice] = useState('all');
+  const [deviceFilter, setDeviceFilter] = useState('all');
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
@@ -35,9 +34,9 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredTemplates = filterVisibleTemplates(
-    templates,
-    browseFilterId(platform, device),
+  const filteredTemplates = filterByDevice(
+    filterVisibleTemplates(templates, null),
+    deviceFilter,
   );
 
   const handleUpload = (urls) => {
@@ -249,11 +248,9 @@ export default function Home() {
         <section id="templates" className="space-y-8 pt-4">
           
 
-          <StoreBrowseFilters
-            platform={platform}
-            device={device}
-            onPlatformChange={setPlatform}
-            onDeviceChange={setDevice}
+          <DeviceBrowseFilters
+            device={deviceFilter}
+            onDeviceChange={setDeviceFilter}
           />
 
           {loading ? (
@@ -270,9 +267,9 @@ export default function Home() {
             <div className="p-12 text-center rounded-2xl border border-dashed border-glint-border bg-glint-surface/40 space-y-3">
               <Layers size={36} className="mx-auto text-glint-text-tertiary opacity-60" />
               <p className="text-base font-semibold text-glint-text">No templates found for this filter</p>
-              <p className="text-xs text-glint-text-secondary">Try selecting "All Platforms" or resetting your device selection.</p>
+              <p className="text-xs text-glint-text-secondary">Try selecting "All Devices" or resetting your filter.</p>
               <button
-                onClick={() => { setPlatform('all'); setDevice('all'); }}
+                onClick={() => setDeviceFilter('all')}
                 className="mt-2 px-4 py-2 text-xs font-semibold rounded-lg bg-glint-surface-2 border border-glint-border hover:border-glint-accent/50 text-glint-text transition-all"
               >
                 Reset Filters

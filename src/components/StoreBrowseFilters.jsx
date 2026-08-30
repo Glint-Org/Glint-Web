@@ -1,75 +1,75 @@
-import { PLATFORMS, devicesForPlatform } from '../utils/storeCatalog';
+import { Smartphones, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
 
 /**
- * Two-level store browse: platform (Play / App Store) → device (Phone, iPad, TV…).
+ * Device-based filter chips for template browsing.
+ * Users pick by device type (iPhone, Android, iPad) not by store.
  */
-export default function StoreBrowseFilters({
-  platform,
-  device,
-  onPlatformChange,
-  onDeviceChange,
-  size = 'md',
-}) {
-  const devices = platform && platform !== 'all' ? devicesForPlatform(platform, { browse: true }) : [];
+
+const DEVICE_FILTERS = [
+  { id: 'all', label: 'All Devices', icon: null },
+  { id: 'android-phone', label: 'Android Phone', icon: Smartphones, stores: ['play/phone'] },
+  { id: 'iphone', label: 'iPhone', icon: Smartphones, stores: ['ios/phone'] },
+  { id: 'ipad', label: 'iPad', icon: Tablet, stores: ['ios/ipad'] },
+  { id: 'tablet', label: 'Tablet', icon: Tablet, stores: ['play/tablet-7', 'play/tablet-10'] },
+  { id: 'tv', label: 'TV', icon: Tv, stores: ['play/tv'], disabled: true },
+  { id: 'wear', label: 'Wear OS', icon: Watch, stores: ['play/wear'], disabled: true },
+  { id: 'chromebook', label: 'Chromebook', icon: Laptop, stores: ['play/chromebook'], disabled: true },
+];
+
+export { DEVICE_FILTERS };
+
+/**
+ * Filter templates by selected device filter.
+ * @param {Array} templates - loaded template objects
+ * @param {string} deviceFilter - selected device filter id
+ * @returns {Array} filtered templates
+ */
+export function filterByDevice(templates, deviceFilter) {
+  if (!deviceFilter || deviceFilter === 'all') return templates;
+
+  const filter = DEVICE_FILTERS.find((d) => d.id === deviceFilter);
+  if (!filter?.stores) return templates;
+
+  return templates.filter((t) => {
+    const store = t.store || '';
+    return filter.stores.some((s) => store.startsWith(s.split('/')[0]) && store.includes(s.split('/')[1]));
+  });
+}
+
+export default function DeviceBrowseFilters({ device, onDeviceChange, size = 'md' }) {
   const chip =
     size === 'sm'
-      ? 'px-2 py-1 rounded-md text-[10px] font-medium'
+      ? 'px-2.5 py-1.5 rounded-lg text-[11px] font-medium'
       : 'px-4 py-2 rounded-full text-sm font-medium';
   const active = size === 'sm'
-    ? 'bg-glint-accent text-glint-text-on-accent'
-    : 'bg-glint-accent text-glint-text-on-accent shadow-md';
+    ? 'bg-glint-accent text-glint-text-on-accent shadow-md shadow-glint-accent/20'
+    : 'bg-glint-accent text-glint-text-on-accent shadow-md shadow-glint-accent/20';
   const idle = size === 'sm'
-    ? 'bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text'
-    : 'bg-glint-surface/80 text-glint-text-secondary hover:bg-glint-surface border border-glint-border';
+    ? 'bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text hover:bg-glint-surface-2/80'
+    : 'bg-glint-surface/80 text-glint-text-secondary hover:bg-glint-surface hover:text-glint-text border border-glint-border hover:border-glint-accent/30';
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2 justify-center flex-wrap">
-        <button
-          type="button"
-          onClick={() => {
-            onPlatformChange('all');
-            onDeviceChange('all');
-          }}
-          className={`${chip} transition-all ${platform === 'all' ? active : idle}`}
-        >
-          All
-        </button>
-        {PLATFORMS.map((p) => (
+    <div className="flex gap-2 justify-center flex-wrap">
+      {DEVICE_FILTERS.map((f) => {
+        const Icon = f.icon;
+        const isDisabled = f.disabled;
+        return (
           <button
-            key={p.id}
+            key={f.id}
             type="button"
-            onClick={() => {
-              onPlatformChange(p.id);
-              onDeviceChange('all');
-            }}
-            className={`${chip} transition-all ${platform === p.id ? active : idle}`}
+            onClick={() => !isDisabled && onDeviceChange(f.id)}
+            disabled={isDisabled}
+            className={`${chip} transition-all duration-300 inline-flex items-center gap-1.5
+              ${device === f.id ? active : idle}
+              ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'}`}
+            title={isDisabled ? 'Coming soon' : f.label}
           >
-            {p.label}
+            {Icon && <Icon size={size === 'sm' ? 12 : 14} />}
+            <span>{f.label}</span>
+            {isDisabled && <span className="text-[9px] opacity-60">soon</span>}
           </button>
-        ))}
-      </div>
-      {devices.length > 0 && (
-        <div className="flex gap-1.5 justify-center flex-wrap">
-          <button
-            type="button"
-            onClick={() => onDeviceChange('all')}
-            className={`${chip} transition-all ${device === 'all' ? active : idle}`}
-          >
-            All sizes
-          </button>
-          {devices.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              onClick={() => onDeviceChange(d.id)}
-              className={`${chip} transition-all ${device === d.id ? active : idle}`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 }
