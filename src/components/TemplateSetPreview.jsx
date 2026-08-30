@@ -12,7 +12,7 @@ export default function TemplateSetPreview({ template, compact = false }) {
   const rootRef = useRef(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [fallbackUrls, setFallbackUrls] = useState(null);
-  const [frameH, setFrameH] = useState(compact ? 140 : 260);
+  const [frameH, setFrameH] = useState(compact ? 140 : 400);
 
   const canvasW = template?.canvas?.width || 1080;
   const canvasH = template?.canvas?.height || 1920;
@@ -20,7 +20,7 @@ export default function TemplateSetPreview({ template, compact = false }) {
   const count = Math.max(slides.length, 1);
   const gap = compact ? 4 : 8;
   const padX = compact ? 12 : 24;
-  const maxH = compact ? 148 : 280;
+  const maxH = compact ? 148 : Math.round(window.innerHeight * 0.5);
   const accent = template?.preview?.bg || '#2A2A2E';
   const staticUrl = getStaticPreviewUrl(template?.id);
 
@@ -32,14 +32,15 @@ export default function TemplateSetPreview({ template, compact = false }) {
       const avail = Math.max(80, el.clientWidth - padX);
       const gaps = gap * Math.max(0, count - 1);
       const hFromWidth = (avail - gaps) / (count * aspect);
-      setFrameH(Math.max(72, Math.min(maxH, Math.floor(hFromWidth))));
+      const maxHVal = compact ? 148 : Math.round(window.innerHeight * 0.5);
+      setFrameH(Math.max(72, Math.min(maxHVal, Math.floor(hFromWidth))));
     };
 
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [aspect, count, gap, padX, maxH, compact]);
+  }, [aspect, count, gap, padX, compact]);
 
   const handleImgError = async () => {
     if (!fallbackUrls && template) {

@@ -414,57 +414,20 @@ function TemplateShowcaseRow({ template, onClick, index = 0 }) {
     return () => io.disconnect();
   }, []);
 
-  const isPlay = (template.store || '').includes('play');
-  const isIos = (template.store || '').includes('ios');
-  const platformLabel = isPlay ? 'Google Play' : isIos ? 'App Store' : 'Universal';
-  const width = template.canvas?.width || 1080;
-  const height = template.canvas?.height || 1920;
-  const slideCount = template.slides?.length || 5;
-
   return (
     <div
       ref={ref}
-      className={`group w-full rounded-2xl overflow-hidden border border-glint-border bg-glint-surface shadow-sm
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
+      className={`group w-full cursor-pointer rounded-2xl overflow-hidden border border-glint-border bg-glint-surface shadow-sm
         hover:border-glint-accent/60 hover:shadow-xl hover:shadow-glint-accent/10
         transition-all duration-300 ease-out
         ${shown ? 'glint-reveal' : 'opacity-0 translate-y-6'}`}
       style={shown ? { animationDelay: `${Math.min(index, 6) * 60}ms` } : undefined}
     >
-      {/* Card Header Bar */}
-      <div className="px-5 py-3.5 bg-glint-surface-2/70 border-b border-glint-border/60 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="font-bold text-sm sm:text-base text-glint-text tracking-tight truncate">
-            {template.name || template.id}
-          </span>
-          <span className="hidden sm:inline-flex text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-glint-surface border border-glint-border text-glint-text-secondary shrink-0">
-            {platformLabel}
-          </span>
-          <span className="hidden md:inline-flex text-[11px] font-mono px-2 py-0.5 rounded bg-glint-surface/60 text-glint-text-tertiary shrink-0">
-            {width} × {height}
-          </span>
-        </div>
-
-        <button
-          onClick={onClick}
-          aria-label={`Use template ${template.name || template.id}`}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold glint-btn-primary shadow-sm group-hover:scale-102 transition-all cursor-pointer shrink-0"
-        >
-          <span>Use template</span>
-          <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-        </button>
-      </div>
-
-      {/* Static PNG Preview Area */}
-      <div
-        onClick={onClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-        className="cursor-pointer relative overflow-hidden"
-      >
-        <TemplateSetPreview template={template} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      </div>
+      <TemplateSetPreview template={template} />
     </div>
   );
 }
