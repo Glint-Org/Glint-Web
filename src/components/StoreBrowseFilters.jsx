@@ -6,7 +6,6 @@ import { Smartphone, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
  */
 
 const DEVICE_FILTERS = [
-  { id: 'all', label: 'All Devices', icon: null },
   { id: 'android-phone', label: 'Android Phone', icon: Smartphone, stores: ['play/phone'] },
   { id: 'iphone', label: 'iPhone', icon: Smartphone, stores: ['ios/phone'] },
   { id: 'ipad', label: 'iPad', icon: Tablet, stores: ['ios/ipad'] },

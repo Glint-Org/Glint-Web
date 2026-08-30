@@ -24,7 +24,7 @@ import { parseGlint, isGlintFile } from '../utils/projectPack';
 export default function Home() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deviceFilter, setDeviceFilter] = useState('all');
+  const [deviceFilter, setDeviceFilter] = useState('android-phone');
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
 
