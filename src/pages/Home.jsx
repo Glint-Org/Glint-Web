@@ -247,21 +247,7 @@ export default function Home() {
 
         {/* Template Showcase Section */}
         <section id="templates" className="space-y-8 pt-4">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-glint-border/60 pb-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-glint-surface-2 border border-glint-border text-xs font-medium text-glint-text-secondary">
-                <Layers size={13} className="text-glint-accent" />
-                <span>Template Library</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-glint-text tracking-tight">Curated Store Packs</h3>
-              <p className="text-xs sm:text-sm text-glint-text-secondary max-w-xl">
-                Ready-to-use 5-frame screenshot sets with instant PNG rendering. Choose a size or mix and match.
-              </p>
-            </div>
-            <div className="text-xs font-medium text-glint-text-tertiary">
-              Showing <span className="font-bold text-glint-text">{filteredTemplates.length}</span> template packs
-            </div>
-          </div>
+          
 
           <StoreBrowseFilters
             platform={platform}
