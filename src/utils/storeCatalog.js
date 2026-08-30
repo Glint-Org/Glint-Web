@@ -69,7 +69,7 @@ export const STORE_TARGETS = {
     height: 450,
     filename: 'wear_screen',
     fastlaneFolder: 'wearOsScreenshots',
-    defaultFrame: 'simple-dark',
+    defaultFrame: null,
     square: true,
   },
   'play/chromebook': {
