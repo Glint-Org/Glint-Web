@@ -41,14 +41,14 @@ export default function UploadZone({ onUpload, compact = false }) {
   const busy = items.length > 0;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div
         onDrop={busy ? undefined : handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onClick={busy ? undefined : () => inputRef.current?.click()}
-        className={`border-2 border-dashed border-glint-border-strong rounded-xl text-center transition-colors bg-glint-surface-2 ${
-          busy ? 'opacity-70 cursor-wait' : 'cursor-pointer hover:border-glint-accent'
-        } ${compact ? 'p-4' : 'p-12'}`}
+        className={`group border border-dashed rounded-2xl text-center transition-all duration-300 bg-glint-surface/60 ${
+          busy ? 'opacity-70 cursor-wait border-glint-accent/40' : 'cursor-pointer border-glint-border-strong hover:border-glint-accent/60 hover:bg-glint-accent/5'
+        } ${compact ? 'p-5' : 'p-8'}`}
       >
         <input
           ref={inputRef}
@@ -59,12 +59,14 @@ export default function UploadZone({ onUpload, compact = false }) {
           className="hidden"
           disabled={busy}
         />
-        <Image size={compact ? 22 : 32} className="mx-auto mb-2 text-glint-text-tertiary" />
-        <p className={`text-glint-text-secondary font-medium ${compact ? 'text-xs' : ''}`}>
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-glint-accent/20 bg-glint-accent/10 text-glint-accent shadow-sm shadow-glint-accent/10">
+          <Image size={compact ? 20 : 22} />
+        </div>
+        <p className={`font-semibold text-glint-text ${compact ? 'text-xs' : 'text-base'}`}>
           {busy ? 'Saving…' : 'Drop screenshots here'}
         </p>
         {!busy && !compact && (
-          <p className="text-glint-text-tertiary mt-1 text-sm">or click to browse</p>
+          <p className="mt-1 text-sm text-glint-text-secondary">or click to browse</p>
         )}
       </div>
 
@@ -76,7 +78,7 @@ export default function UploadZone({ onUpload, compact = false }) {
                 <span className="truncate">{it.name}</span>
                 <span className="tabular-nums shrink-0">{it.pct}%</span>
               </div>
-              <div className="h-1 rounded-full bg-glint-border overflow-hidden">
+              <div className="h-1.5 rounded-full bg-glint-border overflow-hidden">
                 <div
                   className="h-full bg-glint-accent transition-[width] duration-100"
                   style={{ width: `${it.pct}%` }}

@@ -96,10 +96,11 @@ export default function SessionImporter({ onImport, onProjectImport }) {
       <button
         type="button"
         onClick={() => folderRef.current?.click()}
-        className="w-full px-4 py-2 border border-glint-border-strong rounded-lg hover:bg-glint-surface-2 text-sm text-glint-text-secondary"
+        className="w-full px-4 py-3 rounded-xl border border-glint-border-strong bg-glint-surface-2 text-sm font-semibold text-glint-text hover:border-glint-accent/60 hover:bg-glint-accent/5 transition-all duration-200"
       >
         Import Folder (session.json + PNGs)
       </button>
+      <p className="text-xs text-glint-text-tertiary text-center">From Capture or Bridge</p>
     </div>
   );
 }
