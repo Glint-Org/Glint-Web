@@ -11,7 +11,7 @@
   "preview": {
     "bg": "#611AB4",
     "textColor": "#FFFFFF",
-    "frame": "simple-dark",
+    "frame": "pixel9",
     "art": [
       {
         "kind": "blob",
@@ -83,7 +83,7 @@
         },
         {
           "type": "device",
-          "frame": "simple-dark",
+          "frame": "pixel9",
           "slot": 0,
           "scale": 0.903,
           "minCoverage": 0.85,
@@ -102,7 +102,7 @@
         },
         {
           "type": "device",
-          "frame": "simple-dark",
+          "frame": "pixel9",
           "slot": 1,
           "scale": 0.903,
           "minCoverage": 0.85,
@@ -180,7 +180,7 @@
         },
         {
           "type": "device",
-          "frame": "simple-dark",
+          "frame": "pixel9",
           "slot": 2,
           "scale": 0.903,
           "minCoverage": 0.85,
@@ -216,7 +216,7 @@
         },
         {
           "type": "device",
-          "frame": "simple-dark",
+          "frame": "pixel9",
           "slot": 3,
           "scale": 0.903,
           "minCoverage": 0.85,
@@ -252,7 +252,7 @@
         },
         {
           "type": "device",
-          "frame": "simple-dark",
+          "frame": "pixel9",
           "slot": 4,
           "scale": 0.903,
           "minCoverage": 0.85,
