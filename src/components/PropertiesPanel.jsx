@@ -314,6 +314,55 @@ export default function PropertiesPanel({
                 </div>
               ) : null}
             </Section>
+
+            <Section title="Screenshot fit">
+              <p className="text-[10px] text-glint-text-tertiary -mt-1">
+                Control how the screenshot fills the device screen.
+              </p>
+              <div className="flex gap-1.5">
+                {[
+                  { id: 'cover', label: 'Cover' },
+                  { id: 'contain', label: 'Contain' },
+                  { id: 'custom', label: 'Custom' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => patchStyle({ fitMode: opt.id })}
+                    className={`flex-1 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                      (style.fitMode || 'cover') === opt.id
+                        ? 'bg-glint-accent text-glint-text-on-accent'
+                        : 'bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {style.fitMode === 'custom' && (
+                <>
+                  <RangeRow
+                    label="Offset X"
+                    value={style.fitOffsetX ?? 0}
+                    min={-100}
+                    max={100}
+                    onChange={(v) => patchStyle({ fitOffsetX: v / 100 })}
+                  />
+                  <RangeRow
+                    label="Offset Y"
+                    value={style.fitOffsetY ?? 0}
+                    min={-100}
+                    max={100}
+                    onChange={(v) => patchStyle({ fitOffsetY: v / 100 })}
+                  />
+                </>
+              )}
+              <p className="text-[9px] text-glint-text-tertiary">
+                {style.fitMode === 'cover' && 'Crops to fill screen — no white bars'}
+                {style.fitMode === 'contain' && 'Shows full screenshot — may have white bars'}
+                {style.fitMode === 'custom' && 'Drag to choose which part is visible'}
+              </p>
+            </Section>
           </>
         )}
 

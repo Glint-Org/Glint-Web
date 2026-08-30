@@ -13,6 +13,7 @@ import {
   statusBarChromeChanged,
   screenContentRect,
   coverFitRect,
+  containFitRect,
   resolveStatusBarKind,
 } from './statusBar';
 
@@ -231,6 +232,8 @@ function applyOuterBorderStroke(group, chrome = {}) {
  * Cover-fit a screenshot into an exact screen-sized bitmap (white fill + clipped image).
  * Disabled status bar → shot fills the full hole. Enabled → opaque status strip on top,
  * shot cover-fills only the remaining content rect. Status bar chrome matches the device family.
+ * chrome.fitMode: 'cover' (default, crops to fill) | 'contain' (no crop, white bars) | 'custom' (manual offset)
+ * chrome.fitOffsetX/Y: offset for 'custom' mode (-1 to 1, 0 = centered)
  */
 async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {}, frameId = null) {
   const w = Math.max(1, Math.round(screenW));
@@ -238,12 +241,31 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
   const r = Math.max(0, Math.min(rx || 0, w / 2, h / 2));
   const content = screenContentRect(w, h, chrome, frameId);
   const kind = content.kind || resolveStatusBarKind(chrome, frameId);
+  const fitMode = chrome.fitMode || 'cover';
 
   const src = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
   const el = src.getElement?.() || src._element;
   const iw = Math.max(1, el?.naturalWidth || el?.width || src.width || 1);
   const ih = Math.max(1, el?.naturalHeight || el?.height || src.height || 1);
-  const { dx, dy, dw, dh } = coverFitRect(iw, ih, content.w, content.h, content.x, content.y);
+
+  let fit;
+  if (fitMode === 'contain') {
+    fit = containFitRect(iw, ih, content.w, content.h, content.x, content.y);
+  } else if (fitMode === 'custom') {
+    const cover = Math.max(content.w / iw, content.h / ih);
+    const dw = iw * cover;
+    const dh = ih * cover;
+    const offX = (chrome.fitOffsetX ?? 0) * (dw - content.w) * 0.5;
+    const offY = (chrome.fitOffsetY ?? 0) * (dh - content.h) * 0.5;
+    fit = {
+      dx: content.x + (content.w - dw) / 2 + offX,
+      dy: content.y + (content.h - dh) / 2 + offY,
+      dw,
+      dh,
+    };
+  } else {
+    fit = coverFitRect(iw, ih, content.w, content.h, content.x, content.y);
+  }
 
   const off = document.createElement('canvas');
   off.width = w;
@@ -265,7 +287,7 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
   ctx.beginPath();
   ctx.rect(content.x, content.y, content.w, content.h);
   ctx.clip();
-  if (el) ctx.drawImage(el, dx, dy, dw, dh);
+  if (el) ctx.drawImage(el, fit.dx, fit.dy, fit.dw, fit.dh);
   ctx.restore();
 
   if (chrome.statusBarEnabled) {

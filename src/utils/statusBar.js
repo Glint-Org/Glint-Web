@@ -63,6 +63,23 @@ export function coverFitRect(srcW, srcH, destW, destH, destX = 0, destY = 0) {
   };
 }
 
+/** object-fit: contain — fit inside dest without cropping, centered. */
+export function containFitRect(srcW, srcH, destW, destH, destX = 0, destY = 0) {
+  const iw = Math.max(1, srcW);
+  const ih = Math.max(1, srcH);
+  const dw0 = Math.max(1, destW);
+  const dh0 = Math.max(1, destH);
+  const contain = Math.min(dw0 / iw, dh0 / ih);
+  const dw = iw * contain;
+  const dh = ih * contain;
+  return {
+    dx: destX + (dw0 - dw) / 2,
+    dy: destY + (dh0 - dh) / 2,
+    dw,
+    dh,
+  };
+}
+
 function themeColors(theme) {
   const lightIcons = theme !== 'light';
   return {
