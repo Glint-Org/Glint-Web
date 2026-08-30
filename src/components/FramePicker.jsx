@@ -9,10 +9,8 @@ const ICONS = {
   tv: Tv,
   'iphone16-pro-max': Smartphone,
   'iphone16-pro': Smartphone,
-  'phone-3d': Smartphone,
   'ipad-pro-13': Tablet,
   'ipad-pro': Tablet,
-  'tablet-3d': Tablet,
   wear: Watch,
   chromebook: Monitor,
 };

@@ -75,28 +75,6 @@ export const FRAME_INSETS = {
     width: 975,
     height: 1966,
   },
-  /** iPhone 14 Pro Max with soft drop shadow (dimensional). */
-  'phone-3d': {
-    ext: 'png',
-    top: 100,
-    right: 99,
-    bottom: 100,
-    left: 101,
-    rx: 100,
-    width: 1490,
-    height: 2996,
-  },
-  /** iPad Pro 13 photo-real bezel. */
-  'tablet-3d': {
-    ext: 'png',
-    top: 100,
-    right: 100,
-    bottom: 100,
-    left: 100,
-    rx: 55,
-    width: 2264,
-    height: 2952,
-  },
   /** Landscape TV / monitor bezel for Play TV listings. */
   tv: {
     ext: 'svg',
@@ -122,10 +100,8 @@ export const DEVICE_FRAME_OPTIONS = [
   { id: 'tv', label: 'TV', platforms: ['play'], formFactors: ['tv'] },
   { id: 'iphone16-pro-max', label: 'iPhone 16 Pro Max', platforms: ['ios'], formFactors: ['iphone'] },
   { id: 'iphone16-pro', label: 'iPhone 16 Pro', platforms: ['ios'], formFactors: ['iphone'] },
-  { id: 'phone-3d', label: 'Phone Shadow', platforms: ['ios'], formFactors: ['iphone'] },
   { id: 'ipad-pro-13', label: 'iPad Pro 13"', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet', 'chromebook'] },
   { id: 'ipad-pro', label: 'iPad Pro 11"', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet'] },
-  { id: 'tablet-3d', label: 'Tablet Shadow', platforms: ['ios', 'play'], formFactors: ['ipad', 'tablet'] },
 ];
 
 /** Map store target device → form factor used by DEVICE_FRAME_OPTIONS. */

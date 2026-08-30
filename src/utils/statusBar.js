@@ -6,7 +6,7 @@
 
 export function statusBarKindForFrame(frameId) {
   const id = String(frameId || '');
-  if (/iphone|phone-3d/i.test(id)) return 'ios';
+  if (/iphone/i.test(id)) return 'ios';
   if (/ipad|tablet/i.test(id)) return 'ipados';
   return 'android';
 }
@@ -14,7 +14,7 @@ export function statusBarKindForFrame(frameId) {
 /** True for Dynamic Island iPhone frames. */
 export function statusBarHasIsland(frameId) {
   const id = String(frameId || '');
-  return /iphone16|phone-3d/i.test(id);
+  return /iphone16/i.test(id);
 }
 
 export function statusBarHeight(screenW, kind = 'android') {

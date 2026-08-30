@@ -12,9 +12,7 @@ import {
 describe('statusBar', () => {
   it('maps frames to platform status-bar kinds', () => {
     expect(statusBarKindForFrame('iphone16-pro')).toBe('ios');
-    expect(statusBarKindForFrame('phone-3d')).toBe('ios');
     expect(statusBarKindForFrame('ipad-pro-13')).toBe('ipados');
-    expect(statusBarKindForFrame('tablet-3d')).toBe('ipados');
     expect(statusBarKindForFrame('pixel9')).toBe('android');
   });
 
