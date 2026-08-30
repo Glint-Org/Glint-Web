@@ -351,12 +351,12 @@ export default function Home() {
                   className="w-full px-4 py-3.5 border-2 border-dashed border-glint-border hover:border-glint-accent/60 rounded-xl text-xs sm:text-sm text-glint-text-secondary hover:text-glint-text hover:bg-glint-accent-muted transition-all font-medium flex items-center justify-center gap-2 group"
                 >
                   <Upload size={16} className="group-hover:-translate-y-0.5 transition-transform" />
-                  Select .glint / .glintpack file
+                  Select .glint project file
                 </button>
                 <input
                   ref={glintFileRef}
                   type="file"
-                  accept=".glint,.glintpack,.glint.zip"
+                  accept=".glint,.glint.zip"
                   onChange={handleGlintFileInput}
                   className="hidden"
                 />

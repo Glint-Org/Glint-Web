@@ -20,13 +20,6 @@ export const GLINT_VERSION = 1;
 export const GLINT_EXT = '.glint';
 export const GLINT_MAGIC = new Uint8Array([0x47, 0x4C, 0x49, 0x4E, 0x54]); // "GLINT"
 
-/** @deprecated Use GLINT_EXT */
-export const GLINTPACK_EXT = GLINT_EXT;
-/** @deprecated Use GLINT_FORMAT */
-export const GLINTPACK_FORMAT = GLINT_FORMAT;
-/** @deprecated Use GLINT_VERSION */
-export const GLINTPACK_VERSION = GLINT_VERSION;
-
 export function glintFileName() {
   return `Glint-ss${GLINT_EXT}`;
 }
@@ -245,7 +238,6 @@ export function isGlintMagic(bytes) {
 
 /**
  * Parse a .glint file (magic header + ZIP).
- * Falls back to raw ZIP for backward compatibility with .glintpack.
  * Returns restored editor payload with blob: URLs.
  */
 async function readBlobAsArrayBuffer(blob) {
@@ -278,8 +270,7 @@ export async function parseGlint(input) {
     // .glint format: skip 6-byte header
     zipInput = buffer.slice(6);
   } else {
-    // Legacy .glintpack or raw ZIP
-    zipInput = buffer;
+    throw new Error('Not a .glint file (missing GLINT header)');
   }
 
   const zip = await JSZip.loadAsync(zipInput);
@@ -288,7 +279,7 @@ export async function parseGlint(input) {
     throw new Error('Not a Glint file (missing project.json)');
   }
   const project = JSON.parse(await projectFile.async('string'));
-  if (project.format && project.format !== GLINT_FORMAT && project.format !== 'glintpack') {
+  if (project.format && project.format !== GLINT_FORMAT) {
     throw new Error(`Unsupported format: ${project.format}`);
   }
 
@@ -365,14 +356,9 @@ export async function parseGlint(input) {
   };
 }
 
-/** @deprecated Use parseGlint */
-export const parseGlintPack = parseGlint;
-
 export function isGlintFile(file) {
   if (!file?.name) return false;
   const n = file.name.toLowerCase();
-  return n.endsWith('.glint') || n.endsWith('.glintpack') || n.endsWith('.glint.zip');
+  return n.endsWith('.glint') || n.endsWith('.glint.zip');
 }
 
-/** @deprecated Use isGlintFile */
-export const isGlintPackFile = isGlintFile;

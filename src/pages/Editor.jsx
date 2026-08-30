@@ -866,7 +866,7 @@ export default function Editor() {
                     <input
                       ref={glintFileRef}
                       type="file"
-                      accept=".glint,.glintpack,.glint.zip"
+                       accept=".glint,.glint.zip"
                       onChange={handleGlintFileInput}
                       className="hidden"
                     />
@@ -990,7 +990,7 @@ export default function Editor() {
       <ConfirmDialog
         open={leaveOpen}
         title="Leave editor?"
-        message="Unsaved changes will be lost. Download a .glintpack first if you want to keep editing later."
+        message="Unsaved changes will be lost. Download a .glint file first if you want to keep editing later."
         confirmLabel="Leave"
         cancelLabel="Stay"
         danger

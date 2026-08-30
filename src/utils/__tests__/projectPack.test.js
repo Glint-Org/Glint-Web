@@ -31,8 +31,8 @@ describe('projectPack helpers', () => {
 
   it('detects .glint file extensions', () => {
     expect(isGlintFile({ name: 'demo.glint' })).toBe(true);
-    expect(isGlintFile({ name: 'demo.glintpack' })).toBe(true);
     expect(isGlintFile({ name: 'demo.glint.zip' })).toBe(true);
+    expect(isGlintFile({ name: 'demo.glintpack' })).toBe(false);
     expect(isGlintFile({ name: 'demo.zip' })).toBe(false);
     expect(isGlintFile(null)).toBe(false);
   });
@@ -136,7 +136,7 @@ describe('projectPack round-trip', () => {
     expect(parsed.editor.background).toEqual({ type: 'solid', value: '#0B0D10' });
   });
 
-  it('parses legacy .glintpack files for backward compatibility', async () => {
+  it('rejects raw ZIPs without GLINT header', async () => {
     const zip = new JSZip();
     zip.file('project.json', JSON.stringify({
       format: 'glintpack',
@@ -146,15 +146,18 @@ describe('projectPack round-trip', () => {
     }));
     const arrayBuffer = await zip.generateAsync({ type: 'arraybuffer' });
 
-    const parsed = await parseGlint(arrayBuffer);
-    expect(parsed.kind).toBe('glint');
-    expect(parsed.frames).toHaveLength(0);
+    await expect(parseGlint(arrayBuffer)).rejects.toThrow(/missing GLINT header/i);
   });
 
   it('rejects archives without project.json', async () => {
     const zip = new JSZip();
     zip.file('readme.txt', 'nope');
-    const arrayBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+    const zipBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+    // Prepend GLINT header
+    const header = new Uint8Array([0x47, 0x4C, 0x49, 0x4E, 0x54, 0x01]);
+    const arrayBuffer = new Uint8Array(header.length + zipBuffer.byteLength);
+    arrayBuffer.set(header);
+    arrayBuffer.set(new Uint8Array(zipBuffer), header.length);
 
     await expect(parseGlint(arrayBuffer)).rejects.toThrow(/missing project.json/i);
   });
@@ -165,7 +168,12 @@ describe('projectPack round-trip', () => {
       'project.json',
       JSON.stringify({ format: 'other', frames: [] }),
     );
-    const arrayBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+    const zipBuffer = await zip.generateAsync({ type: 'arraybuffer' });
+    // Prepend GLINT header
+    const header = new Uint8Array([0x47, 0x4C, 0x49, 0x4E, 0x54, 0x01]);
+    const arrayBuffer = new Uint8Array(header.length + zipBuffer.byteLength);
+    arrayBuffer.set(header);
+    arrayBuffer.set(new Uint8Array(zipBuffer), header.length);
 
     await expect(parseGlint(arrayBuffer)).rejects.toThrow(/Unsupported format/);
   });
