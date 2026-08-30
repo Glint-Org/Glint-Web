@@ -1,4 +1,4 @@
-import { Smartphones, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
+import { Smartphone, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
 
 /**
  * Device-based filter chips for template browsing.
@@ -7,8 +7,8 @@ import { Smartphones, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
 
 const DEVICE_FILTERS = [
   { id: 'all', label: 'All Devices', icon: null },
-  { id: 'android-phone', label: 'Android Phone', icon: Smartphones, stores: ['play/phone'] },
-  { id: 'iphone', label: 'iPhone', icon: Smartphones, stores: ['ios/phone'] },
+  { id: 'android-phone', label: 'Android Phone', icon: Smartphone, stores: ['play/phone'] },
+  { id: 'iphone', label: 'iPhone', icon: Smartphone, stores: ['ios/phone'] },
   { id: 'ipad', label: 'iPad', icon: Tablet, stores: ['ios/ipad'] },
   { id: 'tablet', label: 'Tablet', icon: Tablet, stores: ['play/tablet-7', 'play/tablet-10'] },
   { id: 'tv', label: 'TV', icon: Tv, stores: ['play/tv'], disabled: true },
