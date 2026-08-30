@@ -22,6 +22,23 @@ Glint-Web is the frames editor (AppLaunchpad-style board).
 4. ZIP `{AppName}.zip` or `glint.zip`
 5. View handoff via Copy for Glint View (`data:` screens)
 
+## Template Previews
+
+Static preview images in `public/templates/previews/` show each template on the Home page.
+
+**Regenerate previews when:**
+- Adding/modifying template JSON files in `public/templates/`
+- Changing template slide layouts or theme colors
+
+**Command:**
+```bash
+npm run generate:previews
+```
+
+Output: `public/templates/previews/{template-id}.png` (one per template)
+
+Commit the updated preview images with your template changes.
+
 ## Future (do not implement unless asked)
 
 Marketplace / contribute `.glintpack` → community gallery: `docs/FUTURE-marketplace-glintpack.md`.
