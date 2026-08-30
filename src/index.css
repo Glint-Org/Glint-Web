@@ -252,8 +252,19 @@ select:disabled {
   }
 }
 
+@keyframes glint-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .glint-reveal {
-  animation: glint-reveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: glint-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes glint-fade-in {
@@ -284,10 +295,30 @@ select:disabled {
   animation: glint-scale-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+@keyframes glint-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.glint-float {
+  animation: glint-float 3s ease-in-out infinite;
+}
+
+@keyframes glint-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 208, 111, 0); }
+  50% { box-shadow: 0 0 20px 4px rgba(245, 208, 111, 0.15); }
+}
+
+.glint-glow-hover:hover {
+  animation: glint-glow 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glint-reveal,
   .glint-fade-in,
-  .glint-scale-in {
+  .glint-scale-in,
+  .glint-float,
+  .glint-glow-hover {
     animation: none;
     opacity: 1;
     transform: none;

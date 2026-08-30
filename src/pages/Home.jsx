@@ -155,15 +155,15 @@ export default function Home() {
           <div className="flex flex-wrap gap-3.5 justify-center items-center pt-2">
             <button
               onClick={() => document.getElementById('templates')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-7 py-3.5 glint-btn-primary rounded-xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all inline-flex items-center gap-2 group"
+              className="px-7 py-3.5 glint-btn-primary rounded-xl text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center gap-2 group"
             >
               <Sparkles size={18} className="group-hover:rotate-12 transition-transform duration-300" />
               Explore Templates
-              <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
             </button>
             <button
               onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-6 py-3.5 border border-glint-border-strong bg-glint-surface/70 backdrop-blur rounded-xl text-sm sm:text-base font-semibold text-glint-text hover:bg-glint-surface-2 hover:border-glint-accent/40 transition-all inline-flex items-center gap-2"
+              className="px-6 py-3.5 border border-glint-border-strong bg-glint-surface/70 backdrop-blur rounded-xl text-sm sm:text-base font-semibold text-glint-text hover:bg-glint-surface-2 hover:border-glint-accent/40 hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center gap-2"
             >
               <Upload size={17} />
               Import Screenshots
@@ -193,9 +193,9 @@ export default function Home() {
 
         {/* Workflow Steps */}
         <section className="grid md:grid-cols-3 gap-6">
-          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 transition-all duration-300 group">
+          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 hover:shadow-xl hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group cursor-default">
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <Upload className="w-5 h-5 text-glint-accent" />
               </div>
               <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-glint-surface-2 text-glint-text-tertiary border border-glint-border">
@@ -210,9 +210,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 transition-all duration-300 group">
+          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 hover:shadow-xl hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group cursor-default" style={{ animationDelay: '80ms' }}>
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <Layers className="w-5 h-5 text-glint-accent" />
               </div>
               <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-glint-surface-2 text-glint-text-tertiary border border-glint-border">
@@ -227,9 +227,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 transition-all duration-300 group">
+          <div className="glint-card rounded-2xl p-7 space-y-4 text-left border border-glint-border hover:border-glint-accent/50 hover:shadow-xl hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group cursor-default" style={{ animationDelay: '160ms' }}>
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/25 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <DownloadCloud className="w-5 h-5 text-glint-accent" />
               </div>
               <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-glint-surface-2 text-glint-text-tertiary border border-glint-border">
@@ -306,9 +306,9 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 transition-all">
+            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 hover:shadow-lg hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <Upload className="w-5 h-5 text-glint-accent" />
                 </div>
                 <div>
@@ -319,9 +319,9 @@ export default function Home() {
               <UploadZone onUpload={handleUpload} />
             </div>
 
-            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 transition-all">
+            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 hover:shadow-lg hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ animationDelay: '60ms' }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <Layers className="w-5 h-5 text-glint-accent" />
                 </div>
                 <div>
@@ -335,9 +335,9 @@ export default function Home() {
               />
             </div>
 
-            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 transition-all">
+            <div className="glint-card rounded-2xl p-7 space-y-5 border border-glint-border hover:border-glint-accent/40 hover:shadow-lg hover:shadow-glint-accent/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" style={{ animationDelay: '120ms' }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-glint-accent/20 to-glint-accent/5 border border-glint-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <FolderOpen className="w-5 h-5 text-glint-accent" />
                 </div>
                 <div>
@@ -348,9 +348,9 @@ export default function Home() {
               <div className="space-y-3">
                 <button
                   onClick={() => glintFileRef.current?.click()}
-                  className="w-full px-4 py-3.5 border-2 border-dashed border-glint-border hover:border-glint-accent/60 rounded-xl text-xs sm:text-sm text-glint-text-secondary hover:text-glint-text hover:bg-glint-accent-muted transition-all font-medium flex items-center justify-center gap-2 group"
+                  className="w-full px-4 py-3.5 border-2 border-dashed border-glint-border hover:border-glint-accent/60 rounded-xl text-xs sm:text-sm text-glint-text-secondary hover:text-glint-text hover:bg-glint-accent-muted hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 font-medium flex items-center justify-center gap-2 group"
                 >
-                  <Upload size={16} className="group-hover:-translate-y-0.5 transition-transform" />
+                  <Upload size={16} className="group-hover:-translate-y-1 transition-transform duration-300" />
                   Select .glint project file
                 </button>
                 <input
@@ -421,11 +421,13 @@ function TemplateShowcaseRow({ template, onClick, index = 0 }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-      className={`group w-full cursor-pointer rounded-2xl overflow-hidden border border-glint-border bg-glint-surface shadow-sm
-        hover:border-glint-accent/60 hover:shadow-xl hover:shadow-glint-accent/10
-        transition-all duration-300 ease-out
+      className={`group w-full cursor-pointer rounded-2xl overflow-hidden border border-glint-border bg-glint-surface
+        shadow-sm hover:shadow-2xl hover:shadow-glint-accent/15
+        hover:border-glint-accent/50
+        hover:scale-[1.02] active:scale-[0.98]
+        transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
         ${shown ? 'glint-reveal' : 'opacity-0 translate-y-6'}`}
-      style={shown ? { animationDelay: `${Math.min(index, 6) * 60}ms` } : undefined}
+      style={shown ? { animationDelay: `${Math.min(index, 6) * 80}ms` } : undefined}
     >
       <TemplateSetPreview template={template} />
     </div>
