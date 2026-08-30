@@ -23,8 +23,8 @@ describe('frameMeta', () => {
     expect(ids).not.toContain('pixel9');
   });
 
-  it('offers Simple Dark for Wear OS listings', () => {
-    expect(framesForStore('play/wear').map((f) => f.id)).toEqual([null, 'simple-dark']);
+  it('offers None for Wear OS listings (no frame available)', () => {
+    expect(framesForStore('play/wear').map((f) => f.id)).toEqual([null]);
   });
 
   it('offers tablet bezels for Play tablets', () => {
