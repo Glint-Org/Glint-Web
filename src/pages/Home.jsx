@@ -269,7 +269,7 @@ export default function Home() {
               <p className="text-base font-semibold text-glint-text">No templates found for this filter</p>
               <p className="text-xs text-glint-text-secondary">Try selecting "All Devices" or resetting your filter.</p>
               <button
-                onClick={() => setDeviceFilter('all')}
+                onClick={() => setDeviceFilter('android-phone')}
                 className="mt-2 px-4 py-2 text-xs font-semibold rounded-lg bg-glint-surface-2 border border-glint-border hover:border-glint-accent/50 text-glint-text transition-all"
               >
                 Reset Filters

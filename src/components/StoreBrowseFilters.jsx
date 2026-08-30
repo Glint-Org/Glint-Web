@@ -9,7 +9,7 @@ const DEVICE_FILTERS = [
   { id: 'android-phone', label: 'Android Phone', icon: Smartphone, stores: ['play/phone'] },
   { id: 'iphone', label: 'iPhone', icon: Smartphone, stores: ['ios/phone'] },
   { id: 'ipad', label: 'iPad', icon: Tablet, stores: ['ios/ipad'] },
-  { id: 'tablet', label: 'Tablet', icon: Tablet, stores: ['play/tablet-7', 'play/tablet-10'] },
+  { id: 'tablet', label: 'Tablet', icon: Tablet, stores: ['play/tablet-7', 'play/tablet-10'], disabled: true },
   { id: 'tv', label: 'TV', icon: Tv, stores: ['play/tv'], disabled: true },
   { id: 'wear', label: 'Wear OS', icon: Watch, stores: ['play/wear'], disabled: true },
   { id: 'chromebook', label: 'Chromebook', icon: Laptop, stores: ['play/chromebook'], disabled: true },
