@@ -26,9 +26,14 @@ export default function FrameBoard({
   padLeft = 0,
   padRight = 0,
   onDropScreenshot,
+  onClearSelection,
 }) {
   const sizeLabel = `${canvasWidth}×${canvasHeight}`;
   const scale = zoom / 100;
+  const displayW = Math.max(1, Math.round(canvasWidth * scale));
+  const frameGap = Math.max(4, Math.round(displayW * 0.035));
+  const boardPadY = Math.max(8, Math.round(displayW * 0.05));
+  const boardPadX = Math.max(12, Math.round(displayW * 0.06));
   const [dropTarget, setDropTarget] = useState(null);
 
   const handleFrameDragOver = (e, index) => {
@@ -58,15 +63,27 @@ export default function FrameBoard({
     }
   };
 
+  const handleBoardPointerDown = (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('[data-frame-column]')) return;
+    onClearSelection?.();
+  };
+
   return (
-    <div className="h-full w-full overflow-auto frame-board-scroll">
+    <div
+      className="h-full w-full overflow-auto frame-board-scroll"
+      onMouseDown={handleBoardPointerDown}
+    >
       <div
-        className="flex items-center gap-6 py-10 min-h-full transition-[padding] duration-200 ease-out"
+        className="flex items-center min-h-full transition-[padding,gap] duration-200 ease-out"
         style={{
           width: 'max-content',
           margin: '0 auto',
-          paddingLeft: Math.max(32, padLeft + 32),
-          paddingRight: Math.max(32, padRight + 32),
+          gap: frameGap,
+          paddingTop: boardPadY,
+          paddingBottom: boardPadY,
+          paddingLeft: Math.max(12, padLeft + boardPadX),
+          paddingRight: Math.max(12, padRight + boardPadX),
         }}
       >
         {frames.map((frame, i) => {
@@ -74,6 +91,7 @@ export default function FrameBoard({
           return (
             <div
               key={frame.id}
+              data-frame-column
               className="relative flex flex-col items-center group"
               onClick={() => onSelect(i)}
               onDragLeave={() => setDropTarget((t) => (t === i ? null : t))}

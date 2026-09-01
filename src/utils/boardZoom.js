@@ -1,15 +1,21 @@
 /**
  * Fit board zoom (%) so frames sit in the visible area between sidebars.
  */
+/** Zoom-aware board spacing — gap scales with displayed frame size. */
+export function boardFrameGap(displayFrameW, minGap = 4, maxGap = 20) {
+  const w = Math.max(1, displayFrameW || 1);
+  return Math.min(maxGap, Math.max(minGap, Math.round(w * 0.035)));
+}
+
 export function computeBoardFitZoom({
   boardWidth,
   boardHeight,
   canvasWidth,
   canvasHeight,
   frameCount = 1,
-  gap = 24,
-  padX = 48,
-  padY = 112,
+  gap = 12,
+  padX = 32,
+  padY = 48,
   minZoom = 8,
   maxZoom = 48,
 } = {}) {

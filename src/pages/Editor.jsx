@@ -36,7 +36,7 @@ import { DEFAULT_SCREENSHOT_STYLE, resolveFrameForStore } from '../utils/frameMe
 import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
-import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
+import { clampBoardZoom, computeBoardFitZoom, boardFrameGap } from '../utils/boardZoom';
 import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
@@ -589,6 +589,7 @@ export default function Editor() {
       canvasWidth: canvasW,
       canvasHeight: canvasH,
       frameCount: frames.length,
+      gap: boardFrameGap(Math.round(canvasW * 0.16)),
     });
     setFitZoom(next);
     return next;

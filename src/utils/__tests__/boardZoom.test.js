@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampBoardZoom, computeBoardFitZoom } from '../boardZoom.js';
+import { clampBoardZoom, computeBoardFitZoom, boardFrameGap } from '../boardZoom.js';
 
 describe('boardZoom', () => {
   it('clamps zoom into bounds', () => {
@@ -40,5 +40,11 @@ describe('boardZoom', () => {
       frameCount: 5,
     });
     expect(many).toBeLessThanOrEqual(one);
+  });
+
+  it('boardFrameGap scales with displayed frame width', () => {
+    expect(boardFrameGap(80)).toBe(4);
+    expect(boardFrameGap(200)).toBe(7);
+    expect(boardFrameGap(600)).toBe(20);
   });
 });
