@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  Type, Trash2, Download, Upload,
+  ZoomIn, ZoomOut, Type, Trash2, Download, Upload,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -36,7 +36,12 @@ import { DEFAULT_SCREENSHOT_STYLE, resolveFrameForStore } from '../utils/frameMe
 import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
-import { computeBoardFitZoom, boardFrameGap } from '../utils/boardZoom';
+import {
+  computeBoardZoomBounds,
+  clampBoardScale,
+  stepBoardScale,
+  boardFrameGap,
+} from '../utils/boardZoom';
 import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
 import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
@@ -44,7 +49,11 @@ import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
+/** Room for the floating bottom toolbar so frame labels stay visible. */
+const BOARD_TOOLBAR_RESERVE = 52;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
+/** ~8% per +/- click — discrete steps avoid trackpad-style rebuild jitter. */
+const ZOOM_STEP = 1.08;
 
 export default function Editor() {
   const location = useLocation();
@@ -106,7 +115,9 @@ export default function Editor() {
   const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
-  const [fitScale, setFitScale] = useState(20);
+  const [boardScale, setBoardScale] = useState(20);
+  const [scaleBounds, setScaleBounds] = useState({ minScale: 20, maxScale: 20 });
+  const userScaleRef = useRef(false);
   const [deviceMenu, setDeviceMenu] = useState(null);
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
@@ -578,29 +589,48 @@ export default function Editor() {
   };
 
   const screenshotList = frames.map((f) => f.screenshotUrl).filter(Boolean);
-  const recomputeFitScale = useCallback(() => {
+
+  const recomputeBoardScale = useCallback(() => {
     const el = boardRef.current;
-    if (!el) return 20;
+    if (!el) return { minScale: 20, maxScale: 20 };
     const leftPad = leftOpen ? LEFT_W : 0;
     const rightPad = rightOpen ? RIGHT_W : 0;
-    const next = computeBoardFitZoom({
+    const params = {
       boardWidth: el.clientWidth - leftPad - rightPad,
-      boardHeight: el.clientHeight,
+      boardHeight: Math.max(200, el.clientHeight - BOARD_TOOLBAR_RESERVE),
       canvasWidth: canvasW,
       canvasHeight: canvasH,
       frameCount: frames.length,
       gap: boardFrameGap(Math.round(canvasW * 0.16)),
+    };
+    const bounds = computeBoardZoomBounds(params);
+    setScaleBounds(bounds);
+    setBoardScale((prev) => {
+      if (userScaleRef.current) return clampBoardScale(prev, bounds.minScale, bounds.maxScale);
+      return bounds.minScale;
     });
-    setFitScale(next);
-    return next;
+    return bounds;
   }, [leftOpen, rightOpen, canvasW, canvasH, frames.length]);
+
+  const zoomIn = () => {
+    userScaleRef.current = true;
+    setBoardScale((s) => stepBoardScale(s, ZOOM_STEP, scaleBounds.minScale, scaleBounds.maxScale));
+  };
+  const zoomOut = () => {
+    userScaleRef.current = true;
+    setBoardScale((s) => stepBoardScale(s, 1 / ZOOM_STEP, scaleBounds.minScale, scaleBounds.maxScale));
+  };
+
+  const canZoomIn = boardScale < scaleBounds.maxScale - 0.05;
+  const canZoomOut = boardScale > scaleBounds.minScale + 0.05;
 
   // Re-fit when sidebars / frame pack / export size change (after layout paints)
   useEffect(() => {
+    userScaleRef.current = false;
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
-      recomputeFitScale();
+      recomputeBoardScale();
     };
     run();
     const raf = requestAnimationFrame(() => requestAnimationFrame(run));
@@ -608,16 +638,16 @@ export default function Editor() {
       cancelled = true;
       cancelAnimationFrame(raf);
     };
-  }, [recomputeFitScale]);
+  }, [recomputeBoardScale]);
 
-  // Keep fit updated on window/board resize
+  // Keep bounds updated on window/board resize (respect manual scale)
   useEffect(() => {
     const el = boardRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => recomputeFitScale());
+    const ro = new ResizeObserver(() => recomputeBoardScale());
     ro.observe(el);
     return () => ro.disconnect();
-  }, [recomputeFitScale]);
+  }, [recomputeBoardScale]);
 
   // Recalc Fabric pointer offsets after CSS display size changes.
   useEffect(() => {
@@ -625,7 +655,7 @@ export default function Editor() {
       Object.values(canvasMapRef.current).forEach((c) => c?.calcOffset?.());
     });
     return () => cancelAnimationFrame(id);
-  }, [fitScale]);
+  }, [boardScale]);
 
   const handleDeviceContextMenu = useCallback((payload) => {
     const idx = frames.findIndex((f) => f.id === payload.frameId);
@@ -831,11 +861,13 @@ export default function Editor() {
             canvasWidth={canvasW}
             canvasHeight={canvasH}
             themes={themes}
-            fitScale={fitScale}
+            fitScale={boardScale}
             padLeft={leftOpen ? LEFT_W : 0}
             padRight={rightOpen ? RIGHT_W : 0}
+            padBottom={BOARD_TOOLBAR_RESERVE}
             onDropScreenshot={assignScreenshotToFrame}
             onClearSelection={clearCanvasSelection}
+            showFrameChrome={!canZoomIn}
           />
 
           <div
@@ -850,6 +882,13 @@ export default function Editor() {
             </ToolBtn>
             <ToolBtn onClick={handleDelete} title="Delete selected">
               <Trash2 size={15} />
+            </ToolBtn>
+            <Sep />
+            <ToolBtn onClick={zoomOut} title="Zoom out (show all frames)" disabled={!canZoomOut}>
+              <ZoomOut size={15} />
+            </ToolBtn>
+            <ToolBtn onClick={zoomIn} title="Zoom in (up to ~2.5 frames)" disabled={!canZoomIn}>
+              <ZoomIn size={15} />
             </ToolBtn>
           </div>
         </main>
@@ -1046,12 +1085,13 @@ export default function Editor() {
   );
 }
 
-function ToolBtn({ children, onClick, active, title }) {
+function ToolBtn({ children, onClick, active, title, disabled }) {
   return (
     <button
       onClick={onClick}
       title={title}
-      className={`p-2 rounded-lg transition-colors ${
+      disabled={disabled}
+      className={`p-2 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none ${
         active
           ? 'bg-glint-accent text-glint-text-on-accent'
           : 'text-glint-text-secondary hover:bg-glint-surface-2'
@@ -1060,6 +1100,10 @@ function ToolBtn({ children, onClick, active, title }) {
       {children}
     </button>
   );
+}
+
+function Sep() {
+  return <div className="w-px h-5 bg-glint-border-strong mx-1" />;
 }
 
 function isLight(hex) {

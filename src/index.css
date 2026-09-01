@@ -234,6 +234,7 @@ select:disabled {
 .frame-board-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  overscroll-behavior-y: none;
 }
 .hide-scrollbar::-webkit-scrollbar,
 .frame-board-scroll::-webkit-scrollbar {

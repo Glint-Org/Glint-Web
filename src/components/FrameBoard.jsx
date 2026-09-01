@@ -1,13 +1,14 @@
 import {
   Plus, Copy, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import FrameCanvas from './FrameCanvas';
 import { MAX_FRAMES, MIN_FRAMES } from '../hooks/useFrames';
 import { readDroppedScreenshotUrl } from '../utils/assetLibrary';
 
 /**
  * AppLaunchpad-style board: horizontal row of clipped Frame artboards.
+ * Scrolls horizontally when zoomed in; no vertical pan.
  */
 export default function FrameBoard({
   frames,
@@ -25,15 +26,18 @@ export default function FrameBoard({
   fitScale = 20,
   padLeft = 0,
   padRight = 0,
+  padBottom = 52,
   onDropScreenshot,
   onClearSelection,
+  showFrameChrome = false,
 }) {
   const sizeLabel = `${canvasWidth}×${canvasHeight}`;
   const scale = fitScale / 100;
   const displayW = Math.max(1, Math.round(canvasWidth * scale));
+  const displayH = Math.max(1, Math.round(canvasHeight * scale));
   const frameGap = Math.max(4, Math.round(displayW * 0.035));
-  const boardPadY = Math.max(8, Math.round(displayW * 0.05));
   const boardPadX = Math.max(12, Math.round(displayW * 0.06));
+  const scrollRef = useRef(null);
   const [dropTarget, setDropTarget] = useState(null);
 
   const handleFrameDragOver = (e, index) => {
@@ -69,37 +73,47 @@ export default function FrameBoard({
     onClearSelection?.();
   };
 
+  /** Trackpad vertical wheel → horizontal scroll when board overflows. */
+  const handleBoardWheel = (e) => {
+    const el = scrollRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth + 1) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    el.scrollLeft += e.deltaY;
+    e.preventDefault();
+  };
+
   return (
     <div
-      className="h-full w-full overflow-auto frame-board-scroll"
+      ref={scrollRef}
+      className="h-full w-full overflow-x-auto overflow-y-hidden frame-board-scroll overscroll-y-none"
+      style={{ paddingBottom: padBottom }}
       onMouseDown={handleBoardPointerDown}
+      onWheel={handleBoardWheel}
     >
-      <div className="flex items-center justify-center min-h-full min-w-full">
-        <div
-          className="flex items-center shrink-0"
-          style={{
-            gap: frameGap,
-            paddingTop: boardPadY,
-            paddingBottom: boardPadY,
-            paddingLeft: Math.max(12, padLeft + boardPadX),
-            paddingRight: Math.max(12, padRight + boardPadX),
-          }}
-        >
+      <div
+        className="inline-flex h-full items-center shrink-0"
+        style={{
+          gap: frameGap,
+          paddingLeft: Math.max(12, padLeft + boardPadX),
+          paddingRight: Math.max(12, padRight + boardPadX),
+        }}
+      >
         {frames.map((frame, i) => {
           const selected = i === activeIndex;
+          const chromeVisible = showFrameChrome || selected;
           return (
             <div
               key={frame.id}
               data-frame-column
-              className="relative flex flex-col items-center group shrink-0"
+              className="relative flex flex-col items-center shrink-0 group"
               onClick={() => onSelect(i)}
               onDragLeave={() => setDropTarget((t) => (t === i ? null : t))}
               onDragOver={(e) => handleFrameDragOver(e, i)}
               onDrop={(e) => handleFrameDrop(e, i)}
             >
               <div
-                className={`flex items-center gap-0.5 mb-2 transition-opacity ${
-                  selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                className={`flex items-center gap-0.5 mb-2 shrink-0 transition-opacity ${
+                  chromeVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                 }`}
               >
                 <CtrlBtn
@@ -140,13 +154,14 @@ export default function FrameBoard({
               </div>
 
               <div
-                className={`relative overflow-hidden rounded-md bg-glint-surface transition-[box-shadow,opacity,ring] duration-150 ${
+                className={`relative overflow-hidden rounded-md bg-glint-surface shrink-0 transition-[box-shadow,opacity,ring] duration-150 ${
                   dropTarget === i
                     ? 'ring-2 ring-glint-accent ring-offset-2 ring-offset-glint-bg shadow-lg shadow-glint-accent/30'
                     : selected
                       ? 'ring-2 ring-glint-accent shadow-lg shadow-glint-accent/25'
                       : 'ring-1 ring-glint-border shadow-xl opacity-90 hover:opacity-100'
                 }`}
+                style={{ width: displayW, height: displayH }}
               >
                 <FrameCanvas
                   frameId={frame.id}
@@ -164,7 +179,7 @@ export default function FrameBoard({
                 />
               </div>
 
-              <div className="mt-2 text-center">
+              <div className="mt-2 text-center shrink-0">
                 <div className={`text-xs font-semibold ${selected ? 'text-glint-accent' : 'text-glint-text-secondary'}`}>
                   #{i + 1}
                 </div>
@@ -173,7 +188,6 @@ export default function FrameBoard({
             </div>
           );
         })}
-        </div>
       </div>
     </div>
   );
