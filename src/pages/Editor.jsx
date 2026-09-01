@@ -37,6 +37,7 @@ import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom, boardFrameGap } from '../utils/boardZoom';
+import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
 import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
@@ -127,6 +128,7 @@ export default function Editor() {
 
   useEffect(() => {
     loadThemePresets().then(setThemes);
+    restoreCustomFonts().catch(() => {});
   }, []);
 
   useEffect(() => () => {
@@ -415,8 +417,9 @@ export default function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exportPreset]);
 
-  const handleAddText = useCallback(() => {
+  const handleAddText = useCallback(async () => {
     if (!activeCanvas) return;
+    await ensureFontReady(fontFamily, '700');
     addTextOverlay(activeCanvas, 'Your headline', {
       fill: background?.type === 'solid' && isLight(background.value) ? '#1A1A1A' : '#FFFFFF',
       fontFamily,

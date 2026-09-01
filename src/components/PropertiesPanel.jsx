@@ -396,6 +396,17 @@ export default function PropertiesPanel({
 
         {rightTab === 'design' && (
           <>
+            <Section title="Font">
+              <FontPicker
+                selected={isText ? textProps.fontFamily : fontFamily}
+                onChange={(name) => {
+                  onFontFamilyChange?.(name);
+                  if (isText) applyToSelection({ fontFamily: name });
+                }}
+                label={null}
+              />
+            </Section>
+
             <Section title="Screenshot chrome">
               {selection?.type !== 'framed-screenshot' && (
                 <>
@@ -523,7 +534,7 @@ export default function PropertiesPanel({
               </div>
             </Section>
 
-            {isText ? (
+            {isText && (
               <Section title="Typography">
                 <textarea
                   value={textProps.text}
@@ -612,14 +623,6 @@ export default function PropertiesPanel({
                     <Bold size={14} />
                   </button>
                 </div>
-                <FontPicker
-                  compact
-                  selected={textProps.fontFamily}
-                  onChange={(name) => {
-                    onFontFamilyChange?.(name);
-                    applyToSelection({ fontFamily: name });
-                  }}
-                />
                 <label className="flex items-center justify-between gap-2 py-0.5">
                   <span className="text-[10px] text-glint-text-tertiary">Text shadow</span>
                   <button
@@ -668,10 +671,6 @@ export default function PropertiesPanel({
                     />
                   </>
                 )}
-              </Section>
-            ) : (
-              <Section title="Font">
-                <FontPicker compact selected={fontFamily} onChange={onFontFamilyChange} />
               </Section>
             )}
           </>
