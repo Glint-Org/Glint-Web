@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  ZoomIn, ZoomOut, RotateCcw, Type, Trash2, Download, Upload,
+  Type, Trash2, Download, Upload,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -36,7 +36,7 @@ import { DEFAULT_SCREENSHOT_STYLE, resolveFrameForStore } from '../utils/frameMe
 import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
-import { clampBoardZoom, computeBoardFitZoom, boardFrameGap } from '../utils/boardZoom';
+import { computeBoardFitZoom, boardFrameGap } from '../utils/boardZoom';
 import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
 import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
@@ -45,8 +45,6 @@ import { parseGlint, isGlintFile } from '../utils/projectPack';
 const LEFT_W = 280;
 const RIGHT_W = 300;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
-/** ~4% per zoom button click — gentle steps within 15–35% range. */
-const ZOOM_STEP = 1.04;
 
 export default function Editor() {
   const location = useLocation();
@@ -108,8 +106,7 @@ export default function Editor() {
   const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
-  const [zoom, setZoom] = useState(20);
-  const [fitZoom, setFitZoom] = useState(20);
+  const [fitScale, setFitScale] = useState(20);
   const [deviceMenu, setDeviceMenu] = useState(null);
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
@@ -581,16 +578,7 @@ export default function Editor() {
   };
 
   const screenshotList = frames.map((f) => f.screenshotUrl).filter(Boolean);
-  const userZoomRef = useRef(false);
-  const wheelFactorRef = useRef(1);
-  const wheelRafRef = useRef(0);
-
-  const scaleZoom = useCallback(
-    (z, factor) => clampBoardZoom(Math.round(z * factor * 10) / 10),
-    [],
-  );
-
-  const recomputeFitZoom = useCallback(() => {
+  const recomputeFitScale = useCallback(() => {
     const el = boardRef.current;
     if (!el) return 20;
     const leftPad = leftOpen ? LEFT_W : 0;
@@ -603,30 +591,16 @@ export default function Editor() {
       frameCount: frames.length,
       gap: boardFrameGap(Math.round(canvasW * 0.16)),
     });
-    setFitZoom(next);
+    setFitScale(next);
     return next;
   }, [leftOpen, rightOpen, canvasW, canvasH, frames.length]);
 
-  const zoomIn = () => {
-    userZoomRef.current = true;
-    setZoom((z) => scaleZoom(z, ZOOM_STEP));
-  };
-  const zoomOut = () => {
-    userZoomRef.current = true;
-    setZoom((z) => scaleZoom(z, 1 / ZOOM_STEP));
-  };
-  const zoomReset = () => {
-    userZoomRef.current = false;
-    setZoom(recomputeFitZoom());
-  };
-
   // Re-fit when sidebars / frame pack / export size change (after layout paints)
   useEffect(() => {
-    userZoomRef.current = false;
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
-      setZoom(recomputeFitZoom());
+      recomputeFitScale();
     };
     run();
     const raf = requestAnimationFrame(() => requestAnimationFrame(run));
@@ -634,19 +608,16 @@ export default function Editor() {
       cancelled = true;
       cancelAnimationFrame(raf);
     };
-  }, [recomputeFitZoom]);
+  }, [recomputeFitScale]);
 
-  // Keep fit updated on window/board resize (respect manual zoom)
+  // Keep fit updated on window/board resize
   useEffect(() => {
     const el = boardRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => {
-      const next = recomputeFitZoom();
-      if (!userZoomRef.current) setZoom(next);
-    });
+    const ro = new ResizeObserver(() => recomputeFitScale());
     ro.observe(el);
     return () => ro.disconnect();
-  }, [recomputeFitZoom]);
+  }, [recomputeFitScale]);
 
   // Recalc Fabric pointer offsets after CSS display size changes.
   useEffect(() => {
@@ -654,31 +625,7 @@ export default function Editor() {
       Object.values(canvasMapRef.current).forEach((c) => c?.calcOffset?.());
     });
     return () => cancelAnimationFrame(id);
-  }, [zoom]);
-
-  // Zoom only the frame board - block browser page zoom over the canvas
-  useEffect(() => {
-    const el = boardRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      userZoomRef.current = true;
-      wheelFactorRef.current *= Math.pow(0.9985, e.deltaY);
-      if (wheelRafRef.current) return;
-      wheelRafRef.current = requestAnimationFrame(() => {
-        wheelRafRef.current = 0;
-        const factor = wheelFactorRef.current;
-        wheelFactorRef.current = 1;
-        setZoom((z) => scaleZoom(z, factor));
-      });
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      el.removeEventListener('wheel', onWheel);
-      if (wheelRafRef.current) cancelAnimationFrame(wheelRafRef.current);
-    };
-  }, [scaleZoom]);
+  }, [fitScale]);
 
   const handleDeviceContextMenu = useCallback((payload) => {
     const idx = frames.findIndex((f) => f.id === payload.frameId);
@@ -884,7 +831,7 @@ export default function Editor() {
             canvasWidth={canvasW}
             canvasHeight={canvasH}
             themes={themes}
-            zoom={zoom}
+            fitScale={fitScale}
             padLeft={leftOpen ? LEFT_W : 0}
             padRight={rightOpen ? RIGHT_W : 0}
             onDropScreenshot={assignScreenshotToFrame}
@@ -903,24 +850,6 @@ export default function Editor() {
             </ToolBtn>
             <ToolBtn onClick={handleDelete} title="Delete selected">
               <Trash2 size={15} />
-            </ToolBtn>
-            <Sep />
-            <ToolBtn onClick={zoomOut} title="Zoom out">
-              <ZoomOut size={15} />
-            </ToolBtn>
-            <button
-              onClick={zoomReset}
-              className="px-2 py-1 rounded-lg text-[11px] font-semibold text-glint-text-secondary hover:bg-glint-surface-2 w-14 tabular-nums"
-              title={`Fit to view (${Math.round(fitZoom)}%)`}
-            >
-              {Math.round(zoom)}%
-            </button>
-            <ToolBtn onClick={zoomIn} title="Zoom in">
-              <ZoomIn size={15} />
-            </ToolBtn>
-            <Sep />
-            <ToolBtn onClick={zoomReset} title="Fit to view">
-              <RotateCcw size={14} />
             </ToolBtn>
           </div>
         </main>
@@ -1131,10 +1060,6 @@ function ToolBtn({ children, onClick, active, title }) {
       {children}
     </button>
   );
-}
-
-function Sep() {
-  return <div className="w-px h-5 bg-glint-border-strong mx-1" />;
 }
 
 function isLight(hex) {

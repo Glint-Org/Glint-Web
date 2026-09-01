@@ -22,14 +22,14 @@ export default function FrameBoard({
   canvasWidth = 1080,
   canvasHeight = 1920,
   themes = {},
-  zoom = 16,
+  fitScale = 20,
   padLeft = 0,
   padRight = 0,
   onDropScreenshot,
   onClearSelection,
 }) {
   const sizeLabel = `${canvasWidth}×${canvasHeight}`;
-  const scale = zoom / 100;
+  const scale = fitScale / 100;
   const displayW = Math.max(1, Math.round(canvasWidth * scale));
   const frameGap = Math.max(4, Math.round(displayW * 0.035));
   const boardPadY = Math.max(8, Math.round(displayW * 0.05));

@@ -1,10 +1,10 @@
 /**
- * Fit board zoom (%) so frames sit in the visible area between sidebars.
+ * Auto-fit board scale (%) so frames sit in the visible area between sidebars.
  */
-export const BOARD_ZOOM_MIN = 15;
-export const BOARD_ZOOM_MAX = 35;
+export const BOARD_FIT_MIN = 8;
+export const BOARD_FIT_MAX = 100;
 
-/** Zoom-aware board spacing — gap scales with displayed frame size. */
+/** Gap scales with displayed frame width. */
 export function boardFrameGap(displayFrameW, minGap = 4, maxGap = 20) {
   const w = Math.max(1, displayFrameW || 1);
   return Math.min(maxGap, Math.max(minGap, Math.round(w * 0.035)));
@@ -19,8 +19,8 @@ export function computeBoardFitZoom({
   gap = 12,
   padX = 32,
   padY = 48,
-  minZoom = BOARD_ZOOM_MIN,
-  maxZoom = BOARD_ZOOM_MAX,
+  minZoom = BOARD_FIT_MIN,
+  maxZoom = BOARD_FIT_MAX,
 } = {}) {
   const n = Math.max(1, frameCount);
   const availW = Math.max(160, (boardWidth || 0) - padX);
@@ -32,8 +32,4 @@ export function computeBoardFitZoom({
   const scaleByW = (availW - totalGaps) / (canvasWidth * n);
   const scale = Math.min(scaleByH, scaleByW);
   return Math.min(maxZoom, Math.max(minZoom, Math.round(scale * 1000) / 10));
-}
-
-export function clampBoardZoom(z, minZoom = BOARD_ZOOM_MIN, maxZoom = BOARD_ZOOM_MAX) {
-  return Math.min(maxZoom, Math.max(minZoom, z));
 }
