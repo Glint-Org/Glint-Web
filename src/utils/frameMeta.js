@@ -128,6 +128,48 @@ export const FRAME_INSETS = {
 };
 
 /**
+ * Per-device status bar assets (`public/frames/status-bars/{profile}-{theme}.svg`).
+ * refW/refH = SVG viewBox (logical pt). refScreenH = device logical height for hole-fit.
+ */
+export const STATUS_BAR_SPECS = {
+  pixel9: { profile: 'android-pixel', refW: 412, refH: 36, refScreenH: 915 },
+  'galaxy-s24': { profile: 'android-samsung', refW: 412, refH: 36, refScreenH: 915 },
+  'galaxy-s21': { profile: 'android-samsung', refW: 412, refH: 36, refScreenH: 915 },
+  'galaxy-s21-ultra': { profile: 'android-samsung', refW: 412, refH: 36, refScreenH: 960 },
+  'iphone16-pro': { profile: 'ios-island', refW: 393, refH: 59, refScreenH: 852 },
+  'iphone16-pro-max': { profile: 'ios-island', refW: 430, refH: 59, refScreenH: 932 },
+  'iphone13-pro': { profile: 'ios-notch', refW: 390, refH: 47, refScreenH: 844 },
+  'iphone13-pro-max': { profile: 'ios-notch', refW: 428, refH: 47, refScreenH: 926 },
+  'ipad-pro-13': { profile: 'ipados', refW: 1024, refH: 24, refScreenH: 1366 },
+  'ipad-pro': { profile: 'ipados', refW: 1024, refH: 24, refScreenH: 1194 },
+  'ipad-air-2020': { profile: 'ipados', refW: 1024, refH: 24, refScreenH: 1180 },
+};
+
+export function getStatusBarMeta(frameId) {
+  if (!frameId) return STATUS_BAR_SPECS.pixel9;
+  return STATUS_BAR_SPECS[frameId] ?? null;
+}
+
+/** Status bar height in screen-hole pixels — tracks frame inset height when available. */
+export function statusBarHeightForFrame(screenW, frameId, screenH = 0) {
+  const sb = getStatusBarMeta(frameId);
+  if (!sb || !(screenW > 0)) return 0;
+  if (screenH > 0 && sb.refScreenH) {
+    return Math.max(1, Math.round((screenH * sb.refH) / sb.refScreenH));
+  }
+  return Math.max(1, Math.round((screenW * sb.refH) / sb.refW));
+}
+
+/** Screen-hole size for a curated frame (native frame pixels). */
+export function frameScreenSize(frameId) {
+  const meta = getFrameMeta(frameId);
+  return {
+    w: meta.width - meta.left - meta.right,
+    h: meta.height - meta.top - meta.bottom,
+  };
+}
+
+/**
  * Curated bezels tagged by store platform + form factor.
  * FrameSelector only offers options allowed for the active store target.
  */

@@ -270,18 +270,15 @@ export default function PropertiesPanel({
           <>
             <FrameSelector selected={frame} onChange={onFrameChange} store={store} />
 
-            <Section title="Status bar">
-              <p className="text-[10px] text-glint-text-tertiary -mt-1">
-                Matches the selected device (iPhone / Android / iPad). Off = shot fills the screen.
-              </p>
+            <Section>
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] text-glint-text-secondary">Show</span>
+                <span className="text-[11px] text-glint-text-secondary">Status bar</span>
                 <button
                   type="button"
                   role="switch"
                   aria-checked={!!style.statusBarEnabled}
                   onClick={() => patchStyle({ statusBarEnabled: !style.statusBarEnabled })}
-                  className={`relative w-9 h-5 rounded-full transition-colors ${
+                  className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
                     style.statusBarEnabled ? 'bg-glint-accent' : 'bg-glint-border'
                   }`}
                 >

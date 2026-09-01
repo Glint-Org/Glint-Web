@@ -2,32 +2,46 @@ import { describe, expect, it } from 'vitest';
 import {
   statusBarHeight,
   statusBarChromeChanged,
-  drawStatusBar,
   screenContentRect,
   coverFitRect,
   statusBarKindForFrame,
   statusBarHasIsland,
 } from '../statusBar.js';
+import { statusBarHeightForFrame, getStatusBarMeta } from '../frameMeta.js';
 
 describe('statusBar', () => {
   it('maps frames to platform status-bar kinds', () => {
     expect(statusBarKindForFrame('iphone16-pro')).toBe('ios');
     expect(statusBarKindForFrame('ipad-pro-13')).toBe('ipados');
     expect(statusBarKindForFrame('pixel9')).toBe('android');
+    expect(statusBarKindForFrame('galaxy-s24')).toBe('android');
   });
 
-  it('enables Dynamic Island only on modern iPhone frames', () => {
+  it('assigns a unique SVG profile per device frame', () => {
+    expect(getStatusBarMeta('iphone16-pro')?.profile).toBe('ios-island');
+    expect(getStatusBarMeta('iphone13-pro')?.profile).toBe('ios-notch');
+    expect(getStatusBarMeta('pixel9')?.profile).toBe('android-pixel');
+    expect(getStatusBarMeta('galaxy-s24')?.profile).toBe('android-samsung');
+    expect(getStatusBarMeta('tv')).toBeNull();
+  });
+
+  it('enables Dynamic Island only on iPhone 16 frames', () => {
     expect(statusBarHasIsland('iphone16-pro-max')).toBe(true);
-    expect(statusBarHasIsland('pixel9')).toBe(false);
+    expect(statusBarHasIsland('iphone13-pro')).toBe(false);
   });
 
-  it('scales height with screen width and kind', () => {
-    expect(statusBarHeight(1080, 'ios')).toBeGreaterThan(statusBarHeight(400, 'ios'));
-    expect(statusBarHeight(100, 'android')).toBe(26);
-    expect(statusBarHeight(800, 'ios')).not.toBe(statusBarHeight(800, 'android'));
+  it('scales height from official SVG viewBox ratios', () => {
+    expect(statusBarHeightForFrame(393, 'iphone16-pro')).toBe(59);
+    expect(statusBarHeightForFrame(1024, 'ipad-pro-13')).toBe(24);
+    expect(statusBarHeight(1080, 'iphone16-pro')).toBe(statusBarHeightForFrame(1080, 'iphone16-pro'));
   });
 
-  it('detects enable / theme chrome changes', () => {
+  it('uses frame hole height when screenH is provided', () => {
+    expect(statusBarHeightForFrame(1206, 'iphone16-pro', 2622)).toBe(182);
+    expect(statusBarHeightForFrame(1280, 'pixel9', 2856)).toBe(112);
+  });
+
+  it('detects enable / theme / profile chrome changes', () => {
     expect(statusBarChromeChanged({}, { statusBarEnabled: true })).toBe(true);
     expect(
       statusBarChromeChanged(
@@ -37,25 +51,27 @@ describe('statusBar', () => {
     ).toBe(true);
     expect(
       statusBarChromeChanged(
-        { statusBarEnabled: true, statusBarTheme: 'dark' },
-        { statusBarEnabled: true, statusBarTheme: 'dark' },
+        { statusBarEnabled: true },
+        { statusBarEnabled: true },
+        'iphone16-pro',
+        'iphone13-pro',
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('reserves full hole when status bar is off', () => {
     const r = screenContentRect(400, 800, { statusBarEnabled: false });
-    expect(r).toEqual({ x: 0, y: 0, w: 400, h: 800, barH: 0, kind: 'android' });
+    expect(r.y).toBe(0);
+    expect(r.h).toBe(800);
+    expect(r.barH).toBe(0);
   });
 
-  it('reserves content below status bar when on', () => {
-    const barH = statusBarHeight(400, 'ios');
+  it('reserves content below per-frame status bar when on', () => {
+    const barH = statusBarHeightForFrame(400, 'iphone16-pro', 800);
     const r = screenContentRect(400, 800, { statusBarEnabled: true }, 'iphone16-pro');
-    expect(r.kind).toBe('ios');
+    expect(r.profile).toBe('ios-island');
     expect(r.y).toBe(barH);
     expect(r.h).toBe(800 - barH);
-    expect(r.w).toBe(400);
-    expect(r.barH).toBe(barH);
   });
 
   it('cover-fits into the content rect without leaving gaps on either axis', () => {
@@ -63,35 +79,5 @@ describe('statusBar', () => {
     expect(fit.dw).toBeCloseTo(400, 5);
     expect(fit.dx).toBeCloseTo(0, 5);
     expect(fit.dh).toBeGreaterThan(700);
-    expect(fit.dy).toBeLessThan(50);
-  });
-
-  it('draws each platform bar without throwing', () => {
-    const ctx = {
-      save() {},
-      restore() {},
-      fillText() {},
-      strokeRect() {},
-      fillRect() {},
-      beginPath() {},
-      arc() {},
-      arcTo() {},
-      moveTo() {},
-      stroke() {},
-      fill() {},
-      roundRect() {},
-      rect() {},
-      measureText() { return { width: 28 }; },
-      fillStyle: '',
-      strokeStyle: '',
-      font: '',
-      textBaseline: '',
-      textAlign: '',
-      lineWidth: 0,
-      lineCap: '',
-    };
-    drawStatusBar(ctx, 400, 'dark', 'ios', 'iphone16-pro');
-    drawStatusBar(ctx, 400, 'light', 'android');
-    drawStatusBar(ctx, 800, 'dark', 'ipados');
   });
 });

@@ -9,12 +9,11 @@ import {
 import { GLINT_CLONE_PROPS } from './glintCloneProps';
 import { isProtectedLayer } from './layerGuards';
 import {
-  drawStatusBar,
+  paintStatusBar,
   statusBarChromeChanged,
   screenContentRect,
   coverFitRect,
   containFitRect,
-  resolveStatusBarKind,
 } from './statusBar';
 
 export { GLINT_CLONE_PROPS } from './glintCloneProps';
@@ -240,7 +239,6 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
   const h = Math.max(1, Math.round(screenH));
   const r = Math.max(0, Math.min(rx || 0, w / 2, h / 2));
   const content = screenContentRect(w, h, chrome, frameId);
-  const kind = content.kind || resolveStatusBarKind(chrome, frameId);
   const fitMode = chrome.fitMode || 'cover';
 
   const src = await FabricImage.fromURL(screenshotUrl, { crossOrigin: 'anonymous' });
@@ -294,7 +292,7 @@ async function buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome = {
     ctx.save();
     pathRoundRect(ctx, 0, 0, w, h, r);
     ctx.clip();
-    drawStatusBar(ctx, w, chrome.statusBarTheme || 'dark', kind, frameId);
+    await paintStatusBar(ctx, w, chrome.statusBarTheme || 'dark', frameId, h);
     ctx.restore();
   }
 
@@ -584,7 +582,7 @@ async function buildFramedDeviceBitmap(screenshotUrl, frameId, chrome = {}) {
   const rx = meta.rx || 0;
 
   // Sharp fill — clipped to the hole; bezel PNG/SVG masks remaining chrome.
-  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, 0, chrome, frameId);
+  const screen = await buildScreenBitmap(screenshotUrl, screenW, screenH, rx, chrome, frameId);
   const screenEl = screen.getElement?.() || screen._element;
 
   const bezel = await loadFrameBezel(frameId);

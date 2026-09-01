@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 412 36" fill="none">
+  <rect width="412" height="36" fill="#FFFFFF"/>
+  
+  <text x="16" y="23.5" fill="#1C1B1F" font-family="Roboto,'Google Sans',system-ui,sans-serif" font-size="14" font-weight="500" letter-spacing="0.1">9:30</text>
+  
+  <rect x="334.00" y="20.68" width="2.72" height="5.32" rx="1.36" fill="#1C1B1F"/>
+  <rect x="338.76" y="18.30" width="2.72" height="7.70" rx="1.36" fill="#1C1B1F"/>
+  <rect x="343.52" y="15.92" width="2.72" height="10.08" rx="1.36" fill="#1C1B1F"/>
+  <rect x="348.28" y="13.12" width="2.72" height="12.88" rx="1.36" fill="#1C1B1F"/>
+  <g color="#1C1B1F">
+    <g transform="translate(355.00,12.50) scale(0.73024) translate(-0.36,-3)" fill="currentColor">
+    <path d="M12.01 21.49L23.64 7c-.45-.34-4.93-4-11.64-4C5.28 3 .81 6.66.36 7l11.63 14.49.01.01.01-.01z"/>
+  </g>
+  </g>
+  <g transform="translate(382.80,12.00) scale(0.70000)" fill="#1C1B1F">
+    <path d="M3.5,2 v0 H1.33 C0.6,2 0,2.6 0,3.33 V13v5.67 C0,19.4 0.6,20 1.33,20 h9.33 C11.4,20 12,19.4 12,18.67 V13V3.33 C12,2.6 11.4,2 10.67,2 H8.5 V0 H3.5 z M2,18v-7V4h8v9v5H2L2,18z" opacity="0.55"/>
+    <path d="M2,18 v-14 h8 v14 z" transform="scale(0.78,1)"/>
+  </g>
+</svg>
