@@ -127,6 +127,23 @@ export async function ingestScreenshotFiles(files, onItemProgress) {
   return out;
 }
 
+/** Restore all cached blobs as object URLs (newest last, up to meta cap). */
+export async function restoreAllCachedScreenshots() {
+  const ids = await listCachedScreenshotIds();
+  const out = [];
+  for (const id of ids) {
+    const blob = await getScreenshotBlob(id);
+    if (blob) {
+      out.push({
+        id,
+        url: URL.createObjectURL(blob),
+        name: `Screenshot ${out.length + 1}`,
+      });
+    }
+  }
+  return out;
+}
+
 /** Restore cached blobs as object URLs (newest first, capped). */
 export async function restoreCachedScreenshots(limit = 10) {
   const ids = await listCachedScreenshotIds();

@@ -9,6 +9,7 @@ import FrameBoard from '../components/FrameBoard';
 import TemplateGallery from '../components/TemplateGallery';
 import SessionImporter from '../components/SessionImporter';
 import FrameScreenshotsPanel from '../components/FrameScreenshotsPanel';
+import AssetLibraryPanel from '../components/AssetLibraryPanel';
 import FramesPanel from '../components/FramesPanel';
 import ExportPanel from '../components/ExportPanel';
 import PropertiesPanel from '../components/PropertiesPanel';
@@ -36,7 +37,8 @@ import { EXPORT_PRESETS, resolveStoreKey } from '../utils/exportHelper';
 import { getStoreTarget } from '../utils/storeCatalog';
 import { getWhiteScreenshot } from '../utils/placeholderScreenshots';
 import { clampBoardZoom, computeBoardFitZoom } from '../utils/boardZoom';
-import { restoreCachedScreenshots } from '../utils/screenshotStore';
+import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
+import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 const LEFT_W = 280;
@@ -48,6 +50,11 @@ export default function Editor() {
   const navigate = useNavigate();
   const initialTemplate = location.state?.template || null;
   const initialScreenshots = location.state?.screenshots || [];
+  const initialAssetItems = location.state?.assetItems?.length
+    ? location.state.assetItems
+    : initialScreenshots
+        .filter(isUserScreenshot)
+        .map((url, i) => ({ id: `init-${i}`, url, name: `Screenshot ${i + 1}` }));
 
   const initialFrames = useMemo(() => {
     if (initialTemplate) return framesFromTemplate(initialTemplate, initialScreenshots);
@@ -94,7 +101,8 @@ export default function Editor() {
   const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
   const [bridgeToken, setBridgeToken] = useState('');
-  const [leftTab, setLeftTab] = useState('templates');
+  const [leftTab, setLeftTab] = useState(initialAssetItems.length ? 'assets' : 'templates');
+  const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [zoom, setZoom] = useState(16);
@@ -127,11 +135,23 @@ export default function Editor() {
     styleApplyGenRef.current += 1;
   }, []);
 
+  const addAssets = useCallback((items) => {
+    if (!items?.length) return;
+    setAssetLibrary((prev) => mergeAssetItems(prev, items));
+  }, []);
+
   useEffect(() => {
     if (bridge.screenshots.length > 0) {
+      const items = bridge.screenshots.map((url, i) => ({
+        id: `bridge-${Date.now()}-${i}`,
+        url,
+        name: `Capture ${i + 1}`,
+      }));
+      addAssets(items);
       mapScreenshots(bridge.screenshots);
+      setLeftTab('assets');
     }
-  }, [bridge.screenshots, mapScreenshots]);
+  }, [bridge.screenshots, mapScreenshots, addAssets]);
 
   const handleCanvasReady = useCallback((frameId, canvas) => {
     if (!frameId) return;
@@ -224,9 +244,12 @@ export default function Editor() {
           packs.find((t) => resolveStoreKey(t.store) === 'play/phone') ||
           packs[0];
         if (!cancelled && pick) loadTemplate(pick);
-        const cached = await restoreCachedScreenshots(10);
+        const cached = await restoreAllCachedScreenshots();
         if (!cancelled && cached.length) {
-          mapScreenshots(cached.map((c) => c.url));
+          setAssetLibrary((prev) => mergeAssetItems(prev, cached));
+          if (!framesRef.current.some((f) => isUserScreenshot(f.screenshotUrl))) {
+            mapScreenshots(cached.map((c) => c.url));
+          }
         }
       } catch {
         /* keep blank board */
@@ -411,7 +434,14 @@ export default function Editor() {
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
     setExportPreset(resolveStoreKey(importedSession.store ?? 'play/phone'));
+    const items = imported.map((url, i) => ({
+      id: `session-${Date.now()}-${i}`,
+      url,
+      name: `Screen ${i + 1}`,
+    }));
+    addAssets(items);
     mapScreenshots(imported);
+    setLeftTab('assets');
     markDirty();
   };
 
@@ -433,17 +463,21 @@ export default function Editor() {
         slides: pack.frames.map((f) => f.design).filter(Boolean),
       });
     }
-    setFrames(
-      pack.frames.map((f) => ({
-        id: f.id,
-        design: f.design,
-        screenshotUrl: f.screenshotUrl,
-        fabricJson: f.fabricJson,
-        fabricRestoreKey: f.fabricRestoreKey,
-      })),
+    const packFrames = pack.frames.map((f) => ({
+      id: f.id,
+      design: f.design,
+      screenshotUrl: f.screenshotUrl,
+      fabricJson: f.fabricJson,
+      fabricRestoreKey: f.fabricRestoreKey,
+    }));
+    setFrames(packFrames);
+    addAssets(
+      packFrames
+        .filter((f) => isUserScreenshot(f.screenshotUrl))
+        .map((f, i) => ({ id: `pack-${f.id}`, url: f.screenshotUrl, name: `Screen ${i + 1}` })),
     );
     setActiveIndex(0);
-    setLeftTab('frames');
+    setLeftTab('assets');
     markDirty();
   };
 
@@ -456,8 +490,10 @@ export default function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleUpload = (urls) => {
-    mapScreenshots(urls);
+  const handleUpload = (ingested) => {
+    addAssets(ingested);
+    mapScreenshots(ingested.map((x) => x.url));
+    setLeftTab('assets');
     markDirty();
   };
 
@@ -495,9 +531,9 @@ export default function Editor() {
     e.stopPropagation();
   }, []);
 
-  const swapFrameDevices = async (index, url) => {
+  const swapFrameDevices = useCallback(async (index, url) => {
     updateFrame(index, { screenshotUrl: url });
-    const frame = frames[index];
+    const frame = framesRef.current[index];
     const canvas = frame ? canvasMapRef.current[frame.id] : null;
     if (!canvas) return;
     const devices = canvas.getObjects().filter((o) => o.glintRole === 'framed-screenshot');
@@ -515,12 +551,23 @@ export default function Editor() {
       const primary = bare[0];
       await restyleScreenshot(primary, screenshotStyle, { forceRebuild: true, screenshotUrl: url });
     }
-  };
+  }, [updateFrame, screenshotStyle]);
+
+  const assignScreenshotToFrame = useCallback(async (index, url, assetItem = null) => {
+    if (!isUserScreenshot(url)) return;
+    if (assetItem) addAssets([assetItem]);
+    await swapFrameDevices(index, url);
+    setActiveIndex(index);
+    markDirty();
+  }, [addAssets, swapFrameDevices, markDirty]);
+
+  const removeAsset = useCallback((id) => {
+    setAssetLibrary((prev) => prev.filter((a) => a.id !== id));
+  }, []);
 
   const handleReplaceScreenshot = async (index, urlOrFile) => {
     const url = typeof urlOrFile === 'string' ? urlOrFile : URL.createObjectURL(urlOrFile);
-    await swapFrameDevices(index, url);
-    markDirty();
+    await assignScreenshotToFrame(index, url);
   };
 
   const handleClearScreenshot = async (index) => {
@@ -780,6 +827,7 @@ export default function Editor() {
             zoom={zoom}
             padLeft={leftOpen ? LEFT_W : 0}
             padRight={rightOpen ? RIGHT_W : 0}
+            onDropScreenshot={assignScreenshotToFrame}
           />
 
           <div
@@ -883,10 +931,17 @@ export default function Editor() {
                       Capture from Device
                     </button>
                   )}
+                  <AssetLibraryPanel
+                    assets={assetLibrary}
+                    frameCount={frames.length}
+                    onAssign={assignScreenshotToFrame}
+                    onRemove={removeAsset}
+                  />
                   <FrameScreenshotsPanel
                     frames={frames}
                     onReplace={handleReplaceScreenshot}
                     onClear={handleClearScreenshot}
+                    onAssetAdded={addAssets}
                   />
                 </>
               )}

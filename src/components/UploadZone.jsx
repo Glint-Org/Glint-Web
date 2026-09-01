@@ -4,7 +4,7 @@ import { ingestScreenshotFiles } from '../utils/screenshotStore';
 
 /**
  * Drop / pick screenshots. Shows per-file % while reading into temp local storage.
- * onUpload(urls: string[]) after ingest completes.
+ * onUpload(ingested: { id, url, name }[]) after ingest completes.
  */
 export default function UploadZone({ onUpload, compact = false }) {
   const inputRef = useRef(null);
@@ -17,7 +17,7 @@ export default function UploadZone({ onUpload, compact = false }) {
       const ingested = await ingestScreenshotFiles(files, (index, pct) => {
         setItems((prev) => prev.map((it, i) => (i === index ? { ...it, pct } : it)));
       });
-      onUpload?.(ingested.map((x) => x.url));
+      onUpload?.(ingested);
     } finally {
       // brief beat so 100% is visible
       setTimeout(() => setItems([]), 400);

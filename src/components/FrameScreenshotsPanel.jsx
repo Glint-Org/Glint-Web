@@ -5,7 +5,7 @@ import { ingestScreenshotFiles } from '../utils/screenshotStore';
 /**
  * Per-frame screenshot slots with replace progress %.
  */
-export default function FrameScreenshotsPanel({ frames, onReplace, onClear }) {
+export default function FrameScreenshotsPanel({ frames, onReplace, onClear, onAssetAdded }) {
   const inputRefs = useRef({});
   const [progress, setProgress] = useState({}); // frameId → pct
 
@@ -18,6 +18,7 @@ export default function FrameScreenshotsPanel({ frames, onReplace, onClear }) {
       const [ingested] = await ingestScreenshotFiles([file], (_i, pct) => {
         setProgress((p) => ({ ...p, [frameId]: pct }));
       });
+      onAssetAdded?.([ingested]);
       await onReplace?.(index, ingested.url);
     } finally {
       setTimeout(() => {

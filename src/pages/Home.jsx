@@ -39,12 +39,27 @@ export default function Home() {
     deviceFilter,
   );
 
-  const handleUpload = (urls) => {
-    navigate('/editor', { state: { screenshots: urls } });
+  const handleUpload = (ingested) => {
+    navigate('/editor', {
+      state: {
+        screenshots: ingested.map((x) => x.url),
+        assetItems: ingested,
+      },
+    });
   };
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
-    navigate('/editor', { state: { screenshots: imported, session: importedSession } });
+    navigate('/editor', {
+      state: {
+        screenshots: imported,
+        session: importedSession,
+        assetItems: imported.map((url, i) => ({
+          id: `session-${i}`,
+          url,
+          name: `Screen ${i + 1}`,
+        })),
+      },
+    });
   };
 
   const handleProjectImport = (pack) => {
