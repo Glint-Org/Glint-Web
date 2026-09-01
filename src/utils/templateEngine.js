@@ -4,6 +4,7 @@ import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
 import { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
+import { ensureFontReady } from './fontLibrary';
 
 export { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
 
@@ -179,28 +180,6 @@ async function addDeviceLayer(canvas, screenshotUrl, layer, canvasW, canvasH, ed
     });
   }
   return group;
-}
-
-const loadedTemplateFonts = new Set(['Inter', 'Space Grotesk']);
-
-function ensureGoogleFont(fontName) {
-  if (typeof document === 'undefined' || !fontName || loadedTemplateFonts.has(fontName)) return;
-  const link = document.createElement('link');
-  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName).replace(/%20/g, '+')}:wght@400;500;600;700;800&display=swap`;
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
-  loadedTemplateFonts.add(fontName);
-}
-
-async function ensureFontReady(fontFamily, fontWeight = '700') {
-  const name = (fontFamily || 'Inter').replace(/,.*/, '').trim();
-  ensureGoogleFont(name);
-  if (typeof document === 'undefined' || !document.fonts?.load) return;
-  try {
-    await document.fonts.load(`${fontWeight} 64px "${name}"`);
-  } catch {
-    /* fall through with system fallback */
-  }
 }
 
 async function addTextLayer(canvas, layer, metadata, canvasW, canvasH, editable, originX = 0) {
