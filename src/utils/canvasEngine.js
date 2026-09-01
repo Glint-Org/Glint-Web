@@ -19,6 +19,100 @@ import {
 export { GLINT_CLONE_PROPS } from './glintCloneProps';
 export { isProtectedLayer } from './layerGuards';
 
+/** Figma-style canvas selection — blue border visible on light and dark backgrounds. */
+export const GLINT_SELECTION = {
+  fill: 'rgba(24, 160, 251, 0.14)',
+  border: '#18A0FB',
+  corner: '#FFFFFF',
+  cornerStroke: '#18A0FB',
+  lineWidth: 2.5,
+  borderScaleFactor: 3,
+  padding: 6,
+};
+
+export function createCanvas(container, width = 1080, height = 1920) {
+  return new Canvas(container, {
+    width,
+    height,
+    backgroundColor: '#ffffff',
+    preserveObjectStacking: true,
+    selection: true,
+    uniformScaling: true,
+    selectionColor: GLINT_SELECTION.fill,
+    selectionBorderColor: GLINT_SELECTION.border,
+    selectionLineWidth: GLINT_SELECTION.lineWidth,
+    defaultCursor: 'default',
+    hoverCursor: 'move',
+    moveCursor: 'grabbing',
+  });
+}
+
+/** Accent selection chrome so selected canvas layers are obvious. */
+export function applySelectionStyle(obj) {
+  if (!obj) return obj;
+  obj.set({
+    borderColor: GLINT_SELECTION.border,
+    cornerColor: GLINT_SELECTION.corner,
+    cornerStrokeColor: GLINT_SELECTION.cornerStroke,
+    cornerStyle: 'rect',
+    cornerSize: 8,
+    transparentCorners: false,
+    borderScaleFactor: GLINT_SELECTION.borderScaleFactor,
+    padding: GLINT_SELECTION.padding,
+    borderOpacityWhenMoving: 1,
+    cornerOpacityWhenMoving: 1,
+  });
+  return obj;
+}
+
+/** Per-target hover cursor on the frame canvas. */
+export function bindCanvasCursors(canvas, { getEditable = () => true, wrapEl = null } = {}) {
+  if (!canvas) return () => {};
+
+  const setCursor = (cursor) => {
+    const cur = cursor || 'default';
+    canvas.defaultCursor = cur;
+    if (canvas.upperCanvasEl) canvas.upperCanvasEl.style.cursor = cur;
+    if (wrapEl) wrapEl.style.cursor = cur;
+  };
+
+  const roleCursor = (target) => {
+    if (!getEditable()) return 'default';
+    let t = target;
+    while (t) {
+      if (t.glintRole === 'framed-screenshot' || t.glintRole === 'screenshot') return 'pointer';
+      if (t.glintRole === 'text' || t.type === 'i-text' || t.type === 'textbox') return 'text';
+      if (t.glintRole === 'graphic' || (t.selectable && t.evented !== false)) return 'move';
+      t = t.group || t.parent;
+    }
+    return 'default';
+  };
+
+  const onMove = (opt) => setCursor(roleCursor(opt.target));
+  const onOver = (opt) => setCursor(roleCursor(opt.target));
+  const onOut = () => setCursor('default');
+  const onDown = (opt) => {
+    if (getEditable() && opt.target) setCursor('grabbing');
+  };
+  const onUp = (opt) => setCursor(roleCursor(opt.target));
+
+  canvas.on('mouse:move', onMove);
+  canvas.on('mouse:over', onOver);
+  canvas.on('mouse:out', onOut);
+  canvas.on('mouse:down', onDown);
+  canvas.on('mouse:up', onUp);
+  setCursor('default');
+
+  return () => {
+    canvas.off('mouse:move', onMove);
+    canvas.off('mouse:over', onOver);
+    canvas.off('mouse:out', onOut);
+    canvas.off('mouse:down', onDown);
+    canvas.off('mouse:up', onUp);
+    setCursor('default');
+  };
+}
+
 /** Build a Fabric Shadow from screenshot chrome style (or null when off). */
 export function buildChromeShadow(style = {}) {
   const s = { ...DEFAULT_SCREENSHOT_STYLE, ...style };
@@ -43,35 +137,6 @@ export function applyChromeShadow(obj, style = {}) {
   obj.set('shadow', buildChromeShadow(merged));
   obj.set({ glintChrome: merged });
   obj.canvas?.requestRenderAll?.();
-  return obj;
-}
-
-export function createCanvas(container, width = 1080, height = 1920) {
-  return new Canvas(container, {
-    width,
-    height,
-    backgroundColor: '#ffffff',
-    preserveObjectStacking: true,
-    selection: true,
-    uniformScaling: true,
-    selectionColor: 'rgba(245, 208, 111, 0.12)',
-    selectionBorderColor: '#F5D06F',
-    selectionLineWidth: 2,
-  });
-}
-
-/** Accent selection chrome so selected canvas layers are obvious. */
-export function applySelectionStyle(obj) {
-  if (!obj) return obj;
-  obj.set({
-    borderColor: '#F5D06F',
-    cornerColor: '#F5D06F',
-    cornerStrokeColor: '#1C1C1E',
-    cornerStyle: 'circle',
-    transparentCorners: false,
-    borderScaleFactor: 2.5,
-    padding: 4,
-  });
   return obj;
 }
 
@@ -660,14 +725,14 @@ export function applyDeviceTransformLocks(group) {
     lockMovementX: false,
     lockMovementY: false,
     hasControls: false,
-    borderColor: 'transparent',
+    hasBorders: true,
   });
   group.setControlsVisibility?.({
     mt: false,
     mb: false,
     ml: false,
     mr: false,
-    mtr: true,
+    mtr: false,
   });
   if (!group.__glintUniformScaleBound) {
     group.__glintUniformScaleBound = true;

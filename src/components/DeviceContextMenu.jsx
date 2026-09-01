@@ -1,7 +1,7 @@
 import { ImagePlus, Trash2 } from 'lucide-react';
 
 /**
- * Right-click menu for a device frame on the canvas.
+ * Device frame actions menu (import / clear screenshot).
  */
 export default function DeviceContextMenu({
   x,

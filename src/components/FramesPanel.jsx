@@ -218,7 +218,7 @@ export default function FramesPanel({
             Layers
           </h3>
           <span className="text-[10px] text-glint-text-tertiary">
-            Frame #{activeIndex + 1}
+            {activeIndex >= 0 ? `Frame #${activeIndex + 1}` : 'No frame selected'}
           </span>
         </div>
         <p className="text-[10px] text-glint-text-tertiary">

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { createCanvas, selectDeviceLayer } from '../utils/canvasEngine';
+import { createCanvas, selectDeviceLayer, bindCanvasCursors } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 
 function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
@@ -77,10 +77,7 @@ export default function FrameCanvas({
     canvasRef.current = c;
     onCanvasReady?.(frameId, c);
 
-    const onMouseDown = (opt) => {
-      if (opt.e?.button !== 2) return;
-      const device = findDeviceTarget(opt.target);
-      if (!device) return;
+    const openDeviceMenu = (opt, device) => {
       opt.e.preventDefault();
       opt.e.stopPropagation();
       c.setActiveObject(device);
@@ -94,20 +91,38 @@ export default function FrameCanvas({
       });
     };
 
-    const onMouseUp = (opt) => {
-      if (opt.e?.button === 2) {
-        opt.e.stopPropagation();
+    /** @type {{ x: number, y: number, target: unknown } | null} */
+    let pendingDeviceClick = null;
+
+    const onMouseDown = (opt) => {
+      if (opt.e?.button !== 0 || !editableRef.current) return;
+      const device = findDeviceTarget(opt.target);
+      if (device) {
+        pendingDeviceClick = { x: opt.e.clientX, y: opt.e.clientY, target: opt.target };
+        c.setActiveObject(device);
+        c.requestRenderAll();
       }
     };
 
-    const blockBrowserMenu = (e) => {
-      const target = c.findTarget?.(e, false);
-      if (findDeviceTarget(target)) e.preventDefault();
+    const onMouseUp = (opt) => {
+      if (opt.e?.button !== 0 || !pendingDeviceClick) return;
+      const start = pendingDeviceClick;
+      pendingDeviceClick = null;
+      const device = findDeviceTarget(opt.target) || findDeviceTarget(start.target);
+      if (!device || !editableRef.current) return;
+      const dx = opt.e.clientX - start.x;
+      const dy = opt.e.clientY - start.y;
+      if (dx * dx + dy * dy > 36) return;
+      openDeviceMenu(opt, device);
     };
 
     c.on('mouse:down', onMouseDown);
     c.on('mouse:up', onMouseUp);
-    c.wrapperEl?.addEventListener('contextmenu', blockBrowserMenu);
+
+    const unbindCursors = bindCanvasCursors(c, {
+      getEditable: () => editableRef.current,
+      wrapEl: wrapRef.current,
+    });
 
     const onDblClick = (opt) => {
       if (!editableRef.current) return;
@@ -133,10 +148,10 @@ export default function FrameCanvas({
     c.on('mouse:dblclick', onDblClick);
 
     return () => {
+      unbindCursors();
       c.off('mouse:down', onMouseDown);
       c.off('mouse:up', onMouseUp);
       c.off('mouse:dblclick', onDblClick);
-      c.wrapperEl?.removeEventListener('contextmenu', blockBrowserMenu);
       onCanvasReady?.(frameId, null);
       c.dispose();
       canvasRef.current = null;

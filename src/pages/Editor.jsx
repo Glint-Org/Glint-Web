@@ -657,7 +657,36 @@ export default function Editor() {
   }, [frames, setActiveIndex]);
 
   const closeDeviceMenu = () => setDeviceMenu(null);
+
+  const clearCanvasSelection = useCallback(() => {
+    closeDeviceMenu();
+    const canvas = activeCanvas;
+    if (canvas) {
+      canvas.discardActiveObject?.();
+      canvas.requestRenderAll?.();
+    }
+    setActiveIndex(-1);
+  }, [activeCanvas, setActiveIndex]);
   const pendingDeviceRef = useRef(null);
+
+  // Close device action menu when user selects another layer or clears selection.
+  useEffect(() => {
+    if (!activeCanvas) return;
+    const syncMenu = () => {
+      const obj = activeCanvas.getActiveObject?.();
+      if (!obj || (obj.glintRole !== 'framed-screenshot' && obj.glintRole !== 'screenshot')) {
+        setDeviceMenu(null);
+      }
+    };
+    activeCanvas.on('selection:created', syncMenu);
+    activeCanvas.on('selection:updated', syncMenu);
+    activeCanvas.on('selection:cleared', syncMenu);
+    return () => {
+      activeCanvas.off('selection:created', syncMenu);
+      activeCanvas.off('selection:updated', syncMenu);
+      activeCanvas.off('selection:cleared', syncMenu);
+    };
+  }, [activeCanvas]);
 
   const handleDeviceImportClick = () => {
     pendingDeviceRef.current = deviceMenu;
@@ -829,6 +858,7 @@ export default function Editor() {
             padLeft={leftOpen ? LEFT_W : 0}
             padRight={rightOpen ? RIGHT_W : 0}
             onDropScreenshot={assignScreenshotToFrame}
+            onClearSelection={clearCanvasSelection}
           />
 
           <div

@@ -54,7 +54,7 @@ export function useFrames(initialFrames) {
   );
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const activeFrame = frames[activeIndex] || frames[0] || null;
+  const activeFrame = activeIndex >= 0 ? (frames[activeIndex] ?? null) : null;
 
   const addFrame = useCallback((afterIndex) => {
     setFrames((prev) => {
