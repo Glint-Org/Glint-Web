@@ -74,25 +74,24 @@ export default function FrameBoard({
       className="h-full w-full overflow-auto frame-board-scroll"
       onMouseDown={handleBoardPointerDown}
     >
-      <div
-        className="flex items-center min-h-full transition-[padding,gap] duration-200 ease-out"
-        style={{
-          width: 'max-content',
-          margin: '0 auto',
-          gap: frameGap,
-          paddingTop: boardPadY,
-          paddingBottom: boardPadY,
-          paddingLeft: Math.max(12, padLeft + boardPadX),
-          paddingRight: Math.max(12, padRight + boardPadX),
-        }}
-      >
+      <div className="flex items-center justify-center min-h-full min-w-full">
+        <div
+          className="flex items-center shrink-0"
+          style={{
+            gap: frameGap,
+            paddingTop: boardPadY,
+            paddingBottom: boardPadY,
+            paddingLeft: Math.max(12, padLeft + boardPadX),
+            paddingRight: Math.max(12, padRight + boardPadX),
+          }}
+        >
         {frames.map((frame, i) => {
           const selected = i === activeIndex;
           return (
             <div
               key={frame.id}
               data-frame-column
-              className="relative flex flex-col items-center group"
+              className="relative flex flex-col items-center group shrink-0"
               onClick={() => onSelect(i)}
               onDragLeave={() => setDropTarget((t) => (t === i ? null : t))}
               onDragOver={(e) => handleFrameDragOver(e, i)}
@@ -174,6 +173,7 @@ export default function FrameBoard({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

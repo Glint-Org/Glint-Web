@@ -45,6 +45,8 @@ import { parseGlint, isGlintFile } from '../utils/projectPack';
 const LEFT_W = 280;
 const RIGHT_W = 300;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
+/** ~4% per zoom button click — gentle steps within 15–35% range. */
+const ZOOM_STEP = 1.04;
 
 export default function Editor() {
   const location = useLocation();
@@ -106,8 +108,8 @@ export default function Editor() {
   const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
-  const [zoom, setZoom] = useState(16);
-  const [fitZoom, setFitZoom] = useState(16);
+  const [zoom, setZoom] = useState(20);
+  const [fitZoom, setFitZoom] = useState(20);
   const [deviceMenu, setDeviceMenu] = useState(null);
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
@@ -580,10 +582,17 @@ export default function Editor() {
 
   const screenshotList = frames.map((f) => f.screenshotUrl).filter(Boolean);
   const userZoomRef = useRef(false);
+  const wheelFactorRef = useRef(1);
+  const wheelRafRef = useRef(0);
+
+  const scaleZoom = useCallback(
+    (z, factor) => clampBoardZoom(Math.round(z * factor * 10) / 10),
+    [],
+  );
 
   const recomputeFitZoom = useCallback(() => {
     const el = boardRef.current;
-    if (!el) return 16;
+    if (!el) return 20;
     const leftPad = leftOpen ? LEFT_W : 0;
     const rightPad = rightOpen ? RIGHT_W : 0;
     const next = computeBoardFitZoom({
@@ -600,11 +609,11 @@ export default function Editor() {
 
   const zoomIn = () => {
     userZoomRef.current = true;
-    setZoom((z) => clampBoardZoom(z + 2));
+    setZoom((z) => scaleZoom(z, ZOOM_STEP));
   };
   const zoomOut = () => {
     userZoomRef.current = true;
-    setZoom((z) => clampBoardZoom(z - 2));
+    setZoom((z) => scaleZoom(z, 1 / ZOOM_STEP));
   };
   const zoomReset = () => {
     userZoomRef.current = false;
@@ -639,6 +648,14 @@ export default function Editor() {
     return () => ro.disconnect();
   }, [recomputeFitZoom]);
 
+  // Recalc Fabric pointer offsets after CSS display size changes.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      Object.values(canvasMapRef.current).forEach((c) => c?.calcOffset?.());
+    });
+    return () => cancelAnimationFrame(id);
+  }, [zoom]);
+
   // Zoom only the frame board - block browser page zoom over the canvas
   useEffect(() => {
     const el = boardRef.current;
@@ -647,11 +664,21 @@ export default function Editor() {
       if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       userZoomRef.current = true;
-      setZoom((z) => clampBoardZoom(z + (e.deltaY > 0 ? -2 : 2)));
+      wheelFactorRef.current *= Math.pow(0.9985, e.deltaY);
+      if (wheelRafRef.current) return;
+      wheelRafRef.current = requestAnimationFrame(() => {
+        wheelRafRef.current = 0;
+        const factor = wheelFactorRef.current;
+        wheelFactorRef.current = 1;
+        setZoom((z) => scaleZoom(z, factor));
+      });
     };
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, []);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      if (wheelRafRef.current) cancelAnimationFrame(wheelRafRef.current);
+    };
+  }, [scaleZoom]);
 
   const handleDeviceContextMenu = useCallback((payload) => {
     const idx = frames.findIndex((f) => f.id === payload.frameId);

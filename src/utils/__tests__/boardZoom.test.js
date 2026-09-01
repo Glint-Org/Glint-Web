@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { clampBoardZoom, computeBoardFitZoom, boardFrameGap } from '../boardZoom.js';
+import { clampBoardZoom, computeBoardFitZoom, boardFrameGap, BOARD_ZOOM_MIN, BOARD_ZOOM_MAX } from '../boardZoom.js';
 
 describe('boardZoom', () => {
   it('clamps zoom into bounds', () => {
-    expect(clampBoardZoom(2)).toBe(8);
-    expect(clampBoardZoom(99)).toBe(48);
+    expect(clampBoardZoom(2)).toBe(BOARD_ZOOM_MIN);
+    expect(clampBoardZoom(99)).toBe(BOARD_ZOOM_MAX);
     expect(clampBoardZoom(24)).toBe(24);
   });
 
   it('falls back when canvas size is missing', () => {
-    expect(computeBoardFitZoom({ boardWidth: 1200, boardHeight: 800 })).toBe(16);
+    expect(computeBoardFitZoom({ boardWidth: 1200, boardHeight: 800 })).toBe(20);
   });
 
   it('fits a single frame into the board', () => {
@@ -20,8 +20,8 @@ describe('boardZoom', () => {
       canvasHeight: 1920,
       frameCount: 1,
     });
-    expect(z).toBeGreaterThanOrEqual(8);
-    expect(z).toBeLessThanOrEqual(48);
+    expect(z).toBeGreaterThanOrEqual(BOARD_ZOOM_MIN);
+    expect(z).toBeLessThanOrEqual(BOARD_ZOOM_MAX);
   });
 
   it('shrinks zoom when more frames are on the board', () => {

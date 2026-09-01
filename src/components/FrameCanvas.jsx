@@ -2,11 +2,8 @@ import { useEffect, useRef } from 'react';
 import { createCanvas, selectDeviceLayer, bindCanvasCursors } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 
-function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
-  const cssW = Math.max(1, Math.round(canvasWidth * scale));
-  const cssH = Math.max(1, Math.round(canvasHeight * scale));
+function applyCssDisplaySize(canvas, cssW, cssH) {
   if (typeof canvas.setDimensions === 'function') {
-    canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
     canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
   }
   const els = [canvas.lowerCanvasEl, canvas.upperCanvasEl, canvas.wrapperEl, canvas.container].filter(Boolean);
@@ -16,8 +13,18 @@ function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
     el.style.maxWidth = `${cssW}px`;
     el.style.maxHeight = `${cssH}px`;
   });
-  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
   canvas.calcOffset?.();
+}
+
+function applyDisplayScale(canvas, canvasWidth, canvasHeight, scale) {
+  const cssW = Math.max(1, Math.round(canvasWidth * scale));
+  const cssH = Math.max(1, Math.round(canvasHeight * scale));
+  if (typeof canvas.setDimensions === 'function') {
+    canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+    canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
+  }
+  applyCssDisplaySize(canvas, cssW, cssH);
+  canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
   canvas.requestRenderAll?.();
   return { cssW, cssH };
 }
@@ -34,7 +41,6 @@ function findDeviceTarget(target) {
 /**
  * One Fabric canvas for a single Frame artboard.
  * Backing store = full store size; CSS display scaled for the board.
- * All frames share the same displayScale so board sizes stay uniform.
  */
 export default function FrameCanvas({
   frameId,
@@ -134,7 +140,6 @@ export default function FrameCanvas({
         t.type === 'i-text' ||
         t.type === 'textbox';
       if (!isText) return;
-      // Fabric enters editing on dblclick; force full text selection like Figma.
       requestAnimationFrame(() => {
         try {
           if (typeof t.enterEditing === 'function' && !t.isEditing) t.enterEditing();
@@ -158,11 +163,12 @@ export default function FrameCanvas({
     };
   }, [canvasWidth, canvasHeight, frameId]);
 
+  // Zoom: CSS size only — never reset the Fabric backstore.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    applyDisplayScale(canvas, canvasWidth, canvasHeight, scale);
-  }, [scale, canvasWidth, canvasHeight]);
+    applyCssDisplaySize(canvas, cssW, cssH);
+  }, [cssW, cssH]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -205,7 +211,7 @@ export default function FrameCanvas({
         });
       }
       if (ac.signal.aborted) return;
-      applyDisplayScale(canvas, canvasWidth, canvasHeight, scaleRef.current);
+      applyCssDisplaySize(canvas, cssW, cssH);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
     })();
