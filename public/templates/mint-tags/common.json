@@ -1,17 +1,55 @@
 {
-  "id": "mint-tags-play",
   "familyId": "mint-tags",
   "name": "Mint Tags",
-  "description": "Color bands, pill tags, centered device (play)",
-  "store": "play/phone",
-  "canvas": {
-    "width": 1080,
-    "height": 1920
+  "description": "Color bands, pill tags, centered device",
+  "palette": [
+    {
+      "id": "c0",
+      "label": "Mint",
+      "color": "#0B3D2E"
+    },
+    {
+      "id": "c1",
+      "label": "Color 2",
+      "color": "#145C45"
+    },
+    {
+      "id": "c2",
+      "label": "Color 3",
+      "color": "#1A7A5C"
+    },
+    {
+      "id": "c3",
+      "label": "Color 4",
+      "color": "#A8D9C8"
+    },
+    {
+      "id": "c4",
+      "label": "Color 5",
+      "color": "#B8E0D2"
+    },
+    {
+      "id": "c5",
+      "label": "Color 6",
+      "color": "#C8EDE0"
+    },
+    {
+      "id": "c6",
+      "label": "Color 7",
+      "color": "#D8F2E8"
+    },
+    {
+      "id": "background",
+      "label": "Background",
+      "color": "#FFFFFF"
+    }
+  ],
+  "device": {
+    "position": "center"
   },
   "preview": {
     "bg": "#0B3D2E",
     "textColor": "#FFFFFF",
-    "frame": "pixel9",
     "art": [
       {
         "kind": "blob",
@@ -46,273 +84,229 @@
   ],
   "slides": [
     {
-      "id": "mint-tags-play-f1",
       "name": "Focus",
       "layers": [
         {
           "type": "background",
-          "color": "#0B3D2E"
+          "color": "#0B3D2E",
+          "role": "bg"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 54,
           "fontWeight": "800",
           "color": "#FFFFFF",
           "placeholder": "Monitor your daily intake",
-          "marginTop": 100
+          "role": "title"
         },
         {
           "type": "badge",
           "text": "Focus",
-          "left": 72,
-          "top": 320,
           "background": "#FFFFFF",
           "color": "#0B3D2E",
-          "fontSize": 22
+          "role": "badge1"
         },
         {
           "type": "badge",
           "text": "Goals",
-          "left": 250,
-          "top": 320,
           "background": "#FFFFFF",
           "color": "#0B3D2E",
-          "fontSize": 22
+          "role": "badge2"
         },
         {
           "type": "badge",
           "text": "Habits",
-          "left": 430,
-          "top": 320,
           "background": "#FFFFFF",
           "color": "#0B3D2E",
-          "fontSize": 22
+          "role": "badge3"
         },
         {
           "type": "device",
-          "frame": "pixel9",
           "slot": 0,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460
+          "role": "device"
         }
       ]
     },
     {
-      "id": "mint-tags-play-f2",
       "name": "Brand",
       "layers": [
         {
           "type": "background",
-          "color": "#145C45"
+          "color": "#145C45",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "curve-sweep.svg",
-          "left": -40,
-          "top": 0,
-          "width": 640,
           "fill": "#0B3D2E",
           "fill2": "#1A7A5C",
           "fill3": "#B8E0D2",
           "opacity": 0.5,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic1"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 64,
           "fontWeight": "800",
           "color": "#FFFFFF",
           "placeholder": "Stay healthy simply",
-          "marginTop": 140
+          "role": "title"
         },
         {
           "type": "device",
-          "frame": "pixel9",
           "slot": 1,
-          "scale": 0.56,
           "position": "center",
-          "marginTop": 480,
-          "angle": 8
+          "role": "device"
         }
       ]
     },
     {
-      "id": "mint-tags-play-f3",
       "name": "Routines",
       "layers": [
         {
           "type": "background",
-          "color": "#C8EDE0"
+          "color": "#C8EDE0",
+          "role": "bg"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 52,
           "fontWeight": "800",
           "color": "#0B3D2E",
           "placeholder": "Create healthy routines",
-          "marginTop": 100
+          "role": "title"
         },
         {
           "type": "badge",
           "text": "Active",
-          "left": 72,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge1"
         },
         {
           "type": "badge",
           "text": "Energy",
-          "left": 260,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge2"
         },
         {
           "type": "badge",
           "text": "Fitness",
-          "left": 460,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge3"
         },
         {
           "type": "device",
-          "frame": "pixel9",
           "slot": 2,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460
+          "role": "device"
         }
       ]
     },
     {
-      "id": "mint-tags-play-f4",
       "name": "Goals",
       "layers": [
         {
           "type": "background",
-          "color": "#A8D9C8"
+          "color": "#A8D9C8",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "soft-blob.svg",
-          "left": 480,
-          "top": 1400,
-          "width": 520,
           "fill": "#0B3D2E",
           "fill2": "#145C45",
           "fill3": "#FFFFFF",
           "opacity": 0.2,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic1"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 52,
           "fontWeight": "800",
           "color": "#0B3D2E",
           "placeholder": "Achieve your goals",
-          "marginTop": 100
+          "role": "title"
         },
         {
           "type": "badge",
           "text": "Train",
-          "left": 72,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge1"
         },
         {
           "type": "badge",
           "text": "Health",
-          "left": 250,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge2"
         },
         {
           "type": "badge",
           "text": "Thrive",
-          "left": 450,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge3"
         },
         {
           "type": "device",
-          "frame": "pixel9",
           "slot": 3,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460
+          "role": "device"
         }
       ]
     },
     {
-      "id": "mint-tags-play-f5",
       "name": "Habits",
       "layers": [
         {
           "type": "background",
-          "color": "#D8F2E8"
+          "color": "#D8F2E8",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "wave-cap.svg",
-          "left": 0,
-          "top": 1520,
-          "width": 1080,
           "fill": "#0B3D2E",
           "fill2": "#145C45",
           "fill3": "#A8D9C8",
           "opacity": 0.35,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic1"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 52,
           "fontWeight": "800",
           "color": "#0B3D2E",
           "placeholder": "Improve your habits",
-          "marginTop": 100
+          "role": "title"
         },
         {
           "type": "badge",
           "text": "Strive",
-          "left": 72,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge1"
         },
         {
           "type": "badge",
           "text": "Evolve",
-          "left": 270,
-          "top": 320,
           "background": "#0B3D2E",
           "color": "#FFFFFF",
-          "fontSize": 22
+          "role": "badge2"
         },
         {
           "type": "device",
-          "frame": "pixel9",
           "slot": 4,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460
+          "role": "device"
         }
       ]
     }

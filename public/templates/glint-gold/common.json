@@ -1,17 +1,58 @@
 {
-  "id": "glint-gold-ipad",
   "familyId": "glint-gold",
   "name": "Glint Gold",
-  "description": "Flagship Glint charcoal & gold iPad pack for the App Store",
-  "store": "ios/ipad",
-  "canvas": {
-    "width": 2048,
-    "height": 2732
+  "description": "Flagship Glint charcoal & gold phone pack",
+  "palette": [
+    {
+      "id": "c0",
+      "label": "Surface",
+      "color": "#0B0D10"
+    },
+    {
+      "id": "c1",
+      "label": "Surface 2",
+      "color": "#151A21"
+    },
+    {
+      "id": "c2",
+      "label": "Color 3",
+      "color": "#1C222B"
+    },
+    {
+      "id": "c3",
+      "label": "Color 4",
+      "color": "#412402"
+    },
+    {
+      "id": "c4",
+      "label": "Color 5",
+      "color": "#8A8F98"
+    },
+    {
+      "id": "c5",
+      "label": "Color 6",
+      "color": "#C4960A"
+    },
+    {
+      "id": "c6",
+      "label": "Color 7",
+      "color": "#E8E6DF"
+    },
+    {
+      "id": "c7",
+      "label": "Gold",
+      "color": "#F5D06F"
+    }
+  ],
+  "style": {
+    "fontFamily": "Space Grotesk"
+  },
+  "device": {
+    "position": "center"
   },
   "preview": {
     "bg": "#0B0D10",
     "textColor": "#F5D06F",
-    "frame": "ipad-pro-13",
     "art": [
       {
         "kind": "blob",
@@ -46,252 +87,212 @@
   ],
   "slides": [
     {
-      "id": "glint-gold-ipad-f1",
       "name": "Hero",
       "layers": [
         {
           "type": "background",
-          "color": "#0B0D10"
+          "color": "#0B0D10",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "soft-blob.svg",
-          "left": -120,
-          "top": -180,
-          "width": 1200,
           "fill": "#F5D06F",
           "fill2": "#FFE9A8",
           "fill3": "#151A21",
           "opacity": 0.22,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic1"
         },
         {
           "type": "graphic",
           "src": "glow-ring.svg",
-          "left": 980,
-          "top": 1400,
-          "width": 1100,
           "fill": "#F5D06F",
           "fill2": "#1C222B",
           "fill3": "#0B0D10",
           "opacity": 0.35,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic2"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 84,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#F5D06F",
           "placeholder": "Capture. Polish. Ship.",
-          "marginTop": 180
+          "role": "title"
         },
         {
           "type": "subheadline",
           "position": "top",
-          "fontSize": 36,
           "fontWeight": "500",
           "fontFamily": "Space Grotesk",
           "color": "#8A8F98",
           "placeholder": "Store screenshots that shine",
-          "marginTop": 340
+          "role": "tagline"
         },
         {
           "type": "device",
-          "frame": "ipad-pro-13",
           "slot": 0,
-          "scale": 0.62,
           "position": "center",
-          "marginTop": 480
+          "role": "device"
         }
       ]
     },
     {
-      "id": "glint-gold-ipad-f2",
       "name": "Ready",
       "layers": [
         {
           "type": "background",
-          "color": "#151A21"
+          "color": "#151A21",
+          "role": "bg"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 68,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#E8E6DF",
           "placeholder": "Your app, store-ready",
-          "marginTop": 160
+          "role": "title"
         },
         {
           "type": "device",
-          "frame": "ipad-pro-13",
           "slot": 1,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 440
+          "role": "device"
         },
         {
           "type": "shape",
           "shape": "rect",
-          "left": -100,
-          "top": 2280,
-          "width": 2300,
-          "height": 560,
           "fill": "#F5D06F",
-          "angle": -6,
-          "rx": 0
+          "role": "banner"
         },
         {
           "type": "headline",
           "position": "left",
-          "fontSize": 52,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#412402",
           "placeholder": "Export in one click",
-          "marginTop": 2420,
-          "marginLeft": 140
+          "role": "title2"
         }
       ]
     },
     {
-      "id": "glint-gold-ipad-f3",
       "name": "Swap",
       "layers": [
         {
           "type": "background",
-          "color": "#1C222B"
+          "color": "#1C222B",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "spark-mini.svg",
-          "left": 120,
-          "top": 200,
-          "width": 180,
           "fill": "#F5D06F",
           "fill2": "#E8E6DF",
-          "fill3": "#151A21"
+          "fill3": "#151A21",
+          "role": "graphic1"
         },
         {
           "type": "graphic",
           "src": "spark-mini.svg",
-          "left": 1680,
-          "top": 280,
-          "width": 150,
           "fill": "#E8E6DF",
           "fill2": "#F5D06F",
           "fill3": "#151A21",
-          "angle": 20
+          "role": "graphic2"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 68,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#F5D06F",
           "placeholder": "Swap shots in seconds",
-          "marginTop": 180
+          "role": "title"
         },
         {
           "type": "device",
-          "frame": "ipad-pro-13",
           "slot": 2,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460,
-          "angle": -4
+          "role": "device"
         }
       ]
     },
     {
-      "id": "glint-gold-ipad-f4",
       "name": "Look",
       "layers": [
         {
           "type": "background",
-          "color": "#F5D06F"
+          "color": "#F5D06F",
+          "role": "bg"
         },
         {
           "type": "graphic",
           "src": "curve-sweep.svg",
-          "left": -60,
-          "top": 1300,
-          "width": 2180,
           "fill": "#412402",
           "fill2": "#C4960A",
           "fill3": "#F5D06F",
           "opacity": 0.18,
-          "sendToBack": true
+          "sendToBack": true,
+          "role": "graphic1"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 76,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#412402",
           "placeholder": "Five screens. One look.",
-          "marginTop": 180
+          "role": "title"
         },
         {
           "type": "device",
-          "frame": "ipad-pro-13",
           "slot": 3,
-          "scale": 0.58,
           "position": "center",
-          "marginTop": 460
+          "role": "device"
         }
       ]
     },
     {
-      "id": "glint-gold-ipad-f5",
       "name": "Ship",
       "layers": [
         {
           "type": "background",
-          "color": "#0B0D10"
+          "color": "#0B0D10",
+          "role": "bg"
         },
         {
           "type": "shape",
           "shape": "rect",
-          "left": 0,
-          "top": 0,
-          "width": 2048,
-          "height": 12,
           "fill": "#F5D06F",
-          "rx": 0
+          "role": "banner"
         },
         {
           "type": "headline",
           "position": "top",
-          "fontSize": 64,
           "fontWeight": "700",
           "fontFamily": "Space Grotesk",
           "color": "#E8E6DF",
           "placeholder": "Built for Play & App Store",
-          "marginTop": 160
+          "role": "title"
         },
         {
           "type": "subheadline",
           "position": "top",
-          "fontSize": 32,
           "fontWeight": "500",
           "fontFamily": "Space Grotesk",
           "color": "#8A8F98",
           "placeholder": "Phone · Tablet · TV · Wear",
-          "marginTop": 300
+          "role": "tagline"
         },
         {
           "type": "device",
-          "frame": "ipad-pro-13",
           "slot": 4,
-          "scale": 0.6,
           "position": "center",
-          "marginTop": 420
+          "role": "device"
         }
       ]
     }

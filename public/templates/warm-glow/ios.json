@@ -1,0 +1,118 @@
+{
+  "id": "warm-glow-ios",
+  "extends": "common",
+  "description": "Solid warm field, soft blob, glow ring, centered device (ios)",
+  "store": "ios/iphone",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "device": {
+    "frame": "iphone16-pro-max",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "iphone16-pro-max"
+  },
+  "layout": {
+    "Hero": {
+      "graphic1": {
+        "left": 96,
+        "top": 233,
+        "width": 215
+      },
+      "graphic2": {
+        "left": 979,
+        "top": 408,
+        "width": 167,
+        "angle": 25
+      },
+      "graphic3": {
+        "left": 239,
+        "top": 1602,
+        "width": 812
+      },
+      "title": {
+        "fontSize": 95,
+        "marginTop": 757
+      },
+      "device": {
+        "marginTop": 1300,
+        "scale": 0.52
+      },
+      "banner": {
+        "left": 346,
+        "top": 1049,
+        "width": 597,
+        "height": 105,
+        "rx": 43
+      }
+    },
+    "Feature": {
+      "graphic1": {
+        "left": 263,
+        "top": 903,
+        "width": 764
+      },
+      "title": {
+        "fontSize": 69,
+        "marginTop": 175
+      },
+      "device": {
+        "marginTop": 612,
+        "scale": 0.58,
+        "angle": -6
+      }
+    },
+    "Device": {
+      "graphic1": {
+        "left": 167,
+        "top": 1136,
+        "width": 956
+      },
+      "title": {
+        "fontSize": 69,
+        "marginTop": 175
+      },
+      "device": {
+        "marginTop": 583,
+        "scale": 0.6
+      }
+    },
+    "Chat": {
+      "graphic1": {
+        "left": 478,
+        "top": -29,
+        "width": 836
+      },
+      "graphic2": {
+        "left": 48,
+        "top": 291,
+        "width": 191
+      },
+      "title": {
+        "fontSize": 69,
+        "marginTop": 175
+      },
+      "device": {
+        "marginTop": 583,
+        "scale": 0.6
+      }
+    },
+    "Modes": {
+      "graphic1": {
+        "left": 0,
+        "top": 2155,
+        "width": 1290
+      },
+      "title": {
+        "fontSize": 69,
+        "marginTop": 175
+      },
+      "device": {
+        "marginTop": 524,
+        "scale": 0.62
+      }
+    }
+  }
+}

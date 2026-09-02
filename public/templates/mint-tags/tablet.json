@@ -1,0 +1,141 @@
+{
+  "id": "mint-tags-tablet",
+  "extends": "common",
+  "description": "Color bands, pill tags, centered device (tablet)",
+  "store": "ios/ipad",
+  "canvas": {
+    "width": 2048,
+    "height": 2732
+  },
+  "device": {
+    "frame": "ipad-pro-13",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "ipad-pro-13",
+    "tablet": true
+  },
+  "layout": {
+    "Focus": {
+      "title": {
+        "fontSize": 90,
+        "marginTop": 142
+      },
+      "badge1": {
+        "fontSize": 37,
+        "left": 137,
+        "top": 455
+      },
+      "badge2": {
+        "fontSize": 37,
+        "left": 474,
+        "top": 455
+      },
+      "badge3": {
+        "fontSize": 37,
+        "left": 815,
+        "top": 455
+      },
+      "device": {
+        "marginTop": 655,
+        "scale": 0.58
+      }
+    },
+    "Brand": {
+      "graphic1": {
+        "left": -76,
+        "top": 0,
+        "width": 1214
+      },
+      "title": {
+        "fontSize": 106,
+        "marginTop": 199
+      },
+      "device": {
+        "marginTop": 683,
+        "scale": 0.56,
+        "angle": 8
+      }
+    },
+    "Routines": {
+      "title": {
+        "fontSize": 86,
+        "marginTop": 142
+      },
+      "badge1": {
+        "fontSize": 37,
+        "left": 137,
+        "top": 455
+      },
+      "badge2": {
+        "fontSize": 37,
+        "left": 493,
+        "top": 455
+      },
+      "badge3": {
+        "fontSize": 37,
+        "left": 872,
+        "top": 455
+      },
+      "device": {
+        "marginTop": 655,
+        "scale": 0.58
+      }
+    },
+    "Goals": {
+      "graphic1": {
+        "left": 910,
+        "top": 1992,
+        "width": 986
+      },
+      "title": {
+        "fontSize": 86,
+        "marginTop": 142
+      },
+      "badge1": {
+        "fontSize": 37,
+        "left": 137,
+        "top": 455
+      },
+      "badge2": {
+        "fontSize": 37,
+        "left": 474,
+        "top": 455
+      },
+      "badge3": {
+        "fontSize": 37,
+        "left": 853,
+        "top": 455
+      },
+      "device": {
+        "marginTop": 655,
+        "scale": 0.58
+      }
+    },
+    "Habits": {
+      "graphic1": {
+        "left": 0,
+        "top": 2163,
+        "width": 2048
+      },
+      "title": {
+        "fontSize": 86,
+        "marginTop": 142
+      },
+      "badge1": {
+        "fontSize": 37,
+        "left": 137,
+        "top": 455
+      },
+      "badge2": {
+        "fontSize": 37,
+        "left": 512,
+        "top": 455
+      },
+      "device": {
+        "marginTop": 655,
+        "scale": 0.58
+      }
+    }
+  }
+}

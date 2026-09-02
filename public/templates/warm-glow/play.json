@@ -1,0 +1,118 @@
+{
+  "id": "warm-glow-play",
+  "extends": "common",
+  "description": "Solid warm field, soft blob, glow ring, centered device (play)",
+  "store": "play/phone",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "device": {
+    "frame": "pixel9",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "pixel9"
+  },
+  "layout": {
+    "Hero": {
+      "graphic1": {
+        "left": 80,
+        "top": 160,
+        "width": 180
+      },
+      "graphic2": {
+        "left": 820,
+        "top": 280,
+        "width": 140,
+        "angle": 25
+      },
+      "graphic3": {
+        "left": 200,
+        "top": 1100,
+        "width": 680
+      },
+      "title": {
+        "fontSize": 72,
+        "marginTop": 520
+      },
+      "device": {
+        "marginTop": 900,
+        "scale": 0.55
+      },
+      "banner": {
+        "left": 290,
+        "top": 720,
+        "width": 500,
+        "height": 72,
+        "rx": 36
+      }
+    },
+    "Feature": {
+      "graphic1": {
+        "left": 220,
+        "top": 620,
+        "width": 640
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 120
+      },
+      "device": {
+        "marginTop": 420,
+        "scale": 0.58,
+        "angle": -6
+      }
+    },
+    "Device": {
+      "graphic1": {
+        "left": 140,
+        "top": 780,
+        "width": 800
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 120
+      },
+      "device": {
+        "marginTop": 400,
+        "scale": 0.6
+      }
+    },
+    "Chat": {
+      "graphic1": {
+        "left": 400,
+        "top": -20,
+        "width": 700
+      },
+      "graphic2": {
+        "left": 40,
+        "top": 200,
+        "width": 160
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 120
+      },
+      "device": {
+        "marginTop": 400,
+        "scale": 0.6
+      }
+    },
+    "Modes": {
+      "graphic1": {
+        "left": 0,
+        "top": 1480,
+        "width": 1080
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 120
+      },
+      "device": {
+        "marginTop": 360,
+        "scale": 0.62
+      }
+    }
+  }
+}

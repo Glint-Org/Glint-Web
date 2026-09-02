@@ -1,0 +1,124 @@
+{
+  "id": "glint-gold-ios",
+  "extends": "common",
+  "description": "Flagship Glint charcoal & gold iPhone pack for the App Store",
+  "store": "ios/iphone",
+  "canvas": {
+    "width": 1290,
+    "height": 2796
+  },
+  "device": {
+    "frame": "iphone16-pro-max",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "iphone16-pro-max"
+  },
+  "layout": {
+    "Hero": {
+      "graphic1": {
+        "left": -100,
+        "top": -160,
+        "width": 860
+      },
+      "graphic2": {
+        "left": 620,
+        "top": 1500,
+        "width": 820
+      },
+      "title": {
+        "fontSize": 72,
+        "marginTop": 200
+      },
+      "tagline": {
+        "fontSize": 32,
+        "marginTop": 380
+      },
+      "device": {
+        "marginTop": 560,
+        "scale": 0.58
+      }
+    },
+    "Ready": {
+      "title": {
+        "fontSize": 58,
+        "marginTop": 180
+      },
+      "device": {
+        "marginTop": 520,
+        "scale": 0.54
+      },
+      "banner": {
+        "left": -80,
+        "top": 2320,
+        "width": 1450,
+        "height": 560,
+        "angle": -8,
+        "rx": 0
+      },
+      "title2": {
+        "fontSize": 44,
+        "marginTop": 2460,
+        "marginLeft": 100
+      }
+    },
+    "Swap": {
+      "graphic1": {
+        "left": 80,
+        "top": 220,
+        "width": 140
+      },
+      "graphic2": {
+        "left": 1050,
+        "top": 320,
+        "width": 120,
+        "angle": 20
+      },
+      "title": {
+        "fontSize": 58,
+        "marginTop": 200
+      },
+      "device": {
+        "marginTop": 540,
+        "scale": 0.54,
+        "angle": -5
+      }
+    },
+    "Look": {
+      "graphic1": {
+        "left": -50,
+        "top": 1400,
+        "width": 1400
+      },
+      "title": {
+        "fontSize": 64,
+        "marginTop": 200
+      },
+      "device": {
+        "marginTop": 540,
+        "scale": 0.54
+      }
+    },
+    "Ship": {
+      "banner": {
+        "left": 0,
+        "top": 0,
+        "width": 1290,
+        "height": 10,
+        "rx": 0
+      },
+      "title": {
+        "fontSize": 54,
+        "marginTop": 180
+      },
+      "tagline": {
+        "fontSize": 28,
+        "marginTop": 340
+      },
+      "device": {
+        "marginTop": 500,
+        "scale": 0.56
+      }
+    }
+  }
+}

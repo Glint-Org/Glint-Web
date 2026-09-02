@@ -1,0 +1,38 @@
+{
+  "id": "blink-play",
+  "extends": "common",
+  "description": "Blink — Play Store (phone).",
+  "store": "play/phone",
+  "canvas": { "width": 1080, "height": 1920 },
+  "device": { "frame": "pixel9", "widthFraction": 0.86 },
+  "preview": { "frame": "pixel9" },
+  "style": {
+    "shadow": { "blur": 5, "offsetX": 8, "offsetY": 8 },
+    "shadowHeavy": { "blur": 8, "offsetX": 16, "offsetY": 14 }
+  },
+  "layout": {
+    "Hero": {
+      "title": { "fontSize": 196, "marginTop": 168 },
+      "tagline": { "fontSize": 84, "marginTop": 372 },
+      "device": { "marginTop": 640 }
+    },
+    "Free": {
+      "device": { "marginTop": 96 },
+      "banner": { "left": -200, "top": 1520, "width": 1480, "height": 720, "angle": -16.8 },
+      "title": { "fontSize": 128, "marginTop": 1496 },
+      "tagline": { "fontSize": 72, "marginTop": 1636 }
+    },
+    "Share": {
+      "title": { "fontSize": 100, "marginTop": 108 },
+      "device": { "marginTop": 392 }
+    },
+    "Scan": {
+      "title": { "fontSize": 100, "marginTop": 116 },
+      "device": { "marginTop": 388 }
+    },
+    "Secure": {
+      "title": { "fontSize": 132, "marginTop": 148 },
+      "device": { "marginTop": 448 }
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "id": "mint-tags-play",
+  "extends": "common",
+  "description": "Color bands, pill tags, centered device (play)",
+  "store": "play/phone",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "device": {
+    "frame": "pixel9",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "pixel9"
+  },
+  "layout": {
+    "Focus": {
+      "title": {
+        "fontSize": 54,
+        "marginTop": 100
+      },
+      "badge1": {
+        "fontSize": 22,
+        "left": 72,
+        "top": 320
+      },
+      "badge2": {
+        "fontSize": 22,
+        "left": 250,
+        "top": 320
+      },
+      "badge3": {
+        "fontSize": 22,
+        "left": 430,
+        "top": 320
+      },
+      "device": {
+        "marginTop": 460,
+        "scale": 0.58
+      }
+    },
+    "Brand": {
+      "graphic1": {
+        "left": -40,
+        "top": 0,
+        "width": 640
+      },
+      "title": {
+        "fontSize": 64,
+        "marginTop": 140
+      },
+      "device": {
+        "marginTop": 480,
+        "scale": 0.56,
+        "angle": 8
+      }
+    },
+    "Routines": {
+      "title": {
+        "fontSize": 52,
+        "marginTop": 100
+      },
+      "badge1": {
+        "fontSize": 22,
+        "left": 72,
+        "top": 320
+      },
+      "badge2": {
+        "fontSize": 22,
+        "left": 260,
+        "top": 320
+      },
+      "badge3": {
+        "fontSize": 22,
+        "left": 460,
+        "top": 320
+      },
+      "device": {
+        "marginTop": 460,
+        "scale": 0.58
+      }
+    },
+    "Goals": {
+      "graphic1": {
+        "left": 480,
+        "top": 1400,
+        "width": 520
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 100
+      },
+      "badge1": {
+        "fontSize": 22,
+        "left": 72,
+        "top": 320
+      },
+      "badge2": {
+        "fontSize": 22,
+        "left": 250,
+        "top": 320
+      },
+      "badge3": {
+        "fontSize": 22,
+        "left": 450,
+        "top": 320
+      },
+      "device": {
+        "marginTop": 460,
+        "scale": 0.58
+      }
+    },
+    "Habits": {
+      "graphic1": {
+        "left": 0,
+        "top": 1520,
+        "width": 1080
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 100
+      },
+      "badge1": {
+        "fontSize": 22,
+        "left": 72,
+        "top": 320
+      },
+      "badge2": {
+        "fontSize": 22,
+        "left": 270,
+        "top": 320
+      },
+      "device": {
+        "marginTop": 460,
+        "scale": 0.58
+      }
+    }
+  }
+}

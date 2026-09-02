@@ -1,0 +1,38 @@
+{
+  "id": "blink-ios",
+  "extends": "common",
+  "description": "Blink — App Store (iPhone).",
+  "store": "ios/iphone",
+  "canvas": { "width": 1290, "height": 2796 },
+  "device": { "frame": "iphone16-pro-max", "widthFraction": 0.86 },
+  "preview": { "frame": "iphone16-pro-max" },
+  "style": {
+    "shadow": { "blur": 6, "offsetX": 10, "offsetY": 10 },
+    "shadowHeavy": { "blur": 10, "offsetX": 20, "offsetY": 18 }
+  },
+  "layout": {
+    "Hero": {
+      "title": { "fontSize": 248, "marginTop": 260 },
+      "tagline": { "fontSize": 106, "marginTop": 548 },
+      "device": { "marginTop": 920 }
+    },
+    "Free": {
+      "device": { "marginTop": 140 },
+      "banner": { "left": -240, "top": 2220, "width": 1770, "height": 900, "angle": -16.8 },
+      "title": { "fontSize": 162, "marginTop": 2180 },
+      "tagline": { "fontSize": 90, "marginTop": 2360 }
+    },
+    "Share": {
+      "title": { "fontSize": 126, "marginTop": 168 },
+      "device": { "marginTop": 560 }
+    },
+    "Scan": {
+      "title": { "fontSize": 126, "marginTop": 176 },
+      "device": { "marginTop": 556 }
+    },
+    "Secure": {
+      "title": { "fontSize": 168, "marginTop": 220 },
+      "device": { "marginTop": 640 }
+    }
+  }
+}

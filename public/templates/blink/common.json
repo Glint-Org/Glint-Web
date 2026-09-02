@@ -1,0 +1,132 @@
+{
+  "familyId": "blink",
+  "name": "Blink",
+  "description": "Share files in a flash — purple store set.",
+  "palette": [
+    { "id": "primary", "label": "Primary", "color": "#611AB4" },
+    { "id": "secondary", "label": "Secondary", "color": "#8030DD" },
+    { "id": "accent", "label": "Accent", "color": "#8A2BE2" },
+    { "id": "soft", "label": "Soft fill", "color": "#D99BFA" },
+    { "id": "background", "label": "Background", "color": "#FFFFFF" }
+  ],
+  "style": {
+    "fontFamily": "Montserrat",
+    "fontWeight": "800",
+    "lineHeight": 1.14,
+    "shadow": { "color": "rgba(0,0,0,0.25)", "blur": 5, "offsetX": 8, "offsetY": 8 },
+    "shadowHeavy": { "color": "rgba(0,0,0,0.25)", "blur": 8, "offsetX": 16, "offsetY": 14 }
+  },
+  "device": {
+    "position": "top",
+    "minCoverage": 0.5
+  },
+  "preview": {
+    "bg": "#611AB4",
+    "textColor": "#FFFFFF",
+    "art": [
+      { "kind": "blob", "color": "#D99BFA", "x": "55%", "y": "-5%", "w": "60%", "h": "35%" },
+      { "kind": "circle", "color": "#8030DD", "x": "-10%", "y": "70%", "w": "40%", "h": "25%" }
+    ],
+    "headlines": ["BLINK", "100% Free", "Select & Share Instantly", "Scan & Download", "Download Securely"]
+  },
+  "layers": [{ "type": "background", "color": "#FFFFFF" }],
+  "slides": [
+    {
+      "name": "Hero",
+      "layers": [
+        { "role": "bg", "type": "background", "color": "#FFFFFF" },
+        {
+          "role": "title",
+          "type": "headline",
+          "position": "top",
+          "placeholder": "BLINK",
+          "color": "#611AB4",
+          "charSpacing": 40,
+          "shadow": true
+        },
+        {
+          "role": "tagline",
+          "type": "subheadline",
+          "position": "top",
+          "placeholder": "Share Files in a\nFlash",
+          "color": "#8030DD"
+        },
+        { "role": "device", "type": "device", "slot": 0 }
+      ]
+    },
+    {
+      "name": "Free",
+      "layers": [
+        { "role": "bg", "type": "background", "color": "#FFFFFF" },
+        { "role": "device", "type": "device", "slot": 1 },
+        {
+          "role": "banner",
+          "type": "shape",
+          "shape": "rect",
+          "fill": "#611AB4"
+        },
+        {
+          "role": "title",
+          "type": "headline",
+          "position": "top",
+          "placeholder": "100% Free",
+          "color": "#FFFFFF",
+          "shadow": "heavy"
+        },
+        {
+          "role": "tagline",
+          "type": "subheadline",
+          "position": "top",
+          "placeholder": "No Login. No Tracking",
+          "color": "#FFFFFF",
+          "shadow": true
+        }
+      ]
+    },
+    {
+      "name": "Share",
+      "layers": [
+        { "role": "bg", "type": "background", "color": "#FFFFFF" },
+        {
+          "role": "title",
+          "type": "headline",
+          "position": "top",
+          "placeholder": "Select & Share\nInstantly",
+          "color": "#8A2BE2",
+          "shadow": true
+        },
+        { "role": "device", "type": "device", "slot": 2 }
+      ]
+    },
+    {
+      "name": "Scan",
+      "layers": [
+        { "role": "bg", "type": "background", "color": "#D99BFA" },
+        {
+          "role": "title",
+          "type": "headline",
+          "position": "top",
+          "placeholder": "Scan &\nDownload",
+          "color": "#FFFFFF",
+          "shadow": true
+        },
+        { "role": "device", "type": "device", "slot": 3 }
+      ]
+    },
+    {
+      "name": "Secure",
+      "layers": [
+        { "role": "bg", "type": "background", "color": "#611AB4" },
+        {
+          "role": "title",
+          "type": "headline",
+          "position": "top",
+          "placeholder": "Download\nSecurely",
+          "color": "#FFFFFF",
+          "shadow": true
+        },
+        { "role": "device", "type": "device", "slot": 4 }
+      ]
+    }
+  ]
+}

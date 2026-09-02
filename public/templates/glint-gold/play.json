@@ -1,0 +1,124 @@
+{
+  "id": "glint-gold-play",
+  "extends": "common",
+  "description": "Flagship Glint charcoal & gold phone pack for Google Play",
+  "store": "play/phone",
+  "canvas": {
+    "width": 1080,
+    "height": 1920
+  },
+  "device": {
+    "frame": "pixel9",
+    "position": "center"
+  },
+  "preview": {
+    "frame": "pixel9"
+  },
+  "layout": {
+    "Hero": {
+      "graphic1": {
+        "left": -80,
+        "top": -120,
+        "width": 720
+      },
+      "graphic2": {
+        "left": 520,
+        "top": 980,
+        "width": 680
+      },
+      "title": {
+        "fontSize": 64,
+        "marginTop": 140
+      },
+      "tagline": {
+        "fontSize": 28,
+        "marginTop": 280
+      },
+      "device": {
+        "marginTop": 420,
+        "scale": 0.62
+      }
+    },
+    "Ready": {
+      "title": {
+        "fontSize": 52,
+        "marginTop": 120
+      },
+      "device": {
+        "marginTop": 360,
+        "scale": 0.58
+      },
+      "banner": {
+        "left": -60,
+        "top": 1580,
+        "width": 1200,
+        "height": 420,
+        "angle": -8,
+        "rx": 0
+      },
+      "title2": {
+        "fontSize": 40,
+        "marginTop": 1680,
+        "marginLeft": 80
+      }
+    },
+    "Swap": {
+      "graphic1": {
+        "left": 60,
+        "top": 160,
+        "width": 120
+      },
+      "graphic2": {
+        "left": 880,
+        "top": 240,
+        "width": 100,
+        "angle": 20
+      },
+      "title": {
+        "fontSize": 52,
+        "marginTop": 140
+      },
+      "device": {
+        "marginTop": 380,
+        "scale": 0.58,
+        "angle": -5
+      }
+    },
+    "Look": {
+      "graphic1": {
+        "left": -40,
+        "top": 900,
+        "width": 1160
+      },
+      "title": {
+        "fontSize": 56,
+        "marginTop": 140
+      },
+      "device": {
+        "marginTop": 380,
+        "scale": 0.58
+      }
+    },
+    "Ship": {
+      "banner": {
+        "left": 0,
+        "top": 0,
+        "width": 1080,
+        "height": 8,
+        "rx": 0
+      },
+      "title": {
+        "fontSize": 48,
+        "marginTop": 120
+      },
+      "tagline": {
+        "fontSize": 24,
+        "marginTop": 240
+      },
+      "device": {
+        "marginTop": 360,
+        "scale": 0.6
+      }
+    }
+  }
+}
