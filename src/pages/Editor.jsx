@@ -165,10 +165,10 @@ export default function Editor() {
         name: `Capture ${i + 1}`,
       }));
       addAssets(items);
-      mapScreenshots(bridge.screenshots);
+      mapScreenshots(bridge.screenshots, template);
       setLeftTab('assets');
     }
-  }, [bridge.screenshots, mapScreenshots, addAssets]);
+  }, [bridge.screenshots, mapScreenshots, addAssets, template]);
 
   const handleCanvasReady = useCallback((frameId, canvas) => {
     if (!frameId) return;
@@ -265,7 +265,7 @@ export default function Editor() {
         if (!cancelled && cached.length) {
           setAssetLibrary((prev) => mergeAssetItems(prev, cached));
           if (!framesRef.current.some((f) => isUserScreenshot(f.screenshotUrl))) {
-            mapScreenshots(cached.map((c) => c.url));
+            mapScreenshots(cached.map((c) => c.url), pick);
           }
         }
       } catch {
@@ -480,7 +480,7 @@ export default function Editor() {
       name: `Screen ${i + 1}`,
     }));
     addAssets(items);
-    mapScreenshots(imported);
+    mapScreenshots(imported, template);
     setLeftTab('assets');
     markDirty();
   };
@@ -532,7 +532,7 @@ export default function Editor() {
 
   const handleUpload = (ingested) => {
     addAssets(ingested);
-    mapScreenshots(ingested.map((x) => x.url));
+    mapScreenshots(ingested.map((x) => x.url), template);
     setLeftTab('assets');
     markDirty();
   };
@@ -894,7 +894,7 @@ export default function Editor() {
             frames={frames}
             activeIndex={activeIndex}
             onSelect={setActiveIndex}
-            onAdd={addFrame}
+            onAdd={(i) => addFrame(i, template)}
             onDuplicate={duplicateFrame}
             onDelete={deleteFrame}
             onMove={moveFrame}

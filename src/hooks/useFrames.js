@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getTemplateSlides } from '../utils/templateEngine';
-import { bindSlideToFrameShot } from '../utils/templateDevices';
+import { getTemplateSlides, resolveFrameDesign } from '../utils/templateEngine';
 import { getPlaceholderScreenshots } from '../utils/placeholderScreenshots';
 
 export const MIN_FRAMES = 1;
@@ -24,13 +23,17 @@ export function createEmptyFrame(screenshotUrl = null) {
 /** Build frames from a template pack + optional user screenshots. */
 export function framesFromTemplate(template, userScreenshots = []) {
   const slides = getTemplateSlides(template);
-  const count = Math.min(MAX_FRAMES, Math.max(MIN_FRAMES, slides.length || DEFAULT_FRAME_COUNT));
+  const slideCount = slides.length || DEFAULT_FRAME_COUNT;
+  const count = Math.min(
+    MAX_FRAMES,
+    Math.max(MIN_FRAMES, slideCount, userScreenshots.length),
+  );
   const placeholders = getPlaceholderScreenshots(count);
   const frames = [];
   for (let i = 0; i < count; i++) {
     frames.push({
       id: newFrameId(),
-      design: bindSlideToFrameShot(slides[i]) || null,
+      design: resolveFrameDesign(template, i),
       screenshotUrl: userScreenshots[i] || placeholders[i] || null,
     });
   }
@@ -56,13 +59,18 @@ export function useFrames(initialFrames) {
 
   const activeFrame = activeIndex >= 0 ? (frames[activeIndex] ?? null) : null;
 
-  const addFrame = useCallback((afterIndex) => {
+  const addFrame = useCallback((afterIndex, template = null) => {
     setFrames((prev) => {
       if (prev.length >= MAX_FRAMES) return prev;
       const idx = afterIndex == null ? prev.length - 1 : afterIndex;
       const placeholders = getPlaceholderScreenshots(1);
+      const insertAt = idx + 1;
       const next = [...prev];
-      next.splice(idx + 1, 0, createEmptyFrame(placeholders[0]));
+      next.splice(insertAt, 0, {
+        id: newFrameId(),
+        design: template ? resolveFrameDesign(template, insertAt) : null,
+        screenshotUrl: placeholders[0],
+      });
       return next;
     });
     setActiveIndex((i) => {
@@ -127,15 +135,16 @@ export function useFrames(initialFrames) {
     const slides = getTemplateSlides(template);
     setFrames((prev) => {
       const keepUrls = prev.map((f) => f.screenshotUrl);
+      const slideCount = slides.length || DEFAULT_FRAME_COUNT;
       const targetCount = resizeToPack
-        ? Math.min(MAX_FRAMES, Math.max(MIN_FRAMES, slides.length || prev.length || DEFAULT_FRAME_COUNT))
+        ? Math.min(MAX_FRAMES, Math.max(MIN_FRAMES, slideCount, prev.length))
         : prev.length;
       const placeholders = getPlaceholderScreenshots(targetCount);
       const next = [];
       for (let i = 0; i < targetCount; i++) {
         next.push({
           id: prev[i]?.id || newFrameId(),
-          design: bindSlideToFrameShot(slides[i]) || null,
+          design: resolveFrameDesign(template, i),
           screenshotUrl: keepUrls[i] || placeholders[i] || null,
           fabricJson: null,
           fabricRestoreKey: null,
@@ -152,7 +161,7 @@ export function useFrames(initialFrames) {
   }, []);
 
   /** Map uploaded screenshots 1:1 onto frames (extend/shrink within limits). */
-  const mapScreenshots = useCallback((urls) => {
+  const mapScreenshots = useCallback((urls, template = null) => {
     setFrames((prev) => {
       const count = Math.min(
         MAX_FRAMES,
@@ -161,9 +170,10 @@ export function useFrames(initialFrames) {
       const placeholders = getPlaceholderScreenshots(count);
       const next = [];
       for (let i = 0; i < count; i++) {
+        const keptDesign = prev[i]?.design;
         next.push({
           id: prev[i]?.id || newFrameId(),
-          design: prev[i]?.design || null,
+          design: keptDesign || (template ? resolveFrameDesign(template, i) : null),
           screenshotUrl: urls[i] || prev[i]?.screenshotUrl || placeholders[i] || null,
         });
       }

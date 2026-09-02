@@ -3,7 +3,7 @@ import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformL
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
-import { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
+import { ensureSlideHasDevice, resolveTemplateFrame, bindSlideToFrameShot } from './templateDevices';
 import { ensureFontReady } from './fontLibrary';
 
 export { ensureSlideHasDevice, resolveTemplateFrame } from './templateDevices';
@@ -346,6 +346,35 @@ export function getTemplateSlides(template) {
         }))
       : expandToFiveSlides(template);
   return raw.map((slide) => ensureSlideHasDevice(slide, frameId, canvas));
+}
+
+/**
+ * Slide design for board frame `index`. Indices past the pack reuse the template
+ * default slide (explicit `defaultSlide`, else last slide) so extra screenshots
+ * keep branded backgrounds — not scratch white boards.
+ */
+export function resolveFrameDesign(template, index) {
+  if (!template || index == null || index < 0) return null;
+  const slides = getTemplateSlides(template);
+  if (!slides.length) return null;
+
+  let slide;
+  if (index < slides.length) {
+    slide = slides[index];
+  } else if (template.defaultSlide?.layers?.length) {
+    slide = ensureSlideHasDevice(
+      {
+        id: template.defaultSlide.id || `${template.id || 'pack'}-default`,
+        name: template.defaultSlide.name || 'Default',
+        layers: template.defaultSlide.layers,
+      },
+      resolveTemplateFrame(template),
+      template.canvas || {},
+    );
+  } else {
+    slide = slides[slides.length - 1];
+  }
+  return bindSlideToFrameShot(slide);
 }
 
 function expandToFiveSlides(template) {
