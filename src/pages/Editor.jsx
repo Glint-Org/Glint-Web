@@ -44,7 +44,7 @@ import {
   boardFrameGap,
 } from '../utils/boardZoom';
 import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
-import { restoreAllCachedScreenshots, removeCachedScreenshot } from '../utils/screenshotStore';
+import { restoreAllCachedScreenshots, removeCachedScreenshot, clearAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
 import {
   getTemplatePalette,
@@ -814,6 +814,25 @@ export default function Editor() {
     markDirty();
   }, [markDirty]);
 
+  const clearAllAssets = useCallback(() => {
+    setAssetLibrary((prev) => {
+      for (const item of prev) {
+        if (item.url?.startsWith('blob:')) {
+          try {
+            URL.revokeObjectURL(item.url);
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+      clearAllCachedScreenshots().catch((err) => {
+        console.warn('Glint: failed to clear screenshot cache', err);
+      });
+      return [];
+    });
+    markDirty();
+  }, [markDirty]);
+
   const handleReplaceScreenshot = async (index, urlOrFile) => {
     const url = typeof urlOrFile === 'string' ? urlOrFile : URL.createObjectURL(urlOrFile);
     await assignScreenshotToFrame(index, url);
@@ -1265,6 +1284,7 @@ export default function Editor() {
                     frameCount={frames.length}
                     onAssign={assignScreenshotToFrame}
                     onRemove={removeAsset}
+                    onClearAll={clearAllAssets}
                   />
                   <FrameScreenshotsPanel
                     frames={frames}

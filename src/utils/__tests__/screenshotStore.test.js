@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { readFileWithProgress, removeCachedScreenshot, listCachedScreenshotIds } from '../screenshotStore.js';
+import { readFileWithProgress, removeCachedScreenshot, listCachedScreenshotIds, clearAllCachedScreenshots } from '../screenshotStore.js';
 
 const META_KEY = 'glint.tempShotIds';
 
@@ -23,6 +23,25 @@ describe('removeCachedScreenshot', () => {
     await removeCachedScreenshot('shot-a', 'blob:fake');
     expect(revoke).toHaveBeenCalledWith('blob:fake');
     expect(await listCachedScreenshotIds()).toEqual(['shot-b']);
+  });
+});
+
+describe('clearAllCachedScreenshots', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal('indexedDB', {
+      open: () => {
+        const req = {};
+        queueMicrotask(() => req.onerror?.({ error: new Error('no idb in test') }));
+        return req;
+      },
+    });
+  });
+
+  it('clears localStorage meta even when IndexedDB is unavailable', async () => {
+    localStorage.setItem(META_KEY, JSON.stringify(['shot-a', 'shot-b']));
+    await clearAllCachedScreenshots();
+    expect(await listCachedScreenshotIds()).toEqual([]);
   });
 });
 

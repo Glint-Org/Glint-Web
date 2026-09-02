@@ -10,6 +10,7 @@ export default function AssetLibraryPanel({
   frameCount = 0,
   onAssign,
   onRemove,
+  onClearAll,
 }) {
   const [menuAssetId, setMenuAssetId] = useState(null);
   const rootRef = useRef(null);
@@ -39,11 +40,22 @@ export default function AssetLibraryPanel({
 
   return (
     <div ref={rootRef} className="space-y-2">
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-glint-text-secondary text-[10px] uppercase tracking-wider">
           Screenshot library
         </h3>
-        <span className="text-[10px] text-glint-text-tertiary tabular-nums">{assets.length}</span>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className="text-[10px] text-glint-text-tertiary tabular-nums">{assets.length}</span>
+          <button
+            type="button"
+            onClick={() => onClearAll?.()}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-glint-text-secondary hover:text-glint-danger hover:bg-glint-surface-2 transition-colors"
+            title="Clear all screenshots from storage"
+          >
+            <Trash2 size={11} />
+            Clear all
+          </button>
+        </div>
       </div>
       <p className="text-[10px] text-glint-text-tertiary -mt-1">
         Click → add to frame · drag onto board

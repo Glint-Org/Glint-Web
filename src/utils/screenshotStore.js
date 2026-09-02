@@ -119,6 +119,25 @@ export async function removeCachedScreenshot(id, url) {
   await deleteScreenshotBlob(id);
 }
 
+/** Wipe all cached screenshots from IndexedDB + localStorage meta. */
+export async function clearAllCachedScreenshots() {
+  try {
+    localStorage.removeItem(META_KEY);
+  } catch {
+    /* ignore */
+  }
+  try {
+    const db = await openDb();
+    try {
+      await idbReq(db.transaction(STORE, 'readwrite').objectStore(STORE).clear());
+    } finally {
+      db.close();
+    }
+  } catch {
+    /* meta already cleared */
+  }
+}
+
 export async function listCachedScreenshotIds() {
   try {
     return JSON.parse(localStorage.getItem(META_KEY) || '[]');
