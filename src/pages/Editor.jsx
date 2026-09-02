@@ -1349,6 +1349,8 @@ export default function Editor() {
                 && (assetLibrary.some((a) => isUserScreenshot(a.url))
                   || frames.some((f) => isUserScreenshot(f.screenshotUrl)))
               }
+              onDeviceTransform={markDirty}
+              onDeviceScaleAdjustStart={pushHistory}
             />
           </div>
         </aside>

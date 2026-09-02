@@ -706,9 +706,11 @@ export async function loadFrameSvg(frameId) {
   return res.text();
 }
 
+export const DEVICE_SCALE_MIN = 0.25;
+export const DEVICE_SCALE_MAX = 1.8;
+
 /**
- * Lock device transforms: uniform size only + free rotate/move.
- * Edge stretch handles are hidden so aspect ratio cannot be broken.
+ * Lock device transforms: uniform scale via corner/edge handles + free move.
  */
 export function applyDeviceTransformLocks(group) {
   if (!group) return group;
@@ -717,17 +719,22 @@ export function applyDeviceTransformLocks(group) {
     lockSkewingX: true,
     lockSkewingY: true,
     lockScalingFlip: true,
-    lockRotation: false,
+    lockRotation: true,
     lockMovementX: false,
     lockMovementY: false,
-    hasControls: false,
+    hasControls: true,
     hasBorders: true,
+    cornerSize: 10,
   });
   group.setControlsVisibility?.({
-    mt: false,
-    mb: false,
-    ml: false,
-    mr: false,
+    tl: true,
+    tr: true,
+    bl: true,
+    br: true,
+    mt: true,
+    mb: true,
+    ml: true,
+    mr: true,
     mtr: false,
   });
   if (!group.__glintUniformScaleBound) {
@@ -736,8 +743,12 @@ export function applyDeviceTransformLocks(group) {
       const sx = Math.abs(this.scaleX || 1);
       const sy = Math.abs(this.scaleY || 1);
       const s = Math.max(sx, sy) || 1;
-      if (Math.abs(sx - s) > 1e-4 || Math.abs(sy - s) > 1e-4) {
-        this.set({ scaleX: s, scaleY: s });
+      const clamped = Math.min(DEVICE_SCALE_MAX, Math.max(DEVICE_SCALE_MIN, s));
+      if (Math.abs(sx - clamped) > 1e-4 || Math.abs(sy - clamped) > 1e-4) {
+        const center = getGroupGeoCenter(this);
+        this.set({ scaleX: clamped, scaleY: clamped });
+        placeGroupAtCenter(this, center.x, center.y);
+        this.setCoords?.();
       }
     };
     group.on('scaling', enforceUniform);
@@ -784,6 +795,33 @@ function placeGroupAtCenter(group, cx, cy) {
     originX: 'left',
     originY: 'top',
   });
+}
+
+/** Display size + uniform scale for a framed device group. */
+export function getDeviceDisplaySize(group) {
+  if (!group || group.glintRole !== 'framed-screenshot') {
+    return { width: 0, height: 0, scale: 1, scalePct: 100 };
+  }
+  const { w, h, sx } = groupLayoutSize(group);
+  const scale = Math.min(DEVICE_SCALE_MAX, Math.max(DEVICE_SCALE_MIN, sx));
+  return {
+    width: Math.round(w),
+    height: Math.round(h),
+    scale,
+    scalePct: Math.round(scale * 100),
+  };
+}
+
+/** Set uniform device scale; keeps geometric center fixed. */
+export function setDeviceUniformScale(group, scale) {
+  if (!group || group.glintRole !== 'framed-screenshot') return false;
+  const clamped = Math.min(DEVICE_SCALE_MAX, Math.max(DEVICE_SCALE_MIN, scale));
+  const center = getGroupGeoCenter(group);
+  group.set({ scaleX: clamped, scaleY: clamped });
+  placeGroupAtCenter(group, center.x, center.y);
+  group.setCoords?.();
+  group.canvas?.requestRenderAll?.();
+  return true;
 }
 
 function chromeBitmapChanged(prev = {}, next = {}, prevFrameId = null, nextFrameId = null) {

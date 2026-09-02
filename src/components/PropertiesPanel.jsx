@@ -9,6 +9,12 @@ import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
 import { getGraphicBySrc } from '../utils/graphicsCatalog';
+import {
+  DEVICE_SCALE_MAX,
+  DEVICE_SCALE_MIN,
+  getDeviceDisplaySize,
+  setDeviceUniformScale,
+} from '../utils/canvasEngine';
 
 const FONT_SIZES = [20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 120, 140, 160, 180, 200, 220];
 const WEIGHTS = [
@@ -41,7 +47,7 @@ function ColorField({ label, value, onChange, getCanvases }) {
   return <ColorPicker label={label} value={value} onChange={onChange} getCanvases={getCanvases} />;
 }
 
-function RangeRow({ label, value, min, max, suffix = '', onChange }) {
+function RangeRow({ label, value, min, max, suffix = '', onChange, onAdjustStart }) {
   return (
     <label className="space-y-1 block">
       <span className="text-[10px] text-glint-text-tertiary">{label}</span>
@@ -51,6 +57,7 @@ function RangeRow({ label, value, min, max, suffix = '', onChange }) {
           min={min}
           max={max}
           value={value}
+          onPointerDown={() => onAdjustStart?.()}
           onChange={(e) => onChange(Number(e.target.value))}
           className="flex-1 accent-glint-accent"
         />
@@ -86,6 +93,8 @@ export default function PropertiesPanel({
   onAutoExtractThemeChange,
   onExtractThemeNow,
   canExtractTheme = false,
+  onDeviceTransform,
+  onDeviceScaleAdjustStart,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -103,6 +112,24 @@ export default function PropertiesPanel({
     shadowColor: '#000000',
   });
   const [shapeFill, setShapeFill] = useState('#FFFFFF');
+  const [deviceScalePct, setDeviceScalePct] = useState(100);
+  const [deviceSize, setDeviceSize] = useState({ width: 0, height: 0 });
+
+  const syncDeviceSize = (obj) => {
+    if (!obj || obj.glintRole !== 'framed-screenshot') return;
+    const d = getDeviceDisplaySize(obj);
+    setDeviceScalePct(d.scalePct);
+    setDeviceSize({ width: d.width, height: d.height });
+  };
+
+  const handleDeviceScale = (pct) => {
+    const obj = selection?.obj;
+    if (!obj || !canvas) return;
+    setDeviceScalePct(pct);
+    setDeviceUniformScale(obj, pct / 100);
+    syncDeviceSize(obj);
+    onDeviceTransform?.();
+  };
 
   useEffect(() => {
     if (!canvas) return;
@@ -120,6 +147,7 @@ export default function PropertiesPanel({
       if (role === 'framed-screenshot' && obj.glintFrameId) {
         onFrameHighlight?.(obj.glintFrameId);
         setRightTab('device');
+        syncDeviceSize(obj);
       } else if (role === 'screenshot') {
         setRightTab('design');
       } else if (role === 'graphic') {
@@ -153,17 +181,22 @@ export default function PropertiesPanel({
     canvas.on('selection:created', sync);
     canvas.on('selection:updated', sync);
     canvas.on('selection:cleared', () => setSelection(null));
-    canvas.on('object:modified', sync);
+    canvas.on('object:modified', (e) => {
+      sync();
+      if (e?.target?.glintRole === 'framed-screenshot') onDeviceTransform?.();
+    });
+    canvas.on('object:scaling', sync);
     canvas.on('text:changed', sync);
 
     return () => {
       canvas.off('selection:created', sync);
       canvas.off('selection:updated', sync);
       canvas.off('selection:cleared');
-      canvas.off('object:modified', sync);
+      canvas.off('object:modified');
+      canvas.off('object:scaling', sync);
       canvas.off('text:changed', sync);
     };
-  }, [canvas, onFrameHighlight]);
+  }, [canvas, onFrameHighlight, onDeviceTransform]);
 
   const applyToSelection = (patch) => {
     if (!canvas || !selection?.obj) return;
@@ -275,6 +308,26 @@ export default function PropertiesPanel({
         {rightTab === 'device' && (
           <>
             <FrameSelector selected={frame} onChange={onFrameChange} store={store} />
+
+            {selection?.type === 'framed-screenshot' ? (
+              <Section title="Device size">
+                <p className="text-[10px] text-glint-text-tertiary">
+                  Drag corner or edge handles on the canvas. Width and height stay locked together.
+                </p>
+                <RangeRow
+                  label="Scale"
+                  value={deviceScalePct}
+                  min={Math.round(DEVICE_SCALE_MIN * 100)}
+                  max={Math.round(DEVICE_SCALE_MAX * 100)}
+                  suffix="%"
+                  onChange={handleDeviceScale}
+                  onAdjustStart={onDeviceScaleAdjustStart}
+                />
+                <p className="text-[10px] text-glint-text-secondary tabular-nums">
+                  {deviceSize.width} × {deviceSize.height} px
+                </p>
+              </Section>
+            ) : null}
 
             <Section>
               <div className="flex items-center justify-between gap-2">
