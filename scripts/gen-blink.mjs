@@ -1,8 +1,6 @@
 /**
- * Pixel-matched Blink templates from template-refs/own/blink-android.svg (1080×2400).
- * Editable Montserrat text (not SVG outlines) so users can change copy.
- * Device frame stays simple-dark at measured placements.
- * Run: node scripts/gen-blink.mjs
+ * DEPRECATED — Blink lives in public/templates/blink/{common,play,ios,tablet}.json.
+ * Do not regenerate flat blink-*.json from this script.
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -15,7 +13,7 @@ const TARGETS = {
   play: {
     store: 'play/phone',
     canvas: { width: 1080, height: 1920 },
-    frame: 'simple-dark',
+    frame: 'pixel9',
     suffix: 'play',
     lockFrame: true,
   },
@@ -38,6 +36,16 @@ const TARGETS = {
 const X_KEYS = new Set(['left', 'width', 'marginLeft', 'rx']);
 const Y_KEYS = new Set(['top', 'height', 'marginTop', 'ry', 'radius']);
 const FONT = 'Montserrat';
+/** Match Play Pixel width (~896/1080) across iPhone/iPad so devices aren't over-wide. */
+const DEVICE_WIDTH_FRACTION = 0.83;
+
+const BLINK_PALETTE = [
+  { id: 'primary', label: 'Primary', color: '#611AB4' },
+  { id: 'secondary', label: 'Secondary', color: '#8030DD' },
+  { id: 'accent', label: 'Accent', color: '#8A2BE2' },
+  { id: 'soft', label: 'Soft fill', color: '#D99BFA' },
+  { id: 'surface', label: 'Surface', color: '#FFFFFF' },
+];
 
 function scaleShadow(shadow, sx, sy, sf) {
   if (!shadow || typeof shadow !== 'object') return shadow;
@@ -72,6 +80,7 @@ function scaleLayer(layer, sx, sy, sf, defaultFrame, lockFrame) {
     else if (
       key === 'angle' ||
       key === 'scale' ||
+      key === 'widthFraction' ||
       key === 'opacity' ||
       key === 'minCoverage' ||
       key === 'charSpacing' ||
@@ -96,7 +105,7 @@ const BLINK = {
   preview: {
     bg: '#611AB4',
     textColor: '#FFFFFF',
-    frame: 'simple-dark',
+    frame: 'pixel9',
     art: [
       { kind: 'blob', color: '#D99BFA', x: '55%', y: '-5%', w: '60%', h: '35%' },
       { kind: 'circle', color: '#8030DD', x: '-10%', y: '70%', w: '40%', h: '25%' },
@@ -109,6 +118,7 @@ const BLINK = {
       'Download Securely',
     ],
   },
+  palette: BLINK_PALETTE,
   layers: [{ type: 'background', color: '#FFFFFF' }],
   slides: [
     {
@@ -140,7 +150,8 @@ const BLINK = {
         },
         {
           type: 'device',
-          frame: 'simple-dark',
+          frame: 'pixel9',
+          widthFraction: DEVICE_WIDTH_FRACTION,
           slot: 0,
           scale: 0.903,
           minCoverage: 0.85,
@@ -155,7 +166,8 @@ const BLINK = {
         { type: 'background', color: '#FFFFFF' },
         {
           type: 'device',
-          frame: 'simple-dark',
+          frame: 'pixel9',
+          widthFraction: DEVICE_WIDTH_FRACTION,
           slot: 1,
           scale: 0.903,
           minCoverage: 0.85,
@@ -214,7 +226,8 @@ const BLINK = {
         },
         {
           type: 'device',
-          frame: 'simple-dark',
+          frame: 'pixel9',
+          widthFraction: DEVICE_WIDTH_FRACTION,
           slot: 2,
           scale: 0.903,
           minCoverage: 0.85,
@@ -241,7 +254,8 @@ const BLINK = {
         },
         {
           type: 'device',
-          frame: 'simple-dark',
+          frame: 'pixel9',
+          widthFraction: DEVICE_WIDTH_FRACTION,
           slot: 3,
           scale: 0.903,
           minCoverage: 0.85,
@@ -268,7 +282,8 @@ const BLINK = {
         },
         {
           type: 'device',
-          frame: 'simple-dark',
+          frame: 'pixel9',
+          widthFraction: DEVICE_WIDTH_FRACTION,
           slot: 4,
           scale: 0.903,
           minCoverage: 0.85,
@@ -294,9 +309,10 @@ function buildVariant(storeKey) {
     description: `${BLINK.description} (${target.suffix})`,
     store: target.store,
     canvas: { ...target.canvas },
+    palette: BLINK_PALETTE.map((s) => ({ ...s })),
     preview: {
       ...BLINK.preview,
-      frame: target.lockFrame ? 'simple-dark' : target.frame,
+      frame: target.frame,
       ...(storeKey === 'ios-tablet' ? { tablet: true } : {}),
     },
     layers: BLINK.layers.map((l) =>

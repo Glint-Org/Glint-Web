@@ -1,6 +1,13 @@
 import { filterTemplatesByStore } from './storeCatalog';
+import {
+  mergeTemplateFamily,
+  templateJsonUrl,
+  templateCommonUrl,
+  TEMPLATE_FAMILY_PATHS,
+} from './templateFamily';
 
 const THEME_CACHE = {};
+const TEMPLATE_CACHE = {};
 
 export async function loadThemePresets() {
   if (Object.keys(THEME_CACHE).length > 0) return THEME_CACHE;
@@ -112,9 +119,29 @@ export function filterVisibleTemplates(templates, filter) {
 }
 
 export async function loadTemplate(templateId) {
-  const res = await fetch(`/templates/${templateId}.json`);
+  if (TEMPLATE_CACHE[templateId]) return TEMPLATE_CACHE[templateId];
+
+  const res = await fetch(templateJsonUrl(templateId));
   if (!res.ok) throw new Error(`Template not found: ${templateId}`);
-  return res.json();
+  const platform = await res.json();
+
+  let template = platform;
+  const commonUrl = templateCommonUrl(templateId);
+  if (commonUrl && (platform.extends || TEMPLATE_FAMILY_PATHS[templateId])) {
+    const commonRes = await fetch(commonUrl);
+    if (!commonRes.ok) throw new Error(`Template common not found: ${commonUrl}`);
+    const common = await commonRes.json();
+    template = mergeTemplateFamily(common, platform);
+  }
+
+  // Drop merge bookkeeping so canvas engine only sees slide layers.
+  delete template.extends;
+  delete template.layout;
+  delete template.style;
+  delete template.device;
+
+  TEMPLATE_CACHE[templateId] = template;
+  return template;
 }
 
 /**
