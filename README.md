@@ -8,6 +8,7 @@ Browser editor that turns real app screenshots into store-ready frames. No login
 - **Graphic templates** - Play Store & App Store packs by device (phone, tablet, TV, Wear, Chromebook, iPhone, iPad) with premium frames where they apply
 - **Assets** - import screenshots, sessions, or Bridge captures; map 1:1 onto frames
 - **Layers** - drag to restack, device right-click → import screenshot
+- **Auto theme** - Colors tab → auto extract palette from imported screenshots
 - **Export** - store PNG ZIP, **`.glintpack`** (editable round-trip), Copy for Glint View
 - **Glint View handoff** - pack import/share, or Preview → **Copy for Glint View**
 
@@ -44,6 +45,7 @@ JSON packs in `public/templates/`. Device layers composite screenshots inside SV
 |------|-----|
 | **Capture** | Import output folder (`session.json` + PNGs) |
 | **Bridge** | `ws://127.0.0.1:7700` + pairing token; captures arrive as data URLs |
+| **Bridge CLI** | `inspect --template blink`, `extract-theme output/` for palette + headlines |
 | **View** | Export → Copy for Glint View (full screenshots). QR = metadata only |
 
 ## Future work

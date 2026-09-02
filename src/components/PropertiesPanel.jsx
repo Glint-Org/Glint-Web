@@ -82,6 +82,10 @@ export default function PropertiesPanel({
   store,
   templatePalette = [],
   onPaletteColorChange,
+  autoExtractTheme = false,
+  onAutoExtractThemeChange,
+  onExtractThemeNow,
+  canExtractTheme = false,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -394,6 +398,39 @@ export default function PropertiesPanel({
 
         {rightTab === 'colors' && (
           <div className="space-y-4">
+            {templatePalette?.length > 0 ? (
+              <Section title="From screenshots">
+                <p className="text-[10px] text-glint-text-tertiary">
+                  Sample colors from imported screenshots and remap the template palette.
+                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] text-glint-text-secondary">Auto extract theme</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!!autoExtractTheme}
+                    onClick={() => onAutoExtractThemeChange?.(!autoExtractTheme)}
+                    className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
+                      autoExtractTheme ? 'bg-glint-accent' : 'bg-glint-border'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                        autoExtractTheme ? 'translate-x-4' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  disabled={!canExtractTheme}
+                  onClick={onExtractThemeNow}
+                  className="w-full py-2 rounded-lg text-[11px] font-medium border border-glint-border text-glint-text-secondary hover:bg-glint-surface-2 disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  Extract now
+                </button>
+              </Section>
+            ) : null}
             {templatePalette?.length > 0 ? (
               <Section title="Template colors">
                 <p className="text-[10px] text-glint-text-tertiary">

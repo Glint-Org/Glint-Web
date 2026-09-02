@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  ZoomIn, ZoomOut, Type, Trash2, Download, Upload, Smartphone,
+  ZoomIn, ZoomOut, Type, Trash2, Download, Upload, Smartphone, Undo2, Redo2,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -51,6 +51,11 @@ import {
   remapCanvasColors,
   remapDesignColors,
 } from '../utils/templatePalette';
+import {
+  buildPaletteRemap,
+  extractThemeFromUrls,
+} from '../utils/screenshotTheme';
+import { captureEditorSnapshot, createEditorHistory } from '../hooks/editorHistory';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 const LEFT_W = 280;
@@ -58,6 +63,7 @@ const RIGHT_W = 300;
 /** Room for the floating bottom toolbar so frame labels stay visible. */
 const BOARD_TOOLBAR_RESERVE = 52;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
+const AUTO_EXTRACT_THEME_KEY = 'glint.autoExtractTheme';
 /** ~8% per +/- click — discrete steps avoid trackpad-style rebuild jitter. */
 const ZOOM_STEP = 1.08;
 
@@ -117,6 +123,13 @@ export default function Editor() {
   }, []);
   const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
+  const [autoExtractTheme, setAutoExtractTheme] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_EXTRACT_THEME_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
   const [bridgeToken, setBridgeToken] = useState('');
   const [leftTab, setLeftTab] = useState(initialAssetItems.length ? 'assets' : 'templates');
   const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
@@ -129,6 +142,21 @@ export default function Editor() {
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
   framesRef.current = frames;
+  const templateRef = useRef(template);
+  templateRef.current = template;
+  const backgroundRef = useRef(background);
+  backgroundRef.current = background;
+  const deviceFrameRef = useRef(deviceFrame);
+  deviceFrameRef.current = deviceFrame;
+  const screenshotStyleRef = useRef(screenshotStyle);
+  screenshotStyleRef.current = screenshotStyle;
+  const fontFamilyRef = useRef(fontFamily);
+  fontFamilyRef.current = fontFamily;
+  const historyRef = useRef(createEditorHistory());
+  const restoringRef = useRef(false);
+  const pushHistoryRef = useRef(() => {});
+  const canvasGestureRef = useRef(new WeakSet());
+  const [historyTick, setHistoryTick] = useState(0);
   const styleApplyTimerRef = useRef(0);
   const styleApplyRafRef = useRef(0);
   const styleApplyGenRef = useRef(0);
@@ -159,23 +187,27 @@ export default function Editor() {
     setAssetLibrary((prev) => mergeAssetItems(prev, items));
   }, []);
 
-  useEffect(() => {
-    if (bridge.screenshots.length > 0) {
-      const items = bridge.screenshots.map((url, i) => ({
-        id: `bridge-${Date.now()}-${i}`,
-        url,
-        name: `Capture ${i + 1}`,
-      }));
-      addAssets(items);
-      mapScreenshots(bridge.screenshots, template);
-      setLeftTab('assets');
-    }
-  }, [bridge.screenshots, mapScreenshots, addAssets, template]);
-
   const handleCanvasReady = useCallback((frameId, canvas) => {
     if (!frameId) return;
-    if (canvas) canvasMapRef.current[frameId] = canvas;
-    else delete canvasMapRef.current[frameId];
+    if (canvas) {
+      canvasMapRef.current[frameId] = canvas;
+      if (!canvasGestureRef.current.has(canvas)) {
+        canvasGestureRef.current.add(canvas);
+        let gesturing = false;
+        canvas.on('mouse:down', (opt) => {
+          if (!opt.target || restoringRef.current) return;
+          if (!gesturing) {
+            gesturing = true;
+            pushHistoryRef.current();
+          }
+        });
+        canvas.on('mouse:up', () => {
+          gesturing = false;
+        });
+      }
+    } else {
+      delete canvasMapRef.current[frameId];
+    }
   }, []);
 
   useEffect(() => {
@@ -209,6 +241,7 @@ export default function Editor() {
 
   const confirmReplaceTemplate = () => {
     if (pendingTemplate) {
+      pushHistoryRef.current();
       loadTemplate(pendingTemplate);
       markDirty();
     }
@@ -306,17 +339,79 @@ export default function Editor() {
     return () => window.removeEventListener('popstate', onPop);
   }, [dirty]);
 
-  const handleBackgroundChange = (bg) => {
-    setBackgroundState(bg);
-    if (activeCanvas && bg) setBackground(activeCanvas, bg.type, bg.value);
-    markDirty();
-  };
-
   const templatePalette = useMemo(() => getTemplatePalette(template), [template]);
+
+  const getSnapshot = useCallback(
+    () =>
+      captureEditorSnapshot({
+        frames: framesRef.current,
+        template: templateRef.current,
+        background: backgroundRef.current,
+        deviceFrame: deviceFrameRef.current,
+        screenshotStyle: screenshotStyleRef.current,
+        fontFamily: fontFamilyRef.current,
+        canvasMap: canvasMapRef.current,
+      }),
+    [],
+  );
+
+  const applySnapshot = useCallback(
+    (snap) => {
+      if (!snap) return;
+      restoringRef.current = true;
+      setTemplate(snap.template);
+      if (snap.background) setBackgroundState(snap.background);
+      if (snap.deviceFrame !== undefined) setDeviceFrame(snap.deviceFrame);
+      if (snap.screenshotStyle) setScreenshotStyle({ ...snap.screenshotStyle });
+      if (snap.fontFamily) setFontFamily(snap.fontFamily);
+      setFrames(snap.frames);
+      markDirty();
+      requestAnimationFrame(() => {
+        restoringRef.current = false;
+      });
+    },
+    [markDirty, setFrames],
+  );
+
+  const pushHistory = useCallback(() => {
+    if (restoringRef.current || bootstrappingRef.current) return;
+    historyRef.current.push(getSnapshot());
+    setHistoryTick((t) => t + 1);
+  }, [getSnapshot]);
+
+  pushHistoryRef.current = pushHistory;
+
+  const canUndo = useMemo(() => historyRef.current.canUndo(), [historyTick]);
+  const canRedo = useMemo(() => historyRef.current.canRedo(), [historyTick]);
+
+  const handleUndo = useCallback(() => {
+    if (!historyRef.current.canUndo()) return;
+    const prev = historyRef.current.undo(getSnapshot());
+    applySnapshot(prev);
+    setHistoryTick((t) => t + 1);
+  }, [getSnapshot, applySnapshot]);
+
+  const handleRedo = useCallback(() => {
+    if (!historyRef.current.canRedo()) return;
+    const next = historyRef.current.redo(getSnapshot());
+    applySnapshot(next);
+    setHistoryTick((t) => t + 1);
+  }, [getSnapshot, applySnapshot]);
+
+  const handleBackgroundChange = useCallback(
+    (bg) => {
+      pushHistory();
+      setBackgroundState(bg);
+      if (activeCanvas && bg) setBackground(activeCanvas, bg.type, bg.value);
+      markDirty();
+    },
+    [activeCanvas, markDirty, pushHistory],
+  );
 
   const handlePaletteColorChange = useCallback(
     (fromColor, toColor) => {
       if (!fromColor || !toColor || fromColor.toUpperCase() === toColor.toUpperCase()) return;
+      pushHistory();
       Object.values(canvasMapRef.current).forEach((c) => remapCanvasColors(c, fromColor, toColor));
       setFrames((prev) =>
         prev.map((frame) => {
@@ -331,8 +426,105 @@ export default function Editor() {
       }
       markDirty();
     },
+    [markDirty, setFrames, template, pushHistory],
+  );
+
+  const applyPaletteRemaps = useCallback(
+    (pairs) => {
+      if (!pairs?.length) return;
+      Object.values(canvasMapRef.current).forEach((c) => {
+        pairs.forEach(([from, to]) => remapCanvasColors(c, from, to));
+      });
+      setFrames((prev) =>
+        prev.map((frame) => {
+          if (!frame.design) return frame;
+          let design = frame.design;
+          pairs.forEach(([from, to]) => {
+            design = remapDesignColors(design, from, to);
+          });
+          return { ...frame, design };
+        }),
+      );
+      setTemplate((prev) => {
+        if (!prev) return prev;
+        let next = prev;
+        pairs.forEach(([from, to]) => {
+          next = remapDesignColors(next, from, to);
+        });
+        return next;
+      });
+      const bgSlot = template?.palette?.find((s) => s.id === 'background');
+      const bgPair = pairs.find(
+        ([from]) => bgSlot && bgSlot.color?.toUpperCase() === from.toUpperCase(),
+      );
+      if (bgPair) {
+        setBackgroundState({ label: 'Custom', type: 'solid', value: bgPair[1].toUpperCase() });
+      }
+      markDirty();
+    },
     [markDirty, setFrames, template],
   );
+
+  const applyThemeFromScreenshots = useCallback(
+    async (urls) => {
+      const palette = getTemplatePalette(template);
+      const userUrls = (urls || []).filter(isUserScreenshot);
+      if (!autoExtractTheme || !template || !palette.length || !userUrls.length) return;
+      try {
+        const theme = await extractThemeFromUrls(userUrls, palette);
+        const pairs = buildPaletteRemap(palette, theme);
+        if (pairs.length) {
+          pushHistory();
+          applyPaletteRemaps(pairs);
+        }
+      } catch {
+        /* ignore failed sampling (CORS, empty image) */
+      }
+    },
+    [autoExtractTheme, template, applyPaletteRemaps, pushHistory],
+  );
+
+  const handleAutoExtractThemeChange = useCallback((enabled) => {
+    setAutoExtractTheme(enabled);
+    try {
+      localStorage.setItem(AUTO_EXTRACT_THEME_KEY, enabled ? '1' : '0');
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const handleExtractThemeNow = useCallback(async () => {
+    const urls = [
+      ...assetLibrary.map((a) => a.url),
+      ...frames.map((f) => f.screenshotUrl),
+    ].filter(isUserScreenshot);
+    const palette = getTemplatePalette(template);
+    if (!template || !palette.length || !urls.length) return;
+    try {
+      const theme = await extractThemeFromUrls(urls, palette);
+      const pairs = buildPaletteRemap(palette, theme);
+      if (pairs.length) {
+        pushHistory();
+        applyPaletteRemaps(pairs);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [assetLibrary, frames, template, applyPaletteRemaps, pushHistory]);
+
+  useEffect(() => {
+    if (bridge.screenshots.length > 0) {
+      const items = bridge.screenshots.map((url, i) => ({
+        id: `bridge-${Date.now()}-${i}`,
+        url,
+        name: `Capture ${i + 1}`,
+      }));
+      addAssets(items);
+      mapScreenshots(bridge.screenshots, template);
+      void applyThemeFromScreenshots(bridge.screenshots);
+      setLeftTab('assets');
+    }
+  }, [bridge.screenshots, mapScreenshots, addAssets, template, applyThemeFromScreenshots]);
 
   const handleScreenshotStyleChange = useCallback((patch) => {
     markDirty();
@@ -458,6 +650,7 @@ export default function Editor() {
 
   const handleAddText = useCallback(async () => {
     if (!activeCanvas) return;
+    pushHistory();
     await ensureFontReady(fontFamily, '700');
     addTextOverlay(activeCanvas, 'Your headline', {
       fill: background?.type === 'solid' && isLight(background.value) ? '#1A1A1A' : '#FFFFFF',
@@ -465,13 +658,15 @@ export default function Editor() {
       fontSize: 48,
     });
     markDirty();
-  }, [activeCanvas, background, fontFamily, markDirty]);
+  }, [activeCanvas, background, fontFamily, markDirty, pushHistory]);
 
   const handleDelete = useCallback(() => {
     if (!activeCanvas) return;
+    if (!activeCanvas.getActiveObjects?.()?.length) return;
+    pushHistory();
     deleteActiveObjects(activeCanvas);
     markDirty();
-  }, [activeCanvas, markDirty]);
+  }, [activeCanvas, markDirty, pushHistory]);
 
   const handleSessionImport = ({ screenshots: imported, session: importedSession }) => {
     setSession(importedSession);
@@ -483,6 +678,7 @@ export default function Editor() {
     }));
     addAssets(items);
     mapScreenshots(imported, template);
+    void applyThemeFromScreenshots(imported);
     setLeftTab('assets');
     markDirty();
   };
@@ -534,7 +730,9 @@ export default function Editor() {
 
   const handleUpload = (ingested) => {
     addAssets(ingested);
-    mapScreenshots(ingested.map((x) => x.url), template);
+    const urls = ingested.map((x) => x.url);
+    mapScreenshots(urls, template);
+    void applyThemeFromScreenshots(urls);
     setLeftTab('assets');
     markDirty();
   };
@@ -721,13 +919,14 @@ export default function Editor() {
 
   /** Strip every frame to the simple extra slide + blank device screens. */
   const confirmStripToDeviceFrames = useCallback(() => {
+    pushHistory();
     const white = getWhiteScreenshot();
     const stamp = Date.now();
     setFrames((prev) => stripFramesToDevices(prev, template, white, stamp));
     setActiveIndex(-1);
     setStripConfirmOpen(false);
     markDirty();
-  }, [template, setFrames, markDirty]);
+  }, [template, setFrames, markDirty, pushHistory]);
 
   const pendingDeviceRef = useRef(null);
 
@@ -796,9 +995,20 @@ export default function Editor() {
       const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       if ((e.key === 'Delete' || e.key === 'Backspace') && !typing && activeCanvas?.getActiveObjects()?.length) {
         e.preventDefault();
-        deleteActiveObjects(activeCanvas);
+        handleDelete();
       }
       if (typing) return;
+      if ((e.key === 'z' || e.key === 'Z') && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      if (
+        ((e.key === 'z' || e.key === 'Z') && (e.metaKey || e.ctrlKey) && e.shiftKey)
+        || ((e.key === 'y' || e.key === 'Y') && (e.metaKey || e.ctrlKey))
+      ) {
+        e.preventDefault();
+        handleRedo();
+      }
       if ((e.key === 't' || e.key === 'T') && !e.metaKey && !e.ctrlKey) handleAddText();
       if (e.key === '\\' && !e.metaKey && !e.ctrlKey) {
         setLeftOpen((v) => !v);
@@ -809,7 +1019,7 @@ export default function Editor() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeCanvas, handleAddText, frames.length, setActiveIndex]);
+  }, [activeCanvas, handleAddText, handleDelete, handleUndo, handleRedo, frames.length, setActiveIndex]);
 
   const getLiveCanvases = () =>
     frames.map((f) => canvasMapRef.current[f.id]).filter(Boolean);
@@ -835,6 +1045,25 @@ export default function Editor() {
             title={leftOpen ? 'Collapse left panel' : 'Expand left panel'}
           >
             {leftOpen ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
+          </button>
+          <div className="w-px h-4 bg-glint-border-strong" />
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-35 disabled:pointer-events-none"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={handleRedo}
+            disabled={!canRedo}
+            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-35 disabled:pointer-events-none"
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo2 size={16} />
           </button>
           <span className="text-sm font-semibold text-glint-text">Editor</span>
           <span className="text-[10px] text-glint-text-tertiary">
@@ -1111,6 +1340,15 @@ export default function Editor() {
               store={exportPreset}
               templatePalette={templatePalette}
               onPaletteColorChange={handlePaletteColorChange}
+              autoExtractTheme={autoExtractTheme}
+              onAutoExtractThemeChange={handleAutoExtractThemeChange}
+              onExtractThemeNow={handleExtractThemeNow}
+              canExtractTheme={
+                !!template
+                && templatePalette.length > 0
+                && (assetLibrary.some((a) => isUserScreenshot(a.url))
+                  || frames.some((f) => isUserScreenshot(f.screenshotUrl)))
+              }
             />
           </div>
         </aside>
