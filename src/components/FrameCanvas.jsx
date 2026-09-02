@@ -223,7 +223,7 @@ export default function FrameCanvas({
       if (editableRef.current) selectDeviceLayer(canvas);
     })();
     return () => ac.abort();
-  }, [fabricJson, canvasWidth, canvasHeight, paintKey]);
+  }, [fabricJson, canvasWidth, canvasHeight, paintKey, screenshotUrl]);
 
   return (
     <div

@@ -64,6 +64,31 @@ export function stripFramesToDevices(frames, template, whiteUrl, stamp = Date.no
   }));
 }
 
+/** Map uploaded screenshots 1:1 onto frames (extend/shrink within limits). */
+export function mapScreenshotUrls(frames, urls, template = null) {
+  const count = Math.min(
+    MAX_FRAMES,
+    Math.max(frames.length, Math.min(urls.length || frames.length, MAX_FRAMES)),
+  );
+  const placeholders = getPlaceholderScreenshots(count);
+  const stamp = Date.now();
+  const next = [];
+  for (let i = 0; i < count; i++) {
+    const keptDesign = frames[i]?.design;
+    const fromImport = urls[i] != null ? urls[i] : null;
+    const screenshotUrl = fromImport ?? frames[i]?.screenshotUrl ?? placeholders[i] ?? null;
+    const urlChanged = fromImport != null && fromImport !== frames[i]?.screenshotUrl;
+    next.push({
+      id: frames[i]?.id || newFrameId(),
+      design: keptDesign || (template ? resolveFrameDesign(template, i) : null),
+      screenshotUrl,
+      fabricJson: urlChanged ? null : frames[i]?.fabricJson ?? null,
+      fabricRestoreKey: urlChanged ? `import-${stamp}-${i}` : frames[i]?.fabricRestoreKey ?? null,
+    });
+  }
+  return next;
+}
+
 export function useFrames(initialFrames) {
   const [frames, setFrames] = useState(
     () => (initialFrames?.length ? initialFrames : framesFromScreenshots([])),
@@ -175,23 +200,7 @@ export function useFrames(initialFrames) {
 
   /** Map uploaded screenshots 1:1 onto frames (extend/shrink within limits). */
   const mapScreenshots = useCallback((urls, template = null) => {
-    setFrames((prev) => {
-      const count = Math.min(
-        MAX_FRAMES,
-        Math.max(prev.length, Math.min(urls.length || prev.length, MAX_FRAMES)),
-      );
-      const placeholders = getPlaceholderScreenshots(count);
-      const next = [];
-      for (let i = 0; i < count; i++) {
-        const keptDesign = prev[i]?.design;
-        next.push({
-          id: prev[i]?.id || newFrameId(),
-          design: keptDesign || (template ? resolveFrameDesign(template, i) : null),
-          screenshotUrl: urls[i] || prev[i]?.screenshotUrl || placeholders[i] || null,
-        });
-      }
-      return next;
-    });
+    setFrames((prev) => mapScreenshotUrls(prev, urls, template));
   }, []);
 
   return {
