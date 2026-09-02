@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  ZoomIn, ZoomOut, Type, Trash2, Download, Upload,
+  ZoomIn, ZoomOut, Type, Trash2, Download, Upload, Smartphone,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -21,6 +21,7 @@ import {
   useFrames,
   framesFromTemplate,
   framesFromScreenshots,
+  stripFramesToDevices,
 } from '../hooks/useFrames';
 import { loadThemePresets, loadAllTemplates } from '../utils/templateLoader';
 import {
@@ -105,6 +106,7 @@ export default function Editor() {
   const [dirty, setDirty] = useState(false);
   const [pendingTemplate, setPendingTemplate] = useState(null);
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [stripConfirmOpen, setStripConfirmOpen] = useState(false);
   const dirtyRef = useRef(false);
   const bootstrappingRef = useRef(true);
 
@@ -716,6 +718,17 @@ export default function Editor() {
     }
     setActiveIndex(-1);
   }, [activeCanvas, setActiveIndex]);
+
+  /** Strip every frame to the simple extra slide + blank device screens. */
+  const confirmStripToDeviceFrames = useCallback(() => {
+    const white = getWhiteScreenshot();
+    const stamp = Date.now();
+    setFrames((prev) => stripFramesToDevices(prev, template, white, stamp));
+    setActiveIndex(-1);
+    setStripConfirmOpen(false);
+    markDirty();
+  }, [template, setFrames, markDirty]);
+
   const pendingDeviceRef = useRef(null);
 
   // Close device action menu when user selects another layer or clears selection.
@@ -911,6 +924,22 @@ export default function Editor() {
             onClearSelection={clearCanvasSelection}
             showFrameChrome={!canZoomIn}
           />
+
+          <div
+            className="absolute top-4 z-20 flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl pointer-events-auto transition-[left,transform] duration-200 ease-out"
+            style={{
+              left: `calc(50% + ${(leftOpen ? LEFT_W : 0) / 2}px - ${(rightOpen ? RIGHT_W : 0) / 2}px)`,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <ToolBtn
+              danger
+              onClick={() => setStripConfirmOpen(true)}
+              title="Clear styling and screenshots — device frames only"
+            >
+              <Smartphone size={15} />
+            </ToolBtn>
+          </div>
 
           <div
             className="absolute bottom-4 z-20 flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl pointer-events-auto transition-[left,transform] duration-200 ease-out"
@@ -1116,6 +1145,18 @@ export default function Editor() {
       />
 
       <ConfirmDialog
+        open={stripConfirmOpen}
+        title="Clear all frames?"
+        message="Removes template styling and screenshots from every frame. Device bezels stay with blank screens."
+        confirmLabel="Clear all"
+        cancelLabel="Cancel"
+        danger
+        enterConfirms
+        onConfirm={confirmStripToDeviceFrames}
+        onCancel={() => setStripConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
         open={leaveOpen}
         title="Leave editor?"
         message="Unsaved changes will be lost. Download a .glint file first if you want to keep editing later."
@@ -1129,16 +1170,18 @@ export default function Editor() {
   );
 }
 
-function ToolBtn({ children, onClick, active, title, disabled }) {
+function ToolBtn({ children, onClick, active, title, disabled, danger }) {
   return (
     <button
       onClick={onClick}
       title={title}
       disabled={disabled}
       className={`p-2 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none ${
-        active
-          ? 'bg-glint-accent text-glint-text-on-accent'
-          : 'text-glint-text-secondary hover:bg-glint-surface-2'
+        danger
+          ? 'bg-glint-danger text-white hover:opacity-90'
+          : active
+            ? 'bg-glint-accent text-glint-text-on-accent'
+            : 'text-glint-text-secondary hover:bg-glint-surface-2'
       }`}
     >
       {children}

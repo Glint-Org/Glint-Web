@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getTemplateSlides, resolveFrameDesign } from '../utils/templateEngine';
+import { getTemplateSlides, resolveFrameDesign, resolveExtraFrameDesign } from '../utils/templateEngine';
 import { getPlaceholderScreenshots } from '../utils/placeholderScreenshots';
 
 export const MIN_FRAMES = 1;
@@ -49,6 +49,19 @@ export function framesFromScreenshots(urls = []) {
     frames.push(createEmptyFrame(urls[i] || placeholders[i] || null));
   }
   return frames;
+}
+
+/** Reset every frame to extraSlide styling + blank device screens. */
+export function stripFramesToDevices(frames, template, whiteUrl, stamp = Date.now()) {
+  const design = template ? resolveExtraFrameDesign(template) : null;
+  const designCopy = design ? JSON.parse(JSON.stringify(design)) : null;
+  return frames.map((f, i) => ({
+    ...f,
+    design: designCopy,
+    screenshotUrl: whiteUrl,
+    fabricJson: null,
+    fabricRestoreKey: `devices-${stamp}-${i}`,
+  }));
 }
 
 export function useFrames(initialFrames) {
