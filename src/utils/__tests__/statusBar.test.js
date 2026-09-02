@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   statusBarHeight,
   statusBarChromeChanged,
+  screenshotFitChanged,
   screenContentRect,
   coverFitRect,
   statusBarKindForFrame,
@@ -57,6 +58,12 @@ describe('statusBar', () => {
         'iphone13-pro',
       ),
     ).toBe(true);
+  });
+
+  it('detects screenshot fit mode and offset changes', () => {
+    expect(screenshotFitChanged({ fitMode: 'cover' }, { fitMode: 'contain' })).toBe(true);
+    expect(screenshotFitChanged({ fitOffsetX: 0 }, { fitOffsetX: 0.5 })).toBe(true);
+    expect(screenshotFitChanged({ fitMode: 'cover' }, { fitMode: 'cover' })).toBe(false);
   });
 
   it('reserves full hole when status bar is off', () => {

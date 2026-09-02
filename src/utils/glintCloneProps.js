@@ -13,4 +13,6 @@ export const GLINT_CLONE_PROPS = [
   'glintChrome',
   'glintTargetW',
   'glintTargetH',
+  'glintLayoutW',
+  'glintLayoutH',
 ];

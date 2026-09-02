@@ -135,3 +135,12 @@ export function statusBarChromeChanged(prev = {}, next = {}, prevFrameId = null,
     || (next.statusBarEnabled && prevProfile !== nextProfile)
   );
 }
+
+/** True when screenshot fit mode / crop offset changed enough to rebake the screen bitmap. */
+export function screenshotFitChanged(prev = {}, next = {}) {
+  return (
+    (prev.fitMode || 'cover') !== (next.fitMode || 'cover')
+    || (prev.fitOffsetX ?? 0) !== (next.fitOffsetX ?? 0)
+    || (prev.fitOffsetY ?? 0) !== (next.fitOffsetY ?? 0)
+  );
+}

@@ -11,6 +11,7 @@ import { isProtectedLayer } from './layerGuards';
 import {
   paintStatusBar,
   statusBarChromeChanged,
+  screenshotFitChanged,
   screenContentRect,
   coverFitRect,
   containFitRect,
@@ -449,6 +450,8 @@ export async function addStyledScreenshot(canvas, screenshotUrl, opts = {}) {
     glintChrome: style,
     glintTargetW: targetW,
     glintTargetH: targetH,
+    glintLayoutW: targetW + pad * 2,
+    glintLayoutH: targetH + pad * 2,
     width: targetW + pad * 2,
     height: targetH + pad * 2,
   });
@@ -473,12 +476,7 @@ export async function stripDeviceFrame(group, style = {}) {
   if (!canvas || !screenshotUrl) return false;
 
   const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...(group.glintChrome || {}), ...style };
-  const center = typeof group.getCenterPoint === 'function'
-    ? group.getCenterPoint()
-    : {
-        x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
-        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2,
-      };
+  const { x: cx, y: cy } = getGroupGeoCenter(group);
   const angle = group.angle || 0;
   const slot = group.glintSlot;
   const slide = group.glintSlide;
@@ -490,8 +488,8 @@ export async function stripDeviceFrame(group, style = {}) {
   const { screenW, screenH } = computeFrameLayout(frameId, baseScale);
   const targetW = screenW * uniform;
   const targetH = screenH * uniform;
-  const left = center.x - targetW / 2;
-  const top = center.y - targetH / 2;
+  const left = cx - targetW / 2;
+  const top = cy - targetH / 2;
 
   const next = await addStyledScreenshot(canvas, screenshotUrl, {
     ...chrome,
@@ -536,7 +534,7 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
   if (group.glintRole === 'framed-screenshot') {
     const prev = group.glintChrome || {};
     const chrome = { ...DEFAULT_SCREENSHOT_STYLE, ...prev, ...style };
-    const needsRebuild = opts.forceRebuild || statusBarChromeChanged(prev, chrome);
+    const needsRebuild = opts.forceRebuild || chromeBitmapChanged(prev, chrome);
     if (!needsRebuild) {
       applyChromeShadow(group, chrome);
       applyOuterBorderStroke(group, chrome);
@@ -558,7 +556,7 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
   const radiusChanged =
     (chrome.cornerRadius ?? 0) !== (prev.cornerRadius ?? DEFAULT_SCREENSHOT_STYLE.cornerRadius);
   const needsBitmapRebuild =
-    opts.forceRebuild || radiusChanged || statusBarChromeChanged(prev, chrome);
+    opts.forceRebuild || radiusChanged || chromeBitmapChanged(prev, chrome);
 
   if (!needsBitmapRebuild) {
     applyBareBorderStroke(group, chrome);
@@ -575,27 +573,25 @@ export async function restyleScreenshot(group, style = {}, opts = {}) {
     return false;
   }
 
-  const center = typeof group.getCenterPoint === 'function'
-    ? group.getCenterPoint()
-    : {
-        x: (group.left || 0) + ((group.width || 0) * (group.scaleX || 1)) / 2,
-        y: (group.top || 0) + ((group.height || 0) * (group.scaleY || 1)) / 2,
-      };
+  const center = getGroupGeoCenter(group);
   const angle = group.angle || 0;
   const slot = group.glintSlot;
   const slide = group.glintSlide;
   const selectable = group.selectable !== false;
   const uniform = Math.max(Math.abs(group.scaleX || 1), Math.abs(group.scaleY || 1));
-  const targetW = (group.glintTargetW || group.width || 1) * uniform;
-  const targetH = (group.glintTargetH || group.height || 1) * uniform;
-  const left = center.x - targetW / 2;
-  const top = center.y - targetH / 2;
+  const pad = outerBorderPad(Math.max(0, chrome.strokeWidth ?? 0));
+  const layoutW = group.glintLayoutW ?? group.width ?? 1;
+  const layoutH = group.glintLayoutH ?? group.height ?? 1;
+  const contentW = (group.glintTargetW ?? Math.max(1, layoutW - pad * 2)) * uniform;
+  const contentH = (group.glintTargetH ?? Math.max(1, layoutH - pad * 2)) * uniform;
+  const left = center.x - contentW / 2;
+  const top = center.y - contentH / 2;
 
   const next = await addStyledScreenshot(canvas, screenshotUrl, {
     ...chrome,
-    targetW,
-    targetH,
-    aspect: targetW / Math.max(1, targetH),
+    targetW: contentW,
+    targetH: contentH,
+    aspect: contentW / Math.max(1, contentH),
     left,
     top,
     selectable,
@@ -751,13 +747,21 @@ export function applyDeviceTransformLocks(group) {
 }
 
 /**
+ * Geometric layout size — ignores shadow blur that inflates Fabric bounds.
+ */
+function groupLayoutSize(group) {
+  const sx = Math.abs(group.scaleX || 1);
+  const sy = Math.abs(group.scaleY || 1);
+  const baseW = group.glintLayoutW ?? group.glintTargetW ?? group.width ?? 0;
+  const baseH = group.glintLayoutH ?? group.glintTargetH ?? group.height ?? 0;
+  return { w: baseW * sx, h: baseH * sy, sx, sy };
+}
+
+/**
  * Geometric center from left/top/size — ignores shadow blur that can skew getCenterPoint.
  */
 function getGroupGeoCenter(group) {
-  const sx = Math.abs(group.scaleX || 1);
-  const sy = Math.abs(group.scaleY || 1);
-  const w = (group.width || 0) * sx;
-  const h = (group.height || 0) * sy;
+  const { w, h, sx, sy } = groupLayoutSize(group);
   return {
     x: (group.left || 0) + w / 2,
     y: (group.top || 0) + h / 2,
@@ -773,16 +777,17 @@ function getGroupGeoCenter(group) {
  */
 function placeGroupAtCenter(group, cx, cy) {
   if (!group) return;
-  const sx = Math.abs(group.scaleX || 1);
-  const sy = Math.abs(group.scaleY || 1);
-  const w = (group.width || 0) * sx;
-  const h = (group.height || 0) * sy;
+  const { w, h } = groupLayoutSize(group);
   group.set({
     left: cx - w / 2,
     top: cy - h / 2,
     originX: 'left',
     originY: 'top',
   });
+}
+
+function chromeBitmapChanged(prev = {}, next = {}, prevFrameId = null, nextFrameId = null) {
+  return statusBarChromeChanged(prev, next, prevFrameId, nextFrameId) || screenshotFitChanged(prev, next);
 }
 
 /**
@@ -858,7 +863,7 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
       ...prev,
       ...(styleOverride || {}),
     };
-    if (!statusBarChromeChanged(prev, chrome)) {
+    if (!chromeBitmapChanged(prev, chrome)) {
       applyChromeShadow(group, chrome);
       applyOuterBorderStroke(group, chrome);
       group.set({ glintChrome: chrome });
@@ -994,6 +999,8 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
     glintCoverage: opts.coverage ?? MIN_DEVICE_COVERAGE,
     glintScreenshotUrl: screenshotUrl,
     glintChrome: chrome,
+    glintLayoutW: frameW + pad * 2,
+    glintLayoutH: frameH + pad * 2,
     width: frameW + pad * 2,
     height: frameH + pad * 2,
   });
