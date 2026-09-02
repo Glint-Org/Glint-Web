@@ -649,6 +649,8 @@ export async function applyDesignToFrame(
     metadata = {},
     editable = true,
     signal,
+    displayCssWidth = 0,
+    displayCssHeight = 0,
   } = {},
 ) {
   if (!canvas) return;
@@ -679,8 +681,16 @@ export async function applyDesignToFrame(
     // Preserve CSS display size — setDimensions alone resets to full pixel size
     // and makes frames unequal until the next board re-fit.
     {
-      const cssW = canvas.lowerCanvasEl?.clientWidth || parseFloat(canvas.lowerCanvasEl?.style?.width) || 0;
-      const cssH = canvas.lowerCanvasEl?.clientHeight || parseFloat(canvas.lowerCanvasEl?.style?.height) || 0;
+      const cssW =
+        displayCssWidth
+        || canvas.lowerCanvasEl?.clientWidth
+        || parseFloat(canvas.lowerCanvasEl?.style?.width)
+        || 0;
+      const cssH =
+        displayCssHeight
+        || canvas.lowerCanvasEl?.clientHeight
+        || parseFloat(canvas.lowerCanvasEl?.style?.height)
+        || 0;
       canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
       if (cssW > 0 && cssH > 0) {
         canvas.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
@@ -690,6 +700,7 @@ export async function applyDesignToFrame(
             el.style.width = `${cssW}px`;
             el.style.height = `${cssH}px`;
           });
+        canvas.calcOffset?.();
       }
     }
     canvas.backgroundColor = draft.backgroundColor;

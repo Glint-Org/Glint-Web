@@ -678,11 +678,17 @@ export default function Editor() {
 
   // Recalc Fabric pointer offsets after CSS display size changes.
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      Object.values(canvasMapRef.current).forEach((c) => c?.calcOffset?.());
+    let innerId = 0;
+    const outerId = requestAnimationFrame(() => {
+      innerId = requestAnimationFrame(() => {
+        Object.values(canvasMapRef.current).forEach((c) => c?.calcOffset?.());
+      });
     });
-    return () => cancelAnimationFrame(id);
-  }, [boardScale]);
+    return () => {
+      cancelAnimationFrame(outerId);
+      if (innerId) cancelAnimationFrame(innerId);
+    };
+  }, [boardScale, canvasW, canvasH, frames.length, template?.id]);
 
   const handleDeviceContextMenu = useCallback((payload) => {
     const idx = frames.findIndex((f) => f.id === payload.frameId);

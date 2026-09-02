@@ -1,35 +1,40 @@
-import { useEffect, useState } from 'react';
-import {
-  loadAllTemplates,
-  filterVisibleTemplates,
-  browseFilterId,
-  getStoreTarget,
-} from '../utils/templateLoader';
+import { useEffect, useRef, useState } from 'react';
+import { loadAllTemplates, filterVisibleTemplates } from '../utils/templateLoader';
 import TemplateSetPreview from './TemplateSetPreview';
-import StoreBrowseFilters from './StoreBrowseFilters';
+import DeviceBrowseFilters, { filterByDevice, storeToDeviceFilter } from './StoreBrowseFilters';
 
 /**
  * Left sidebar — pick a store template pack (preview only).
- * Platform → device filters set the export size via the pack.
+ * Device chips filter the list; selection persists after applying a template.
  */
 export default function TemplateGallery({ onChange, activeStore }) {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [platform, setPlatform] = useState('all');
-  const [device, setDevice] = useState('all');
+  const [deviceFilter, setDeviceFilter] = useState(() => storeToDeviceFilter(activeStore));
+  const userPickedFilter = useRef(false);
 
   useEffect(() => {
     loadAllTemplates({ enabledOnly: true }).then(setTemplates).finally(() => setLoading(false));
   }, []);
 
+  // Sync from export preset only until the user picks a device chip themselves.
   useEffect(() => {
-    if (!activeStore) return;
-    const target = getStoreTarget(activeStore);
-    setPlatform(target.platform);
-    setDevice(target.id);
+    if (userPickedFilter.current || !activeStore) return;
+    setDeviceFilter(storeToDeviceFilter(activeStore));
   }, [activeStore]);
 
-  const filtered = filterVisibleTemplates(templates, browseFilterId(platform, device));
+  const filtered = filterByDevice(filterVisibleTemplates(templates, null), deviceFilter);
+
+  const handleDeviceChange = (id) => {
+    userPickedFilter.current = true;
+    setDeviceFilter(id);
+  };
+
+  const handlePickTemplate = (t) => {
+    onChange(t);
+    // Avoid a lingering focus ring that looks like the template stayed selected.
+    requestAnimationFrame(() => document.activeElement?.blur?.());
+  };
 
   if (loading) {
     return <p className="text-sm text-glint-text-tertiary">Loading templates…</p>;
@@ -38,13 +43,11 @@ export default function TemplateGallery({ onChange, activeStore }) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Pick a platform, then a device size. Export uses that canvas.
+        Pick a platform, then choose a template. Export uses that canvas size.
       </p>
-      <StoreBrowseFilters
-        platform={platform}
-        device={device}
-        onPlatformChange={setPlatform}
-        onDeviceChange={setDevice}
+      <DeviceBrowseFilters
+        device={deviceFilter}
+        onDeviceChange={handleDeviceChange}
         size="sm"
       />
       {filtered.length === 0 ? (
@@ -59,8 +62,8 @@ export default function TemplateGallery({ onChange, activeStore }) {
               type="button"
               data-template-id={t.id}
               title={t.name || t.id}
-              onClick={() => onChange(t)}
-              className="group w-full rounded-xl overflow-hidden border border-glint-border hover:border-glint-accent/50 hover:shadow-md transition-all bg-glint-surface focus:outline-none focus:ring-2 focus:ring-glint-accent/40"
+              onClick={() => handlePickTemplate(t)}
+              className="group w-full rounded-xl overflow-hidden border border-glint-border hover:border-glint-accent/50 hover:shadow-md transition-all bg-glint-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-glint-accent/40"
             >
               <TemplateSetPreview template={t} compact />
             </button>

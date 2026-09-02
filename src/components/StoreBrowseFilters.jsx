@@ -1,4 +1,5 @@
 import { Smartphone, Tablet, Monitor, Tv, Watch, Laptop } from 'lucide-react';
+import { resolveStoreKey } from '../utils/storeCatalog';
 
 /**
  * Device-based filter chips for template browsing.
@@ -16,6 +17,14 @@ const DEVICE_FILTERS = [
 ];
 
 export { DEVICE_FILTERS };
+
+/** Map export store key → sidebar device chip id. */
+export function storeToDeviceFilter(store) {
+  const key = resolveStoreKey(store);
+  if (key === 'ios/iphone') return 'iphone';
+  if (key === 'ios/ipad') return 'ipad';
+  return 'android-phone';
+}
 
 /**
  * Filter templates by selected device filter.

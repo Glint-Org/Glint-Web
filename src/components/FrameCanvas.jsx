@@ -178,11 +178,29 @@ export default function FrameCanvas({
     if (editable) selectDeviceLayer(canvas);
   }, [editable]);
 
+  const syncDisplaySize = (canvas) => {
+    const s = scaleRef.current;
+    applyCssDisplaySize(
+      canvas,
+      Math.max(1, Math.round(canvasWidth * s)),
+      Math.max(1, Math.round(canvasHeight * s)),
+    );
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
     (async () => {
+      const paintOpts = {
+        canvasWidth,
+        canvasHeight,
+        themes: themesRef.current,
+        editable: editableRef.current,
+        signal: ac.signal,
+        displayCssWidth: Math.max(1, Math.round(canvasWidth * scaleRef.current)),
+        displayCssHeight: Math.max(1, Math.round(canvasHeight * scaleRef.current)),
+      };
       if (fabricJson) {
         try {
           if (typeof canvas.loadFromJSON === 'function') {
@@ -194,25 +212,13 @@ export default function FrameCanvas({
           canvas.requestRenderAll?.();
         } catch (err) {
           console.warn('Glint pack fabric restore failed, falling back to design', err);
-          await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, {
-            canvasWidth,
-            canvasHeight,
-            themes: themesRef.current,
-            editable: editableRef.current,
-            signal: ac.signal,
-          });
+          await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, paintOpts);
         }
       } else {
-        await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, {
-          canvasWidth,
-          canvasHeight,
-          themes: themesRef.current,
-          editable: editableRef.current,
-          signal: ac.signal,
-        });
+        await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, paintOpts);
       }
       if (ac.signal.aborted) return;
-      applyCssDisplaySize(canvas, cssW, cssH);
+      syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
     })();
