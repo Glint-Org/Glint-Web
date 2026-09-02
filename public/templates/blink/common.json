@@ -128,5 +128,12 @@
         { "role": "device", "type": "device", "slot": 4 }
       ]
     }
-  ]
+  ],
+  "extraSlide": {
+    "name": "Extra",
+    "layers": [
+      { "role": "bg", "type": "background", "color": "#FFFFFF" },
+      { "role": "device", "type": "device", "slot": 0 }
+    ]
+  }
 }

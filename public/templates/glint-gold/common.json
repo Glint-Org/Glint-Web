@@ -296,5 +296,12 @@
         }
       ]
     }
-  ]
+  ],
+  "extraSlide": {
+    "name": "Extra",
+    "layers": [
+      { "role": "bg", "type": "background", "color": "#0B0D10" },
+      { "role": "device", "type": "device", "slot": 0, "position": "center" }
+    ]
+  }
 }

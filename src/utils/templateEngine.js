@@ -349,32 +349,75 @@ export function getTemplateSlides(template) {
 }
 
 /**
- * Slide design for board frame `index`. Indices past the pack reuse the template
- * default slide (explicit `defaultSlide`, else last slide) so extra screenshots
- * keep branded backgrounds — not scratch white boards.
+ * Simple overflow slide — used for frame 6+ and “device frames only” reset.
+ * Authored as template.extraSlide; otherwise generated from palette + device defaults.
+ */
+export function resolveExtraFrameDesign(template) {
+  if (!template) return null;
+  const frameId = resolveTemplateFrame(template);
+  const canvas = template.canvas || {};
+  const device = template.device || {};
+
+  const spec = template.extraSlide?.layers?.length
+    ? template.extraSlide
+    : {
+        name: 'Extra',
+        layers: [
+          { type: 'background', color: pickExtraBackground(template) },
+          { type: 'device', slot: 0 },
+        ],
+      };
+
+  const layers = (spec.layers || []).map((layer) => {
+    if (layer.type !== 'device') return { ...layer };
+    return {
+      ...layer,
+      frame: layer.frame || device.frame || frameId,
+      ...(device.widthFraction != null && layer.widthFraction == null
+        ? { widthFraction: device.widthFraction }
+        : {}),
+      ...(device.scale != null && layer.scale == null && layer.widthFraction == null
+        ? { scale: device.scale }
+        : {}),
+      ...(device.minCoverage != null && layer.minCoverage == null
+        ? { minCoverage: device.minCoverage }
+        : {}),
+      ...(device.position && !layer.position ? { position: device.position } : {}),
+    };
+  });
+
+  const slide = ensureSlideHasDevice(
+    {
+      id: spec.id || `${template.id || 'pack'}-extra`,
+      name: spec.name || 'Extra',
+      layers,
+    },
+    frameId,
+    canvas,
+  );
+  return bindSlideToFrameShot(slide);
+}
+
+function pickExtraBackground(template) {
+  const slot = template.palette?.find((p) => p.id === 'background');
+  if (slot?.color) return slot.color;
+  const rootBg = template.layers?.find((l) => l.type === 'background');
+  if (rootBg?.color) return rootBg.color;
+  const slideBg = template.slides?.[0]?.layers?.find((l) => l.type === 'background');
+  return slideBg?.color || '#FFFFFF';
+}
+
+/**
+ * Slide design for board frame `index`. Frames past the pack use extraSlide only.
  */
 export function resolveFrameDesign(template, index) {
   if (!template || index == null || index < 0) return null;
   const slides = getTemplateSlides(template);
   if (!slides.length) return null;
-
-  let slide;
   if (index < slides.length) {
-    slide = slides[index];
-  } else if (template.defaultSlide?.layers?.length) {
-    slide = ensureSlideHasDevice(
-      {
-        id: template.defaultSlide.id || `${template.id || 'pack'}-default`,
-        name: template.defaultSlide.name || 'Default',
-        layers: template.defaultSlide.layers,
-      },
-      resolveTemplateFrame(template),
-      template.canvas || {},
-    );
-  } else {
-    slide = slides[slides.length - 1];
+    return bindSlideToFrameShot(slides[index]);
   }
-  return bindSlideToFrameShot(slide);
+  return resolveExtraFrameDesign(template);
 }
 
 function expandToFiveSlides(template) {

@@ -114,6 +114,7 @@ export function mergeTemplateFamily(common, platform) {
     preview,
     layers: platform.layers || common.layers || [{ type: 'background', color: '#FFFFFF' }],
     slides,
+    extraSlide: platform.extraSlide || common.extraSlide,
     // Internal keys not needed at runtime
     extends: undefined,
     layout: undefined,
