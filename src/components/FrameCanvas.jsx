@@ -63,6 +63,7 @@ export default function FrameCanvas({
   const editableRef = useRef(editable);
   const menuRef = useRef(onDeviceContextMenu);
   const screenshotRef = useRef(screenshotUrl);
+  const designRef = useRef(design);
   const scaleRef = useRef(Math.max(0.05, displayScale));
   const scale = Math.max(0.05, displayScale);
   scaleRef.current = scale;
@@ -70,8 +71,8 @@ export default function FrameCanvas({
   editableRef.current = editable;
   menuRef.current = onDeviceContextMenu;
   screenshotRef.current = screenshotUrl;
+  designRef.current = design;
 
-  const themesReady = Object.keys(themes).length > 0 ? 1 : 0;
   const cssW = Math.max(1, Math.round(canvasWidth * scale));
   const cssH = Math.max(1, Math.round(canvasHeight * scale));
 
@@ -193,7 +194,7 @@ export default function FrameCanvas({
           canvas.requestRenderAll?.();
         } catch (err) {
           console.warn('Glint pack fabric restore failed, falling back to design', err);
-          await applyDesignToFrame(canvas, design, screenshotRef.current, {
+          await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, {
             canvasWidth,
             canvasHeight,
             themes: themesRef.current,
@@ -202,7 +203,7 @@ export default function FrameCanvas({
           });
         }
       } else {
-        await applyDesignToFrame(canvas, design, screenshotRef.current, {
+        await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, {
           canvasWidth,
           canvasHeight,
           themes: themesRef.current,
@@ -216,7 +217,7 @@ export default function FrameCanvas({
       if (editableRef.current) selectDeviceLayer(canvas);
     })();
     return () => ac.abort();
-  }, [design, fabricJson, canvasWidth, canvasHeight, paintKey, themesReady]);
+  }, [fabricJson, canvasWidth, canvasHeight, paintKey]);
 
   return (
     <div

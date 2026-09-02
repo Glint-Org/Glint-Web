@@ -154,11 +154,20 @@ async function addFrameLayer(canvas, frameId, layer, canvasW, canvasH, editable,
 
 async function addDeviceLayer(canvas, screenshotUrl, layer, canvasW, canvasH, editable, originX = 0) {
   if (!layer.frame || !screenshotUrl) return null;
-  // layer.scale = canvas coverage (0.6 = 60% of frame). Min 60% unless minCoverage overrides (e.g. dual phones).
-  const minCoverage = layer.minCoverage ?? MIN_DEVICE_COVERAGE;
-  const coverage = Math.max(minCoverage, layer.scale ?? minCoverage);
-  const scale = resolveDeviceScale(layer.frame, canvasW, canvasH, coverage, { minCoverage });
   const meta = getFrameMeta(layer.frame);
+  const minCoverage = layer.minCoverage ?? MIN_DEVICE_COVERAGE;
+  let scale;
+  let coverage;
+  // widthFraction: size by canvas width (keeps Android/iOS/iPad side margins consistent).
+  // layer.scale alone = coverage of the tighter canvas axis (legacy).
+  if (layer.widthFraction != null && layer.widthFraction > 0) {
+    const frac = Math.min(1, Math.max(0.2, layer.widthFraction));
+    scale = (canvasW * frac) / meta.width;
+    coverage = Math.max(minCoverage, (meta.width * scale) / canvasW, (meta.height * scale) / canvasH);
+  } else {
+    coverage = Math.max(minCoverage, layer.scale ?? minCoverage);
+    scale = resolveDeviceScale(layer.frame, canvasW, canvasH, coverage, { minCoverage });
+  }
   const frameW = meta.width * scale;
   const frameH = meta.height * scale;
   const pos = resolvePosition(layer.position, canvasW, canvasH, frameW, frameH, layer);

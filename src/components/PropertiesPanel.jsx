@@ -80,6 +80,8 @@ export default function PropertiesPanel({
   onAddText,
   onDelete,
   store,
+  templatePalette = [],
+  onPaletteColorChange,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -391,7 +393,29 @@ export default function PropertiesPanel({
         )}
 
         {rightTab === 'colors' && (
-          <ThemeSelector selected={background} onChange={onBackgroundChange} />
+          <div className="space-y-4">
+            {templatePalette?.length > 0 ? (
+              <Section title="Template colors">
+                <p className="text-[10px] text-glint-text-tertiary">
+                  Brand colors for this pack. Background is the artboard behind the device.
+                </p>
+                <div className="space-y-2.5">
+                  {templatePalette.map((slot) => (
+                    <CField
+                      key={slot.id}
+                      label={slot.label}
+                      value={slot.color}
+                      onChange={(v) => onPaletteColorChange?.(slot.color, v)}
+                    />
+                  ))}
+                </div>
+              </Section>
+            ) : (
+              <Section title="Background">
+                <ThemeSelector selected={background} onChange={onBackgroundChange} />
+              </Section>
+            )}
+          </div>
         )}
 
         {rightTab === 'design' && (

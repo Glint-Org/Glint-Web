@@ -45,6 +45,11 @@ import {
 import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
 import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
+import {
+  getTemplatePalette,
+  remapCanvasColors,
+  remapDesignColors,
+} from '../utils/templatePalette';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
 
 const LEFT_W = 280;
@@ -304,6 +309,28 @@ export default function Editor() {
     if (activeCanvas && bg) setBackground(activeCanvas, bg.type, bg.value);
     markDirty();
   };
+
+  const templatePalette = useMemo(() => getTemplatePalette(template), [template]);
+
+  const handlePaletteColorChange = useCallback(
+    (fromColor, toColor) => {
+      if (!fromColor || !toColor || fromColor.toUpperCase() === toColor.toUpperCase()) return;
+      Object.values(canvasMapRef.current).forEach((c) => remapCanvasColors(c, fromColor, toColor));
+      setFrames((prev) =>
+        prev.map((frame) => {
+          if (!frame.design) return frame;
+          return { ...frame, design: remapDesignColors(frame.design, fromColor, toColor) };
+        }),
+      );
+      setTemplate((prev) => (prev ? remapDesignColors(prev, fromColor, toColor) : prev));
+      const bgSlot = template?.palette?.find((s) => s.id === 'background');
+      if (bgSlot && bgSlot.color?.toUpperCase() === fromColor.toUpperCase()) {
+        setBackgroundState({ label: 'Custom', type: 'solid', value: toColor.toUpperCase() });
+      }
+      markDirty();
+    },
+    [markDirty, setFrames, template],
+  );
 
   const handleScreenshotStyleChange = useCallback((patch) => {
     markDirty();
@@ -1038,6 +1065,8 @@ export default function Editor() {
               onAddText={handleAddText}
               onDelete={handleDelete}
               store={exportPreset}
+              templatePalette={templatePalette}
+              onPaletteColorChange={handlePaletteColorChange}
             />
           </div>
         </aside>
