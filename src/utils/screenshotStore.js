@@ -93,13 +93,30 @@ export async function getScreenshotBlob(id) {
 }
 
 export async function deleteScreenshotBlob(id) {
-  const db = await openDb();
+  if (!id) return;
+  forgetId(id);
   try {
-    await idbReq(db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id));
-    forgetId(id);
-  } finally {
-    db.close();
+    const db = await openDb();
+    try {
+      await idbReq(db.transaction(STORE, 'readwrite').objectStore(STORE).delete(id));
+    } finally {
+      db.close();
+    }
+  } catch {
+    /* meta already cleared — orphaned blob is inert until manual cache clear */
   }
+}
+
+/** Drop from asset library + IndexedDB cache (survives refresh if skipped). */
+export async function removeCachedScreenshot(id, url) {
+  if (url?.startsWith('blob:')) {
+    try {
+      URL.revokeObjectURL(url);
+    } catch {
+      /* ignore */
+    }
+  }
+  await deleteScreenshotBlob(id);
 }
 
 export async function listCachedScreenshotIds() {

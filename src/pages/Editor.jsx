@@ -43,7 +43,7 @@ import {
   boardFrameGap,
 } from '../utils/boardZoom';
 import { restoreCustomFonts, ensureFontReady } from '../utils/fontLibrary';
-import { restoreAllCachedScreenshots } from '../utils/screenshotStore';
+import { restoreAllCachedScreenshots, removeCachedScreenshot } from '../utils/screenshotStore';
 import { mergeAssetItems, isUserScreenshot } from '../utils/assetLibrary';
 import {
   getTemplatePalette,
@@ -602,8 +602,17 @@ export default function Editor() {
   }, [addAssets, swapFrameDevices, markDirty]);
 
   const removeAsset = useCallback((id) => {
-    setAssetLibrary((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+    setAssetLibrary((prev) => {
+      const item = prev.find((a) => a.id === id);
+      if (item) {
+        removeCachedScreenshot(id, item.url).catch((err) => {
+          console.warn('Glint: failed to remove cached screenshot', err);
+        });
+      }
+      return prev.filter((a) => a.id !== id);
+    });
+    markDirty();
+  }, [markDirty]);
 
   const handleReplaceScreenshot = async (index, urlOrFile) => {
     const url = typeof urlOrFile === 'string' ? urlOrFile : URL.createObjectURL(urlOrFile);
