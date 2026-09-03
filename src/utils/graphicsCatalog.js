@@ -92,6 +92,36 @@ export const GRAPHICS = [
     label: 'Bars',
     defaultPlacement: { left: 0, top: 0, width: 1080 },
   },
+  {
+    id: 'gradient-orb',
+    src: 'gradient-orb.svg',
+    label: 'Gradient orb',
+    defaultPlacement: { left: 200, top: 400, width: 680 },
+  },
+  {
+    id: 'abstract-wave',
+    src: 'abstract-wave.svg',
+    label: 'Abstract wave',
+    defaultPlacement: { left: 0, top: 0, width: 1080 },
+  },
+  {
+    id: 'corner-accents',
+    src: 'corner-accents.svg',
+    label: 'Corner accents',
+    defaultPlacement: { left: 0, top: 0, width: 1080 },
+  },
+  {
+    id: 'soft-glow',
+    src: 'soft-glow.svg',
+    label: 'Soft glow',
+    defaultPlacement: { left: 0, top: 0, width: 1080 },
+  },
+  {
+    id: 'diamond-stack',
+    src: 'diamond-stack.svg',
+    label: 'Diamonds',
+    defaultPlacement: { left: 340, top: 200, width: 400 },
+  },
 ];
 
 /** Functional icons in /public/graphics/icons/ - same recolor system. */
