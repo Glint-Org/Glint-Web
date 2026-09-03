@@ -30,14 +30,21 @@ function FontRow({ name, selected, onPick, preview = false, loading = false }) {
       type="button"
       disabled={loading}
       onClick={() => onPick(name)}
-      className={`w-full flex items-center gap-2 text-left px-2.5 py-2 rounded-lg text-[13px] transition-colors truncate disabled:opacity-60 ${
+      className={`w-full flex items-center gap-2.5 text-left px-2.5 py-2 rounded-lg text-[13px] transition-colors truncate disabled:opacity-60 ${
         selected === name
           ? 'bg-glint-accent-muted text-glint-accent font-medium'
           : 'text-glint-text hover:bg-glint-surface-2'
       }`}
-      style={showFace ? { fontFamily: `"${name}", sans-serif` } : undefined}
     >
       {loading && <Loader2 size={12} className="shrink-0 animate-spin" />}
+      {showFace && (
+        <span
+          className="shrink-0 text-lg leading-none text-glint-text-secondary select-none"
+          style={{ fontFamily: `"${name}", sans-serif` }}
+        >
+          Aa
+        </span>
+      )}
       <span className="truncate">{name}</span>
     </button>
   );
@@ -168,10 +175,16 @@ export default function FontPicker({ selected, onChange, label = 'Font' }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border bg-glint-surface text-sm text-glint-text transition-colors ${
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-glint-surface text-sm text-glint-text transition-colors ${
             open ? 'border-glint-accent ring-1 ring-glint-accent/30' : 'border-glint-border hover:border-glint-border-strong'
           }`}
         >
+          <span
+            className="shrink-0 text-lg leading-none text-glint-text-secondary select-none"
+            style={{ fontFamily: `"${current}", sans-serif` }}
+          >
+            Aa
+          </span>
           <span className="flex-1 text-left truncate" style={{ fontFamily: `"${current}", sans-serif` }}>
             {current}
           </span>
