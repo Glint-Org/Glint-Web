@@ -6,6 +6,7 @@ import {
   EXPORT_PRESETS,
   zipFileName,
   buildExportFilenames,
+  verifyExport,
 } from '../utils/exportHelper';
 
 /**
@@ -104,7 +105,20 @@ export default function FrameExport({
     try {
       setProgress(`Rendering ${format.toUpperCase()}...`);
       const results = await renderFrames(format);
-      if (format === 'png') publishPreviews(results);
+
+      // Verify against store specs before downloading
+      if (format === 'png') {
+        const verification = verifyExport(results, exportPreset);
+        publishPreviews(results);
+        if (!verification.ok) {
+          setProgress(`Export blocked: ${verification.errors.join('; ')}`);
+          return;
+        }
+        if (verification.warnings.length) {
+          setProgress(`Warning: ${verification.warnings[0]} · Exporting ${results.length} frame(s)`);
+        }
+      }
+
       const filenames = buildExportFilenames(results.length, { format });
       await downloadBatchZip(results, filenames, `Glint-ss.zip`);
       setProgress(
