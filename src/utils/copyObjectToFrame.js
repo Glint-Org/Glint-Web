@@ -25,6 +25,7 @@ export async function copyObjectToFrame(sourceCanvas, targetCanvas, object, offs
   });
 
   targetCanvas.add(clone);
+  clone.bringToFront();
   targetCanvas.setActiveObject(clone);
   targetCanvas.requestRenderAll();
   return clone;

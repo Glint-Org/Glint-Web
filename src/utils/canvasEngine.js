@@ -955,11 +955,11 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     });
     placeGroupAtCenter(next, cx, cy);
     applyDeviceTransformLocks(next);
-    canvas.remove(group);
-    group.dispose?.();
-    canvas.requestRenderAll();
-    return true;
-  }
+canvas.remove(group);
+  group.dispose?.();
+  canvas.requestRenderAll();
+  return true;
+}
 
   const baseScale = resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
   const next = await addFramedScreenshot(canvas, screenshotUrl, nextFrameId, {
@@ -984,6 +984,7 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
 
   canvas.remove(group);
   group.dispose?.();
+  canvas.sendObjectToBack(next);
   canvas.requestRenderAll();
   return true;
 }
