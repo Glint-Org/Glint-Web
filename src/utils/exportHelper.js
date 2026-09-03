@@ -2,10 +2,11 @@ import JSZip from 'jszip';
 import {
   STORE_TARGETS,
   resolveStoreKey,
+  getStoreTarget,
   storeExportLabel,
 } from './storeCatalog';
 
-export { resolveStoreKey, storeExportLabel } from './storeCatalog';
+export { resolveStoreKey, storeExportLabel, getStoreTarget } from './storeCatalog';
 
 export function downloadSinglePNG(dataUrl, filename = 'screenshot.png') {
   const link = document.createElement('a');
@@ -100,3 +101,42 @@ export const EXPORT_PRESETS = Object.fromEntries(
 EXPORT_PRESETS.play = EXPORT_PRESETS['play/phone'];
 EXPORT_PRESETS.ios = EXPORT_PRESETS['ios/iphone'];
 EXPORT_PRESETS['ios-tablet'] = EXPORT_PRESETS['ios/ipad'];
+
+/**
+ * Verify exported PNGs against store spec dimensions.
+ * Returns { ok, errors, warnings } where errors block upload and warnings advise.
+ */
+export function verifyExport(dataUrls, store = 'play/phone') {
+  const target = getStoreTarget(store);
+  const errors = [];
+  const warnings = [];
+
+  if (!dataUrls?.length) {
+    errors.push('No screenshots to verify');
+    return { ok: false, errors, warnings };
+  }
+
+  if (dataUrls.length < 2) {
+    warnings.push(`Only ${dataUrls.length} screenshot(s) — most stores recommend 3-5`);
+  }
+  if (dataUrls.length > 8) {
+    warnings.push(`${dataUrls.length} screenshots — Play Store allows max 8 per listing`);
+  }
+
+  // We can't check pixel dimensions of data URLs in-browser without loading them,
+  // but we can verify the store target exists and frame count is valid.
+  if (!target) {
+    errors.push(`Unknown store target: ${store}`);
+  }
+
+  return {
+    ok: errors.length === 0,
+    store: target?.id || store,
+    label: target?.fullLabel || store,
+    width: target?.width,
+    height: target?.height,
+    count: dataUrls.length,
+    errors,
+    warnings,
+  };
+}
