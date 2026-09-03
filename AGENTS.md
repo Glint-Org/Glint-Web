@@ -1,6 +1,8 @@
 # Glint-Web - Agent Instructions
 
-Glint-Web is the frames editor (AppLaunchpad-style board).
+Gint-Web is the frames editor (AppLaunchpad-style board). Import raw screenshots → pick template → set headlines → export store-ready ZIP.
+
+**Full workflow:** See `skills/glint/SKILL.md` in Glint-Org for the complete multi-repo pipeline.
 
 ## Sidebars
 
