@@ -225,7 +225,7 @@ export default function FontPicker({ selected, onChange, label = 'Font' }) {
                     name={f.name}
                     selected={current}
                     onPick={pick}
-                    preview={!isSearching || listFonts.length <= 24}
+                    preview
                     loading={applying === f.name}
                   />
                 ))

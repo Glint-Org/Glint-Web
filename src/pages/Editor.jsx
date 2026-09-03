@@ -1070,7 +1070,7 @@ export default function Editor() {
             type="button"
             onClick={handleUndo}
             disabled={!canUndo}
-            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-35 disabled:pointer-events-none"
+            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
             title="Undo (Ctrl+Z)"
           >
             <Undo2 size={16} />
@@ -1079,7 +1079,7 @@ export default function Editor() {
             type="button"
             onClick={handleRedo}
             disabled={!canRedo}
-            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-35 disabled:pointer-events-none"
+            className="p-1.5 rounded-md hover:bg-glint-surface-2 text-glint-text-secondary hover:text-glint-text disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
             title="Redo (Ctrl+Shift+Z)"
           >
             <Redo2 size={16} />
