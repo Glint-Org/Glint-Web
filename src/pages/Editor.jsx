@@ -57,6 +57,8 @@ import {
 } from '../utils/screenshotTheme';
 import { captureEditorSnapshot, createEditorHistory } from '../hooks/editorHistory';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
+import CopyToFrameModal from '../components/CopyToFrameModal';
+import { copySelectionToFrame } from '../utils/copyObjectToFrame';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
@@ -139,6 +141,7 @@ export default function Editor() {
   const [scaleBounds, setScaleBounds] = useState({ minScale: 20, maxScale: 20 });
   const userScaleRef = useRef(false);
   const [deviceMenu, setDeviceMenu] = useState(null);
+  const [copyToFrameOpen, setCopyToFrameOpen] = useState(false);
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
   framesRef.current = frames;
@@ -793,6 +796,24 @@ export default function Editor() {
     }
   }, [updateFrame, screenshotStyle]);
 
+  const handleCopyToFrame = useCallback(async (targetFrameId) => {
+    const sourceCanvas = canvasMapRef.current[frames[activeIndex]?.id];
+    const targetCanvas = canvasMapRef.current[targetFrameId];
+    if (!sourceCanvas || !targetCanvas) return;
+
+    const activeObj = sourceCanvas.getActiveObject();
+    if (!activeObj) return;
+
+    const objects = activeObj.type === 'activeSelection'
+      ? activeObj.getObjects()
+      : [activeObj];
+
+    const offset = { x: 0, y: 0 };
+    await copySelectionToFrame(sourceCanvas, targetCanvas, objects, offset);
+    pushHistory();
+    setCopyToFrameOpen(false);
+  }, [activeIndex, frames, pushHistory]);
+
   const assignScreenshotToFrame = useCallback(async (index, url, assetItem = null) => {
     if (!isUserScreenshot(url)) return;
     if (assetItem) addAssets([assetItem]);
@@ -1371,6 +1392,8 @@ export default function Editor() {
               }
               onDeviceTransform={markDirty}
               onDeviceScaleAdjustStart={pushHistory}
+              onCopyToFrame={() => setCopyToFrameOpen(true)}
+              hasSelection={!!activeCanvas?.getActiveObject()}
             />
           </div>
         </aside>
@@ -1385,6 +1408,14 @@ export default function Editor() {
           onClose={closeDeviceMenu}
         />
       )}
+      <CopyToFrameModal
+        open={copyToFrameOpen}
+        frames={frames}
+        activeIndex={activeIndex}
+        onCopy={handleCopyToFrame}
+        onClose={() => setCopyToFrameOpen(false)}
+        getCanvasForFrame={(id) => canvasMapRef.current[id]}
+      />
       <input
         ref={deviceFileRef}
         type="file"

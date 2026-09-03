@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Type, Trash2, AlignLeft, AlignCenter, AlignRight, Bold } from 'lucide-react';
+import { Type, Trash2, AlignLeft, AlignCenter, AlignRight, Bold, Copy } from 'lucide-react';
 import { Shadow } from 'fabric';
 import ColorPicker from './ColorPicker';
 import FontPicker from './FontPicker';
@@ -95,6 +95,8 @@ export default function PropertiesPanel({
   canExtractTheme = false,
   onDeviceTransform,
   onDeviceScaleAdjustStart,
+  onCopyToFrame,
+  hasSelection = false,
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -645,6 +647,16 @@ export default function PropertiesPanel({
                 >
                   <Trash2 size={14} />
                 </button>
+                {hasSelection && (
+                  <button
+                    type="button"
+                    onClick={onCopyToFrame}
+                    className="px-2.5 py-2 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-accent hover:bg-glint-surface-2"
+                    title="Copy to another frame"
+                  >
+                    <Copy size={14} />
+                  </button>
+                )}
               </div>
             </Section>
 
