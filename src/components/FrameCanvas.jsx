@@ -85,7 +85,6 @@ export default function FrameCanvas({
     setFrameEditable(c, editableRef.current);
     canvasRef.current = c;
     onCanvasReady?.(frameId, c);
-    setLoaded(false);
 
     const openDeviceMenu = (opt, device) => {
       opt.e.preventDefault();
