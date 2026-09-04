@@ -1,0 +1,29 @@
+{
+  "template": "blink-play",
+  "screenshots": [],
+  "overrides": {
+    "slides": {
+      "Hero": {
+        "headline": "Your App Name",
+        "subheadline": "The tagline that sells it"
+      },
+      "Free": {
+        "headline": "100% Free",
+        "subheadline": "No hidden costs"
+      },
+      "Share": {
+        "headline": "Share Instantly",
+        "subheadline": "Tap, send, done"
+      },
+      "Scan": {
+        "headline": "Scan & Go",
+        "subheadline": "One camera, zero effort"
+      },
+      "Secure": {
+        "headline": "Bank-Grade Security",
+        "subheadline": "Your data stays yours"
+      }
+    }
+  },
+  "store": "play/phone"
+}
