@@ -222,3 +222,41 @@ export function getGraphicBySrc(src) {
   const file = (src || '').split('/').pop();
   return GRAPHICS.find((g) => g.src === file) || ICONS.find((g) => g.src.endsWith(file)) || null;
 }
+
+// ─── Color contrast helpers ─────────────────────────────────────────────────
+
+/** Parse hex color to [r, g, b] (0-255). */
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const n = parseInt(h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+/** Relative luminance per WCAG 2.0. 0 = dark, 1 = light. */
+export function luminance(hex) {
+  const [r, g, b] = hexToRgb(hex).map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** Is this color dark? (luminance < 0.4) */
+export function isDark(hex) {
+  return luminance(hex) < 0.4;
+}
+
+/**
+ * Pick a visible icon color against a background.
+ * If the theme color contrasts with bg, use it.
+ * Otherwise fall back to white (dark bg) or dark (light bg).
+ */
+export function contrastingIconColor(themeColor, bgColor) {
+  if (!bgColor) return themeColor;
+  const themeDark = isDark(themeColor);
+  const bgDark = isDark(bgColor);
+  // If they're on opposite sides of dark/light, theme color is visible
+  if (themeDark !== bgDark) return themeColor;
+  // Same side — pick the opposite
+  return bgDark ? '#FFFFFF' : '#1A1A2E';
+}

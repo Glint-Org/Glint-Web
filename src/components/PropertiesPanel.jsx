@@ -8,7 +8,7 @@ import FrameSelector from './FrameSelector';
 import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
-import { getGraphicBySrc } from '../utils/graphicsCatalog';
+import { getGraphicBySrc, contrastingIconColor } from '../utils/graphicsCatalog';
 import {
   DEVICE_SCALE_MAX,
   DEVICE_SCALE_MIN,
@@ -265,9 +265,12 @@ export default function PropertiesPanel({
     const meta = getGraphicBySrc(src);
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
     const primary = themeColor || templatePalette?.[0]?.color || '#FF6B4A';
+    // Pick icon color that contrasts with the canvas background
+    const bgColor = background || '#FFFFFF';
+    const fillColor = contrastingIconColor(primary, bgColor);
     await addGraphicLayer(canvas, {
       src,
-      fill: primary,
+      fill: fillColor,
       fill2: '#FFD166',
       fill3: '#FFFFFF',
       left: Math.round((place.left ?? 0) * sx),
