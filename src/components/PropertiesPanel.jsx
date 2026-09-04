@@ -282,6 +282,7 @@ export default function PropertiesPanel({
         top: Math.round((place.top ?? 0) * sy),
         width: Math.round((place.width ?? 1080) * sx),
       }, { selectable: true });
+      obj.set({ selectable: true, evented: true, hasControls: true, hasBorders: true });
       c.setActiveObject(obj);
       c.requestRenderAll();
     } catch (err) {
@@ -310,6 +311,7 @@ export default function PropertiesPanel({
       left: 340,
       top: 860,
     }, { selectable: true });
+    obj.set({ selectable: true, evented: true, hasControls: true, hasBorders: true });
     c.setActiveObject(obj);
     c.requestRenderAll();
   };
