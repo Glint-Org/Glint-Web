@@ -1,4 +1,8 @@
+import { useState } from 'react';
 import { GRAPHICS, ICONS } from '../utils/graphicsCatalog';
+
+const ICON_INITIAL = 6;
+const DECOR_INITIAL = 6;
 
 function GraphicTile({ item, onInsert, isIcon }) {
   return (
@@ -21,11 +25,30 @@ function GraphicTile({ item, onInsert, isIcon }) {
   );
 }
 
+function ViewAllButton({ expanded, count, onToggle }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full py-1.5 text-[10px] font-medium text-glint-accent hover:text-glint-accent/80 transition-colors"
+    >
+      {expanded ? 'Show less' : `View all (${count})`}
+    </button>
+  );
+}
+
 /**
  * Visual graphic picker — preview tiles instead of name-only dropdown.
- * Shows decorative graphics and functional icons in separate sections.
+ * Shows icons and decorative graphics in separate sections with "View All" toggles.
  */
 export default function GraphicPicker({ onInsert }) {
+  const [showAllIcons, setShowAllIcons] = useState(false);
+  const [showAllDecor, setShowAllDecor] = useState(false);
+
+  const visibleIcons = showAllIcons ? ICONS : ICONS.slice(0, ICON_INITIAL);
+  const visibleDecor = showAllDecor ? GRAPHICS : GRAPHICS.filter(g => g.featured).slice(0, DECOR_INITIAL);
+  const hiddenDecorCount = GRAPHICS.length - DECOR_INITIAL;
+
   return (
     <div className="space-y-3">
       {/* Icons section */}
@@ -34,10 +57,17 @@ export default function GraphicPicker({ onInsert }) {
           Icons
         </p>
         <div className="grid grid-cols-4 gap-1.5">
-          {ICONS.map((g) => (
+          {visibleIcons.map((g) => (
             <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
           ))}
         </div>
+        {ICONS.length > ICON_INITIAL && (
+          <ViewAllButton
+            expanded={showAllIcons}
+            count={ICONS.length}
+            onToggle={() => setShowAllIcons(!showAllIcons)}
+          />
+        )}
       </div>
 
       {/* Decorative graphics section */}
@@ -46,10 +76,17 @@ export default function GraphicPicker({ onInsert }) {
           Decorative
         </p>
         <div className="grid grid-cols-2 gap-1.5">
-          {GRAPHICS.map((g) => (
+          {visibleDecor.map((g) => (
             <GraphicTile key={g.id} item={g} onInsert={onInsert} />
           ))}
         </div>
+        {hiddenDecorCount > 0 && (
+          <ViewAllButton
+            expanded={showAllDecor}
+            count={GRAPHICS.length}
+            onToggle={() => setShowAllDecor(!showAllDecor)}
+          />
+        )}
       </div>
 
       <p className="text-[10px] text-glint-text-tertiary">

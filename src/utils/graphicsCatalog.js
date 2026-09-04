@@ -3,15 +3,69 @@
 /** Default insert placement on a 1080x1920 Play canvas (scaled by caller if needed). */
 export const GRAPHICS = [
   {
+    id: 'gradient-circle',
+    src: 'gradient-circle.svg',
+    label: 'Gradient',
+    defaultPlacement: { left: 290, top: 760, width: 500 },
+    featured: true,
+  },
+  {
+    id: 'soft-cloud',
+    src: 'soft-cloud.svg',
+    label: 'Cloud',
+    defaultPlacement: { left: 250, top: 600, width: 500 },
+    featured: true,
+  },
+  {
+    id: 'glow-soft',
+    src: 'glow-soft.svg',
+    label: 'Glow',
+    defaultPlacement: { left: 250, top: 700, width: 500 },
+    featured: true,
+  },
+  {
+    id: 'wave-bottom',
+    src: 'wave-bottom.svg',
+    label: 'Wave',
+    defaultPlacement: { left: 0, top: 1620, width: 1080 },
+    featured: true,
+  },
+  {
+    id: 'abstract-arc',
+    src: 'abstract-arc.svg',
+    label: 'Arc',
+    defaultPlacement: { left: 290, top: 800, width: 500 },
+    featured: true,
+  },
+  {
+    id: 'corner-dots',
+    src: 'corner-dots.svg',
+    label: 'Dots',
+    defaultPlacement: { left: 48, top: 120, width: 200 },
+    featured: true,
+  },
+  {
+    id: 'line-accent',
+    src: 'line-accent.svg',
+    label: 'Lines',
+    defaultPlacement: { left: 0, top: 0, width: 400 },
+  },
+  {
+    id: 'dot-grid',
+    src: 'dot-grid.svg',
+    label: 'Grid',
+    defaultPlacement: { left: 0, top: 0, width: 400 },
+  },
+  {
     id: 'soft-blob',
     src: 'soft-blob.svg',
-    label: 'Soft blob',
+    label: 'Blob',
     defaultPlacement: { left: 420, top: 980, width: 520 },
   },
   {
     id: 'glow-ring',
     src: 'glow-ring.svg',
-    label: 'Glow ring',
+    label: 'Ring',
     defaultPlacement: { left: 280, top: 720, width: 520 },
   },
   {
@@ -29,7 +83,7 @@ export const GRAPHICS = [
   {
     id: 'curve-sweep',
     src: 'curve-sweep.svg',
-    label: 'Curve sweep',
+    label: 'Sweep',
     defaultPlacement: { left: 360, top: -40, width: 720 },
   },
   {
@@ -73,54 +127,6 @@ export const GRAPHICS = [
     src: 'arch.svg',
     label: 'Arch',
     defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'dots-grid',
-    src: 'dots-grid.svg',
-    label: 'Dots',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'leaf-flourish',
-    src: 'leaf-flourish.svg',
-    label: 'Flourish',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'diagonal-bars',
-    src: 'diagonal-bars.svg',
-    label: 'Bars',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'gradient-orb',
-    src: 'gradient-orb.svg',
-    label: 'Gradient orb',
-    defaultPlacement: { left: 200, top: 400, width: 680 },
-  },
-  {
-    id: 'abstract-wave',
-    src: 'abstract-wave.svg',
-    label: 'Abstract wave',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'corner-accents',
-    src: 'corner-accents.svg',
-    label: 'Corner accents',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'soft-glow',
-    src: 'soft-glow.svg',
-    label: 'Soft glow',
-    defaultPlacement: { left: 0, top: 0, width: 1080 },
-  },
-  {
-    id: 'diamond-stack',
-    src: 'diamond-stack.svg',
-    label: 'Diamonds',
-    defaultPlacement: { left: 340, top: 200, width: 400 },
   },
 ];
 
