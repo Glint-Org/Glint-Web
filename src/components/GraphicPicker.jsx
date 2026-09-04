@@ -18,9 +18,6 @@ function GraphicTile({ item, onInsert, isIcon, themeColor }) {
         className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-95 group-hover:opacity-100"
         draggable={false}
       />
-      <span className="absolute inset-x-0 bottom-0 px-1 py-0.5 text-[9px] font-medium text-center text-white bg-black/45 truncate">
-        {item.label}
-      </span>
     </button>
   );
 }

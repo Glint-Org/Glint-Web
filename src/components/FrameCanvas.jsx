@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createCanvas, selectDeviceLayer, bindCanvasCursors } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 
@@ -76,6 +76,8 @@ export default function FrameCanvas({
   const cssW = Math.max(1, Math.round(canvasWidth * scale));
   const cssH = Math.max(1, Math.round(canvasHeight * scale));
 
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
     if (!elRef.current) return;
     const c = createCanvas(elRef.current, canvasWidth, canvasHeight);
@@ -83,6 +85,7 @@ export default function FrameCanvas({
     setFrameEditable(c, editableRef.current);
     canvasRef.current = c;
     onCanvasReady?.(frameId, c);
+    setLoaded(false);
 
     const openDeviceMenu = (opt, device) => {
       opt.e.preventDefault();
@@ -221,6 +224,7 @@ export default function FrameCanvas({
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
+      setLoaded(true);
     })();
     return () => ac.abort();
   }, [fabricJson, canvasWidth, canvasHeight, paintKey, screenshotUrl]);
@@ -231,7 +235,12 @@ export default function FrameCanvas({
       className="relative overflow-hidden rounded-sm"
       style={{ width: cssW, height: cssH }}
     >
-      <canvas ref={elRef} className="block" />
+      <canvas ref={elRef} className={`block transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`} />
+      {!loaded && (
+        <div className="absolute inset-0 bg-glint-surface-2 overflow-hidden">
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        </div>
+      )}
     </div>
   );
 }
