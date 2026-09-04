@@ -461,7 +461,7 @@ export default function PropertiesPanel({
 
         {rightTab === 'graphics' && (
           <>
-            <GraphicPicker onInsert={handleInsertGraphic} onInsertShape={handleInsertShape} />
+            <GraphicPicker onInsert={handleInsertGraphic} />
             {isGraphic && (
               <Section title="Selected graphic colors">
                 <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
