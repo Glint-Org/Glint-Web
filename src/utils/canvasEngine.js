@@ -510,8 +510,19 @@ export async function stripDeviceFrame(group, style = {}) {
   });
   applyDeviceTransformLocks(next);
 
+  // Record old z-position before removing — canvas.add() inside addStyledScreenshot
+  // appends next to the top, breaking layer order when user objects overlap.
+  const objects = canvas.getObjects();
+  const oldIndex = objects.indexOf(group);
   canvas.remove(group);
   group.dispose?.();
+  // next was already canvas.add()'d at the end — move it to the old device's position.
+  canvas.remove(next);
+  if (oldIndex >= 0) {
+    canvas.insertAt(Math.min(oldIndex, canvas.getObjects().length), next);
+  } else {
+    canvas.add(next);
+  }
   canvas.requestRenderAll();
   return true;
 }

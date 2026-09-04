@@ -80,6 +80,11 @@ export default function FrameCanvas({
 
   useEffect(() => {
     if (!elRef.current) return;
+    // Synchronously hide — loaded may still be true from previous paint cycle,
+    // and setLoaded(false) is batched by React so the new blank canvas would flash.
+    elRef.current.style.opacity = '0';
+    elRef.current.style.pointerEvents = 'none';
+    setLoaded(false);
     const c = createCanvas(elRef.current, canvasWidth, canvasHeight);
     applyDisplayScale(c, canvasWidth, canvasHeight, scaleRef.current);
     setFrameEditable(c, editableRef.current);
@@ -200,6 +205,12 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
+    // Hide canvas synchronously via DOM — setLoaded(false) is batched by React
+    // and won't paint the shimmer overlay before the blank canvas flashes.
+    if (elRef.current) {
+      elRef.current.style.opacity = '0';
+      elRef.current.style.pointerEvents = 'none';
+    }
     setLoaded(false);
     (async () => {
       const paintOpts = {
@@ -241,6 +252,11 @@ export default function FrameCanvas({
         canvas.requestRenderAll?.();
         requestAnimationFrame(() => {
           if (ac.signal.aborted) return;
+          // Clear the inline hide styles, then let React class take over.
+          if (elRef.current) {
+            elRef.current.style.opacity = '';
+            elRef.current.style.pointerEvents = '';
+          }
           setLoaded(true);
         });
       });
