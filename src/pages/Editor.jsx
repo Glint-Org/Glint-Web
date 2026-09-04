@@ -1394,6 +1394,7 @@ export default function Editor() {
               onDeviceScaleAdjustStart={pushHistory}
               onCopyToFrame={() => setCopyToFrameOpen(true)}
               hasSelection={!!activeCanvas?.getActiveObject()}
+              theme={theme}
             />
           </div>
         </aside>

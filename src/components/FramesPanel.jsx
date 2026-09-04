@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Eye, EyeOff, GripVertical, Trash2 } from 'lucide-react';
 import { isProtectedLayer } from '../utils/layerGuards';
+import { getGraphicBySrc } from '../utils/graphicsCatalog';
 
 function layerName(obj, index) {
   if (obj?.glintRole === 'store-frame') return obj.glintFrameName || `Frame ${index + 1}`;
   if (obj?.glintRole === 'framed-screenshot') return 'Device + screenshot';
   if (obj?.glintRole === 'screenshot') return 'Screenshot';
   if (obj?.glintRole === 'text') return `Text: ${(obj?.text || 'Layer').slice(0, 20)}`;
-  if (obj?.glintRole === 'graphic') return 'Graphic';
+  if (obj?.glintRole === 'graphic') {
+    const graphic = getGraphicBySrc(obj.glintGraphic);
+    return graphic ? graphic.label : 'Graphic';
+  }
   if (obj?.glintRole === 'frame-label') return obj.text || 'Label';
   if (obj?.glintRole === 'slide-bg') return 'Background';
   if (obj?.type === 'i-text' || obj?.type === 'textbox' || obj?.type === 'text') {

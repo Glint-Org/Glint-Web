@@ -97,6 +97,7 @@ export default function PropertiesPanel({
   onDeviceScaleAdjustStart,
   onCopyToFrame,
   hasSelection = false,
+  theme = 'dark',
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
@@ -270,10 +271,11 @@ export default function PropertiesPanel({
     const sy = canvasH / 1920;
     const meta = getGraphicBySrc(src);
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
+    const fillColor = theme === 'dark' ? '#E8E6DF' : '#2A2A3A';
     try {
       await addGraphicLayer(c, {
         src,
-        fill: templatePalette?.[0]?.color || '#FF6B4A',
+        fill: fillColor,
         fill2: '#FFD166',
         fill3: '#FFFFFF',
         left: Math.round((place.left ?? 0) * sx),
