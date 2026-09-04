@@ -1,5 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <circle cx="100" cy="100" r="75" stroke="#A10000" stroke-width="10" fill="none"/>
-  <line x1="100" y1="100" x2="100" y2="50" stroke="#A10000" stroke-width="10" stroke-linecap="round"/>
-  <line x1="100" y1="100" x2="140" y2="100" stroke="#A10000" stroke-width="8" stroke-linecap="round"/>
+<!-- @license lucide-static v1.40.0 - ISC -->
+<svg
+  class="lucide lucide-clock"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 6v6l4 2" />
 </svg>
