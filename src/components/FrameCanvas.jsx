@@ -201,13 +201,6 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
-    // Safety net: if paint fails or aborts, still make canvas interactive after a short delay.
-    const loadTimeout = setTimeout(() => {
-      if (!loaded) {
-        setFrameEditable(canvas, editableRef.current);
-        setLoaded(true);
-      }
-    }, 3000);
     (async () => {
       const paintOpts = {
         canvasWidth,
@@ -218,33 +211,38 @@ export default function FrameCanvas({
         displayCssWidth: Math.max(1, Math.round(canvasWidth * scaleRef.current)),
         displayCssHeight: Math.max(1, Math.round(canvasHeight * scaleRef.current)),
       };
-      if (fabricJson) {
-        try {
-          if (typeof canvas.loadFromJSON === 'function') {
-            await canvas.loadFromJSON(fabricJson);
-          } else if (typeof canvas.loadFromObject === 'function') {
-            await canvas.loadFromObject(fabricJson);
+      try {
+        if (fabricJson) {
+          try {
+            if (typeof canvas.loadFromJSON === 'function') {
+              await canvas.loadFromJSON(fabricJson);
+            } else if (typeof canvas.loadFromObject === 'function') {
+              await canvas.loadFromObject(fabricJson);
+            }
+          } catch (err) {
+            console.warn('Glint pack fabric restore failed, falling back to design', err);
+            await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, paintOpts);
           }
-          if (ac.signal.aborted) return;
-          canvas.requestRenderAll?.();
-        } catch (err) {
-          console.warn('Glint pack fabric restore failed, falling back to design', err);
+        } else {
           await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, paintOpts);
         }
-      } else {
-        await applyDesignToFrame(canvas, designRef.current, screenshotRef.current, paintOpts);
+      } catch (err) {
+        console.error('Glint: paint failed', err);
       }
       if (ac.signal.aborted) return;
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
-      clearTimeout(loadTimeout);
+      // Double-rAF to ensure CSS layout is settled before recalculating pointer offsets.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          canvas.calcOffset?.();
+          canvas.requestRenderAll?.();
+        });
+      });
       setLoaded(true);
     })();
-    return () => {
-      clearTimeout(loadTimeout);
-      ac.abort();
-    };
+    return () => ac.abort();
   }, [fabricJson, canvasWidth, canvasHeight, paintKey, screenshotUrl]);
 
   return (
