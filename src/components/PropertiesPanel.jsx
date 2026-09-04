@@ -8,7 +8,7 @@ import FrameSelector from './FrameSelector';
 import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
 import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
-import { getGraphicBySrc, contrastingIconColor } from '../utils/graphicsCatalog';
+import { getGraphicBySrc } from '../utils/graphicsCatalog';
 import {
   DEVICE_SCALE_MAX,
   DEVICE_SCALE_MIN,
@@ -258,7 +258,7 @@ export default function PropertiesPanel({
   const graphicFills = selection?.obj?.glintFills || { a: '#FF6B4A', b: '#FFD166', c: '#FFFFFF' };
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
 
-  const handleInsertGraphic = async (src, themeColor) => {
+  const handleInsertGraphic = async (src) => {
     const c = canvasRef.current;
     if (!c) {
       console.warn('Glint: no active canvas to insert graphic');
@@ -270,13 +270,10 @@ export default function PropertiesPanel({
     const sy = canvasH / 1920;
     const meta = getGraphicBySrc(src);
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
-    const primary = themeColor || templatePalette?.[0]?.color || '#FF6B4A';
-    const bgColor = background || '#FFFFFF';
-    const fillColor = contrastingIconColor(primary, bgColor);
     try {
       await addGraphicLayer(c, {
         src,
-        fill: fillColor,
+        fill: templatePalette?.[0]?.color || '#FF6B4A',
         fill2: '#FFD166',
         fill3: '#FFFFFF',
         left: Math.round((place.left ?? 0) * sx),
@@ -440,7 +437,7 @@ export default function PropertiesPanel({
 
         {rightTab === 'graphics' && (
           <>
-            <GraphicPicker onInsert={handleInsertGraphic} themeColor={templatePalette?.[0]?.color || '#FF6B4A'} />
+            <GraphicPicker onInsert={handleInsertGraphic} />
             {isGraphic && (
               <Section title="Selected graphic colors">
                 <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />

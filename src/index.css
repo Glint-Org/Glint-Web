@@ -331,3 +331,11 @@ select:disabled {
   50% { transform: translateX(100%); }
   100% { transform: translateX(100%); }
 }
+
+/* Dark mode: icons show white. Light mode: icons show dark (#2A2A3A). */
+.graphic-tile img {
+  filter: brightness(0) invert(0.15);
+}
+[data-theme="dark"] .graphic-tile img {
+  filter: brightness(0) invert(0.92);
+}

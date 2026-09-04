@@ -1,50 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { GRAPHICS, ICONS } from '../utils/graphicsCatalog';
 
 const ICON_INITIAL = 12;
 const DECOR_INITIAL = 4;
 
-const SVG_CACHE = new Map();
-
-function useThemedSvg(src, themeColor) {
-  const [url, setUrl] = useState(null);
-
-  useEffect(() => {
-    if (!src || !themeColor) { setUrl(null); return; }
-    const cacheKey = `${src}::${themeColor}`;
-    if (SVG_CACHE.has(cacheKey)) { setUrl(SVG_CACHE.get(cacheKey)); return; }
-    let alive = true;
-    (async () => {
-      try {
-        const res = await fetch(`/graphics/${src}`);
-        if (!res.ok) return;
-        let svg = await res.text();
-        svg = svg.replace(/#A10000/gi, themeColor);
-        const blob = new Blob([svg], { type: 'image/svg+xml' });
-        const blobUrl = URL.createObjectURL(blob);
-        if (alive) {
-          SVG_CACHE.set(cacheKey, blobUrl);
-          setUrl(blobUrl);
-        }
-      } catch { /* silent */ }
-    })();
-    return () => { alive = false; };
-  }, [src, themeColor]);
-
-  return url;
-}
-
-function GraphicTile({ item, onInsert, isIcon, themeColor }) {
-  const themedSrc = useThemedSvg(item.src, isIcon ? themeColor : null);
+function GraphicTile({ item, onInsert, isIcon }) {
   return (
     <button
       type="button"
       title={item.label}
-      onClick={() => onInsert?.(item.src, themeColor)}
-      className={`group relative rounded-lg border border-glint-border bg-glint-surface-2 overflow-hidden hover:border-glint-accent hover:ring-1 hover:ring-glint-accent/30 transition-all ${isIcon ? 'aspect-square' : 'aspect-[3/4]'}`}
+      onClick={() => onInsert?.(item.src)}
+      className={`graphic-tile group relative rounded-lg border border-glint-border bg-glint-surface-2 overflow-hidden hover:border-glint-accent hover:ring-1 hover:ring-glint-accent/30 transition-all ${isIcon ? 'aspect-square' : 'aspect-[3/4]'}`}
     >
       <img
-        src={themedSrc || `/graphics/${item.src}`}
+        src={`/graphics/${item.src}`}
         alt={item.label}
         className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-95 group-hover:opacity-100"
         draggable={false}
@@ -65,7 +34,7 @@ function ViewAllButton({ expanded, count, onToggle }) {
   );
 }
 
-export default function GraphicPicker({ onInsert, themeColor }) {
+export default function GraphicPicker({ onInsert }) {
   const [showAllIcons, setShowAllIcons] = useState(false);
   const [showAllDecor, setShowAllDecor] = useState(false);
 
@@ -81,7 +50,7 @@ export default function GraphicPicker({ onInsert, themeColor }) {
         </p>
         <div className="grid grid-cols-4 gap-1.5">
           {visibleIcons.map((g) => (
-            <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon themeColor={themeColor} />
+            <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
           ))}
         </div>
         {ICONS.length > ICON_INITIAL && (
@@ -100,7 +69,7 @@ export default function GraphicPicker({ onInsert, themeColor }) {
           </p>
           <div className="grid grid-cols-2 gap-1.5">
             {visibleDecor.map((g) => (
-              <GraphicTile key={g.id} item={g} onInsert={onInsert} themeColor={themeColor} />
+              <GraphicTile key={g.id} item={g} onInsert={onInsert} />
             ))}
           </div>
           {hiddenDecorCount > 0 && (
