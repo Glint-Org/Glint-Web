@@ -257,7 +257,10 @@ export default function PropertiesPanel({
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
 
   const handleInsertGraphic = async (src, themeColor) => {
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('Glint: no active canvas to insert graphic');
+      return;
+    }
     const canvasW = canvas.getWidth?.() || 1080;
     const canvasH = canvas.getHeight?.() || 1920;
     const sx = canvasW / 1080;
@@ -265,18 +268,22 @@ export default function PropertiesPanel({
     const meta = getGraphicBySrc(src);
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
     const primary = themeColor || templatePalette?.[0]?.color || '#FF6B4A';
-    // Pick icon color that contrasts with the canvas background
     const bgColor = background || '#FFFFFF';
     const fillColor = contrastingIconColor(primary, bgColor);
-    await addGraphicLayer(canvas, {
-      src,
-      fill: fillColor,
-      fill2: '#FFD166',
-      fill3: '#FFFFFF',
-      left: Math.round((place.left ?? 0) * sx),
-      top: Math.round((place.top ?? 0) * sy),
-      width: Math.round((place.width ?? 1080) * sx),
-    }, { selectable: true });
+    try {
+      await addGraphicLayer(canvas, {
+        src,
+        fill: fillColor,
+        fill2: '#FFD166',
+        fill3: '#FFFFFF',
+        left: Math.round((place.left ?? 0) * sx),
+        top: Math.round((place.top ?? 0) * sy),
+        width: Math.round((place.width ?? 1080) * sx),
+      }, { selectable: true });
+      canvas.requestRenderAll?.();
+    } catch (err) {
+      console.error('Glint: failed to insert graphic', err);
+    }
   };
 
   const handleGraphicFill = (slot, color) => {

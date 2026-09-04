@@ -1,19 +1,50 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GRAPHICS, ICONS } from '../utils/graphicsCatalog';
 
 const ICON_INITIAL = 12;
 const DECOR_INITIAL = 4;
 
+const SVG_CACHE = new Map();
+
+function useThemedSvg(src, themeColor) {
+  const [url, setUrl] = useState(null);
+
+  useEffect(() => {
+    if (!src || !themeColor) { setUrl(null); return; }
+    const cacheKey = `${src}::${themeColor}`;
+    if (SVG_CACHE.has(cacheKey)) { setUrl(SVG_CACHE.get(cacheKey)); return; }
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/graphics/${src}`);
+        if (!res.ok) return;
+        let svg = await res.text();
+        svg = svg.replace(/#A10000/gi, themeColor);
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const blobUrl = URL.createObjectURL(blob);
+        if (alive) {
+          SVG_CACHE.set(cacheKey, blobUrl);
+          setUrl(blobUrl);
+        }
+      } catch { /* silent */ }
+    })();
+    return () => { alive = false; };
+  }, [src, themeColor]);
+
+  return url;
+}
+
 function GraphicTile({ item, onInsert, isIcon, themeColor }) {
+  const themedSrc = useThemedSvg(item.src, isIcon ? themeColor : null);
   return (
     <button
       type="button"
-      title={isIcon ? `${item.label} — ${item.use}` : item.label}
+      title={item.label}
       onClick={() => onInsert?.(item.src, themeColor)}
       className={`group relative rounded-lg border border-glint-border bg-glint-surface-2 overflow-hidden hover:border-glint-accent hover:ring-1 hover:ring-glint-accent/30 transition-all ${isIcon ? 'aspect-square' : 'aspect-[3/4]'}`}
     >
       <img
-        src={`/graphics/${item.src}`}
+        src={themedSrc || `/graphics/${item.src}`}
         alt={item.label}
         className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-95 group-hover:opacity-100"
         draggable={false}
@@ -34,11 +65,6 @@ function ViewAllButton({ expanded, count, onToggle }) {
   );
 }
 
-/**
- * Visual graphic picker — preview tiles instead of name-only dropdown.
- * Shows icons and decorative graphics in separate sections with "View All" toggles.
- * Icons default to template theme color (not hardcoded red).
- */
 export default function GraphicPicker({ onInsert, themeColor }) {
   const [showAllIcons, setShowAllIcons] = useState(false);
   const [showAllDecor, setShowAllDecor] = useState(false);
@@ -49,7 +75,6 @@ export default function GraphicPicker({ onInsert, themeColor }) {
 
   return (
     <div className="space-y-3">
-      {/* Icons section */}
       <div>
         <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
           Icons
@@ -68,7 +93,6 @@ export default function GraphicPicker({ onInsert, themeColor }) {
         )}
       </div>
 
-      {/* Decorative graphics section */}
       {GRAPHICS.length > 0 && (
         <div>
           <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
