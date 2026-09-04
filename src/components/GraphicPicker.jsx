@@ -92,28 +92,89 @@ function ViewAllButton({ expanded, count, onToggle }) {
 
 export default function GraphicPicker({ onInsert, onInsertShape }) {
   const [showAllIcons, setShowAllIcons] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const visibleIcons = showAllIcons ? ICONS : ICONS.slice(0, ICON_INITIAL);
+  const filteredIcons = ICONS.filter((g) =>
+    g.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const visibleIcons = showAllIcons ? filteredIcons : filteredIcons.slice(0, ICON_INITIAL);
+
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
 
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
-          Icons
-        </p>
-        <div className="grid grid-cols-4 gap-1.5">
-          {visibleIcons.map((g) => (
-            <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
-          ))}
-        </div>
-        {ICONS.length > ICON_INITIAL && (
-          <ViewAllButton
-            expanded={showAllIcons}
-            count={ICONS.length}
-            onToggle={() => setShowAllIcons(!showAllIcons)}
-          />
-        )}
+      <div className="flex items-center space-x-2">
+        <input
+          type="text"
+          placeholder="Search icons, brands..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="flex-1 rounded border border-glint-border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-glint-accent/30"
+        />
       </div>
+
+      <div className="flex space-x-2 mb-2">
+        <button
+          type="button"
+          onClick={() => setShowAllIcons(false)}
+          className={`px-3 py-1 rounded text-[10px] font-medium transition-colors ${!showAllIcons ? 'bg-glint-accent text-white' : 'text-glint-accent/30'}`}
+        >
+          Icons
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowAllIcons(true)}
+          className={`px-3 py-1 rounded text-[10px] font-medium transition-colors ${showAllIcons ? 'bg-glint-accent text-white' : 'text-glint-accent/30'}`}
+        >
+          Brands
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowAllIcons(!showAllIcons)}
+          className={`px-3 py-1 rounded text-[10px] font-medium transition-colors ${showAllIcons ? 'bg-glint-accent text-white' : 'text-glint-accent/30'}`}
+        >
+          Shapes
+        </button>
+      </div>
+
+      {showAllIcons ? (
+        <div>
+          <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
+            Icons
+          </p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {visibleIcons.map((g) => (
+              <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
+            ))}
+          </div>
+          {filteredIcons.length > ICON_INITIAL && (
+            <ViewAllButton
+              expanded={showAllIcons}
+              count={filteredIcons.length}
+              onToggle={() => setShowAllIcons(!showAllIcons)}
+            />
+          )}
+        </div>
+      ) : (
+        <div>
+          <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
+            Icons
+          </p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {visibleIcons.map((g) => (
+              <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
+            ))}
+          </div>
+          {filteredIcons.length > ICON_INITIAL && (
+            <ViewAllButton
+              expanded={showAllIcons}
+              count={filteredIcons.length}
+              onToggle={() => setShowAllIcons(!showAllIcons)}
+            />
+          )}
+        </div>
+      )}
 
       <div>
         <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
@@ -131,4 +192,4 @@ export default function GraphicPicker({ onInsert, onInsertShape }) {
       </p>
     </div>
   );
-}
+};
