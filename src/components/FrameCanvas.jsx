@@ -201,6 +201,7 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
+    setLoaded(false);
     (async () => {
       const paintOpts = {
         canvasWidth,
