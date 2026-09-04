@@ -233,14 +233,17 @@ export default function FrameCanvas({
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
-      // Double-rAF to ensure CSS layout is settled before recalculating pointer offsets.
+      // Wait for the actual pixel paint to land before revealing the canvas.
+      // requestRenderAll() queues a render for the next animation frame;
+      // without this wait the canvas shows one blank frame before the template.
       requestAnimationFrame(() => {
+        canvas.calcOffset?.();
+        canvas.requestRenderAll?.();
         requestAnimationFrame(() => {
-          canvas.calcOffset?.();
-          canvas.requestRenderAll?.();
+          if (ac.signal.aborted) return;
+          setLoaded(true);
         });
       });
-      setLoaded(true);
     })();
     return () => ac.abort();
   }, [fabricJson, canvasWidth, canvasHeight, paintKey, screenshotUrl]);
