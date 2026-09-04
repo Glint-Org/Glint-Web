@@ -64,7 +64,7 @@ export default function GraphicPicker({ onInsert }) {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1">
+      <div className="flex-1 overflow-y-hidden">
         {tab === 'icons' && (
           <div className="grid grid-cols-4 gap-1.5">
             {filteredIcons.map((g) => (
