@@ -106,8 +106,15 @@ export default function FrameCanvas({
 
     const onMouseDown = (opt) => {
       if (opt.e?.button !== 0 || !editableRef.current) return;
-      const device = findDeviceTarget(opt.target);
-      if (device) {
+      const target = opt.target;
+      const device = findDeviceTarget(target);
+      // Only force device selection when clicking the device group itself or
+      // one of its internal children (bezel bitmap, border rect).
+      // User-added objects (text, graphics, shapes) are top-level canvas objects
+      // that may overlap the device — let Fabric select them normally.
+      const isDeviceChild = device && target !== device
+        && (target.group === device || target.parent === device);
+      if (device && (target === device || isDeviceChild)) {
         pendingDeviceClick = { x: opt.e.clientX, y: opt.e.clientY, target: opt.target };
         c.setActiveObject(device);
         c.requestRenderAll();
@@ -194,6 +201,13 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
+    // Safety net: if paint fails or aborts, still make canvas interactive after a short delay.
+    const loadTimeout = setTimeout(() => {
+      if (!loaded) {
+        setFrameEditable(canvas, editableRef.current);
+        setLoaded(true);
+      }
+    }, 3000);
     (async () => {
       const paintOpts = {
         canvasWidth,
@@ -224,9 +238,13 @@ export default function FrameCanvas({
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
       if (editableRef.current) selectDeviceLayer(canvas);
+      clearTimeout(loadTimeout);
       setLoaded(true);
     })();
-    return () => ac.abort();
+    return () => {
+      clearTimeout(loadTimeout);
+      ac.abort();
+    };
   }, [fabricJson, canvasWidth, canvasHeight, paintKey, screenshotUrl]);
 
   return (
