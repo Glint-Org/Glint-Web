@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
-  ZoomIn, ZoomOut, Type, Trash2, Download, Upload, Smartphone, Undo2, Redo2,
+  ZoomIn, ZoomOut, Type, Trash2, Download, Upload, Undo2, Redo2,
+  RotateCcw,
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import FrameBoard from '../components/FrameBoard';
@@ -1195,22 +1196,6 @@ export default function Editor() {
           />
 
           <div
-            className="absolute top-4 z-20 flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl pointer-events-auto transition-[left,transform] duration-200 ease-out"
-            style={{
-              left: `calc(50% + ${(leftOpen ? LEFT_W : 0) / 2}px - ${(rightOpen ? RIGHT_W : 0) / 2}px)`,
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <ToolBtn
-              danger
-              onClick={() => setStripConfirmOpen(true)}
-              title="Clear styling and screenshots — device frames only"
-            >
-              <Smartphone size={15} />
-            </ToolBtn>
-          </div>
-
-          <div
             className="absolute bottom-4 z-20 flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl pointer-events-auto transition-[left,transform] duration-200 ease-out"
             style={{
               left: `calc(50% + ${(leftOpen ? LEFT_W : 0) / 2}px - ${(rightOpen ? RIGHT_W : 0) / 2}px)`,
@@ -1230,6 +1215,16 @@ export default function Editor() {
             <ToolBtn onClick={zoomIn} title="Zoom in (up to ~2.5 frames)" disabled={!canZoomIn}>
               <ZoomIn size={15} />
             </ToolBtn>
+            <Sep />
+            <button
+              type="button"
+              onClick={() => setStripConfirmOpen(true)}
+              title="Clear styling and screenshots — device frames only"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-glint-text-secondary hover:text-glint-danger hover:bg-glint-danger/10 transition-colors"
+            >
+              <RotateCcw size={14} />
+              <span>Reset</span>
+            </button>
           </div>
         </main>
 
