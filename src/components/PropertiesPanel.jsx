@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Type, Trash2, AlignLeft, AlignCenter, AlignRight, Bold, Copy } from 'lucide-react';
 import { Shadow } from 'fabric';
 import ColorPicker from './ColorPicker';
@@ -100,6 +100,8 @@ export default function PropertiesPanel({
 }) {
   const [rightTab, setRightTab] = useState('device');
   const [selection, setSelection] = useState(null);
+  const canvasRef = useRef(canvas);
+  canvasRef.current = canvas;
   const [textProps, setTextProps] = useState({
     text: '',
     fontSize: 48,
@@ -257,12 +259,13 @@ export default function PropertiesPanel({
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
 
   const handleInsertGraphic = async (src, themeColor) => {
-    if (!canvas) {
+    const c = canvasRef.current;
+    if (!c) {
       console.warn('Glint: no active canvas to insert graphic');
       return;
     }
-    const canvasW = canvas.getWidth?.() || 1080;
-    const canvasH = canvas.getHeight?.() || 1920;
+    const canvasW = c.getWidth?.() || 1080;
+    const canvasH = c.getHeight?.() || 1920;
     const sx = canvasW / 1080;
     const sy = canvasH / 1920;
     const meta = getGraphicBySrc(src);
@@ -271,7 +274,7 @@ export default function PropertiesPanel({
     const bgColor = background || '#FFFFFF';
     const fillColor = contrastingIconColor(primary, bgColor);
     try {
-      await addGraphicLayer(canvas, {
+      await addGraphicLayer(c, {
         src,
         fill: fillColor,
         fill2: '#FFD166',
@@ -280,7 +283,7 @@ export default function PropertiesPanel({
         top: Math.round((place.top ?? 0) * sy),
         width: Math.round((place.width ?? 1080) * sx),
       }, { selectable: true });
-      canvas.requestRenderAll?.();
+      c.requestRenderAll?.();
     } catch (err) {
       console.error('Glint: failed to insert graphic', err);
     }
