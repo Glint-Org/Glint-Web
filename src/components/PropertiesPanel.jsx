@@ -256,7 +256,7 @@ export default function PropertiesPanel({
   const graphicFills = selection?.obj?.glintFills || { a: '#FF6B4A', b: '#FFD166', c: '#FFFFFF' };
   const style = { ...DEFAULT_SCREENSHOT_STYLE, ...screenshotStyle };
 
-  const handleInsertGraphic = async (src) => {
+  const handleInsertGraphic = async (src, themeColor) => {
     if (!canvas) return;
     const canvasW = canvas.getWidth?.() || 1080;
     const canvasH = canvas.getHeight?.() || 1920;
@@ -264,9 +264,10 @@ export default function PropertiesPanel({
     const sy = canvasH / 1920;
     const meta = getGraphicBySrc(src);
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
+    const primary = themeColor || templatePalette?.[0]?.color || '#FF6B4A';
     await addGraphicLayer(canvas, {
       src,
-      fill: '#FF6B4A',
+      fill: primary,
       fill2: '#FFD166',
       fill3: '#FFFFFF',
       left: Math.round((place.left ?? 0) * sx),
@@ -426,7 +427,7 @@ export default function PropertiesPanel({
 
         {rightTab === 'graphics' && (
           <>
-            <GraphicPicker onInsert={handleInsertGraphic} />
+            <GraphicPicker onInsert={handleInsertGraphic} themeColor={templatePalette?.[0]?.color || '#FF6B4A'} />
             {isGraphic && (
               <Section title="Selected graphic colors">
                 <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />

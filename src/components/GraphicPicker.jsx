@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { GRAPHICS, ICONS } from '../utils/graphicsCatalog';
 
-const ICON_INITIAL = 6;
-const DECOR_INITIAL = 6;
+const ICON_INITIAL = 12;
+const DECOR_INITIAL = 4;
 
-function GraphicTile({ item, onInsert, isIcon }) {
+function GraphicTile({ item, onInsert, isIcon, themeColor }) {
   return (
     <button
       type="button"
       title={isIcon ? `${item.label} — ${item.use}` : item.label}
-      onClick={() => onInsert?.(item.src)}
+      onClick={() => onInsert?.(item.src, themeColor)}
       className={`group relative rounded-lg border border-glint-border bg-glint-surface-2 overflow-hidden hover:border-glint-accent hover:ring-1 hover:ring-glint-accent/30 transition-all ${isIcon ? 'aspect-square' : 'aspect-[3/4]'}`}
     >
       <img
@@ -40,13 +40,14 @@ function ViewAllButton({ expanded, count, onToggle }) {
 /**
  * Visual graphic picker — preview tiles instead of name-only dropdown.
  * Shows icons and decorative graphics in separate sections with "View All" toggles.
+ * Icons default to template theme color (not hardcoded red).
  */
-export default function GraphicPicker({ onInsert }) {
+export default function GraphicPicker({ onInsert, themeColor }) {
   const [showAllIcons, setShowAllIcons] = useState(false);
   const [showAllDecor, setShowAllDecor] = useState(false);
 
   const visibleIcons = showAllIcons ? ICONS : ICONS.slice(0, ICON_INITIAL);
-  const visibleDecor = showAllDecor ? GRAPHICS : GRAPHICS.filter(g => g.featured).slice(0, DECOR_INITIAL);
+  const visibleDecor = showAllDecor ? GRAPHICS : GRAPHICS.slice(0, DECOR_INITIAL);
   const hiddenDecorCount = GRAPHICS.length - DECOR_INITIAL;
 
   return (
@@ -58,7 +59,7 @@ export default function GraphicPicker({ onInsert }) {
         </p>
         <div className="grid grid-cols-4 gap-1.5">
           {visibleIcons.map((g) => (
-            <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon />
+            <GraphicTile key={g.id} item={g} onInsert={onInsert} isIcon themeColor={themeColor} />
           ))}
         </div>
         {ICONS.length > ICON_INITIAL && (
@@ -71,26 +72,28 @@ export default function GraphicPicker({ onInsert }) {
       </div>
 
       {/* Decorative graphics section */}
-      <div>
-        <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
-          Decorative
-        </p>
-        <div className="grid grid-cols-2 gap-1.5">
-          {visibleDecor.map((g) => (
-            <GraphicTile key={g.id} item={g} onInsert={onInsert} />
-          ))}
+      {GRAPHICS.length > 0 && (
+        <div>
+          <p className="text-[10px] font-medium text-glint-text-secondary mb-1.5 uppercase tracking-wider">
+            Decorative
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {visibleDecor.map((g) => (
+              <GraphicTile key={g.id} item={g} onInsert={onInsert} themeColor={themeColor} />
+            ))}
+          </div>
+          {hiddenDecorCount > 0 && (
+            <ViewAllButton
+              expanded={showAllDecor}
+              count={GRAPHICS.length}
+              onToggle={() => setShowAllDecor(!showAllDecor)}
+            />
+          )}
         </div>
-        {hiddenDecorCount > 0 && (
-          <ViewAllButton
-            expanded={showAllDecor}
-            count={GRAPHICS.length}
-            onToggle={() => setShowAllDecor(!showAllDecor)}
-          />
-        )}
-      </div>
+      )}
 
       <p className="text-[10px] text-glint-text-tertiary">
-        Click to insert. Drag freely after. Select to recolor with a/b/c slots.
+        Click to insert. Drag freely after. Select to recolor.
       </p>
     </div>
   );

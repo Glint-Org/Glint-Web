@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
-  <line x1="0" y1="0" x2="400" y2="400" stroke="#A10000" stroke-opacity="0.15" stroke-width="2"/>
-  <line x1="60" y1="0" x2="400" y2="340" stroke="#B10000" stroke-opacity="0.1" stroke-width="1.5"/>
-  <line x1="120" y1="0" x2="400" y2="280" stroke="#C10000" stroke-opacity="0.08" stroke-width="1"/>
-</svg>
