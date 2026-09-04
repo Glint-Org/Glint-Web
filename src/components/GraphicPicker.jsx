@@ -18,7 +18,8 @@ function GraphicTile({ item, onInsert }) {
       <img
         src={`/graphics/${item.src}`}
         alt={item.label}
-        className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-95 group-hover:opacity-100 dark:text-glint-text dark:invert"
+        className="absolute inset-0 w-full h-full object-contain p-2 pointer-events-none opacity-95 group-hover:opacity-100 dark:invert"
+        style={{ color: '#000' }}
         draggable={false}
       />
     </button>

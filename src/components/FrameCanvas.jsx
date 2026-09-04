@@ -255,8 +255,8 @@ export default function FrameCanvas({
       {!loaded && (
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent" />
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_0.4s_infinite] bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-black/[0.06] to-transparent dark:via-white/[0.08]" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_0.4s_infinite] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent dark:via-white/[0.05]" />
         </div>
       )}
     </div>
