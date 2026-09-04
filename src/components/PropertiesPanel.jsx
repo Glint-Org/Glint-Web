@@ -7,7 +7,7 @@ import ThemeSelector from './ThemeSelector';
 import FrameSelector from './FrameSelector';
 import GraphicPicker from './GraphicPicker';
 import { DEFAULT_SCREENSHOT_STYLE } from '../utils/frameMeta';
-import { addGraphicLayer, recolorGraphic } from '../utils/graphicLayers';
+import { addGraphicLayer, addShapeLayer, recolorGraphic } from '../utils/graphicLayers';
 import { getGraphicBySrc } from '../utils/graphicsCatalog';
 import {
   DEVICE_SCALE_MAX,
@@ -294,6 +294,24 @@ export default function PropertiesPanel({
     canvas.requestRenderAll();
   };
 
+  const handleInsertShape = (shape) => {
+    const c = canvasRef.current;
+    if (!c) return;
+    const fillColor = theme === 'dark' ? '#E8E6DF' : '#2A2A3A';
+    addShapeLayer(c, {
+      shape: shape.shape,
+      fill: fillColor,
+      width: shape.width ?? 400,
+      height: shape.height ?? 200,
+      rx: shape.rx ?? 0,
+      ry: shape.ry ?? shape.rx ?? 0,
+      radius: 140,
+      left: 340,
+      top: 860,
+    }, { selectable: true });
+    c.requestRenderAll?.();
+  };
+
   const patchStyle = (patch) => onScreenshotStyleChange?.(patch);
 
   const CField = ({ label, value, onChange }) => (
@@ -439,7 +457,7 @@ export default function PropertiesPanel({
 
         {rightTab === 'graphics' && (
           <>
-            <GraphicPicker onInsert={handleInsertGraphic} />
+            <GraphicPicker onInsert={handleInsertGraphic} onInsertShape={handleInsertShape} />
             {isGraphic && (
               <Section title="Selected graphic colors">
                 <CField label="Fill A" value={graphicFills.a || '#FF6B4A'} onChange={(v) => handleGraphicFill('a', v)} />
