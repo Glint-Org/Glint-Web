@@ -232,13 +232,15 @@ export default function FrameCanvas({
   return (
     <div
       ref={wrapRef}
-      className="relative overflow-hidden rounded-sm"
+      className="relative overflow-hidden rounded-sm bg-glint-surface-2"
       style={{ width: cssW, height: cssH }}
     >
-      <canvas ref={elRef} className={`block transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`} />
+      <canvas ref={elRef} className={`block ${loaded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
       {!loaded && (
-        <div className="absolute inset-0 bg-glint-surface-2 overflow-hidden">
-          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_0.4s_infinite] bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
         </div>
       )}
     </div>
