@@ -273,7 +273,7 @@ export default function PropertiesPanel({
     const place = meta?.defaultPlacement || { left: 0, top: 0, width: 1080 };
     const fillColor = theme === 'dark' ? '#E8E6DF' : '#2A2A3A';
     try {
-      await addGraphicLayer(c, {
+      const obj = await addGraphicLayer(c, {
         src,
         fill: fillColor,
         fill2: '#FFD166',
@@ -282,7 +282,8 @@ export default function PropertiesPanel({
         top: Math.round((place.top ?? 0) * sy),
         width: Math.round((place.width ?? 1080) * sx),
       }, { selectable: true });
-      c.requestRenderAll?.();
+      c.setActiveObject(obj);
+      c.requestRenderAll();
     } catch (err) {
       console.error('Glint: failed to insert graphic', err);
     }
@@ -298,7 +299,7 @@ export default function PropertiesPanel({
     const c = canvasRef.current;
     if (!c) return;
     const fillColor = theme === 'dark' ? '#E8E6DF' : '#2A2A3A';
-    addShapeLayer(c, {
+    const obj = addShapeLayer(c, {
       shape: shape.shape,
       fill: fillColor,
       width: shape.width ?? 400,
@@ -309,7 +310,8 @@ export default function PropertiesPanel({
       left: 340,
       top: 860,
     }, { selectable: true });
-    c.requestRenderAll?.();
+    c.setActiveObject(obj);
+    c.requestRenderAll();
   };
 
   const patchStyle = (patch) => onScreenshotStyleChange?.(patch);
