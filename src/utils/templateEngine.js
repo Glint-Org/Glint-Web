@@ -1,5 +1,5 @@
 import { FabricImage, Rect, IText, Shadow } from 'fabric';
-import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, GLINT_CLONE_PROPS, loadFrameBezel } from './canvasEngine';
+import { createCanvas, setBackground, addFramedScreenshot, applyDeviceTransformLocks, applySelectionStyle, copyGlintProps, loadFrameBezel } from './canvasEngine';
 import { addGraphicLayer, addShapeLayer } from './graphicLayers';
 import { getTheme } from './templateLoader';
 import { getFrameMeta, resolveDeviceScale, MIN_DEVICE_COVERAGE } from './frameMeta';
@@ -740,8 +740,9 @@ export async function applyDesignToFrame(
     for (let i = 0; i < draftObjects.length; i++) {
       if (signal?.aborted) return;
       const src = draftObjects[i];
-      // Fabric clone drops custom glint* fields unless listed — then copy again to be safe.
-      const cloned = await src.clone(GLINT_CLONE_PROPS);
+      // Fabric clone() first arg is a callback, not a prop list.
+      // clone() alone preserves standard Fabric props; copyGlintProps restores custom ones.
+      const cloned = await src.clone();
       copyGlintProps(src, cloned);
       clones.push(cloned);
     }
@@ -776,7 +777,10 @@ export async function applyDesignToFrame(
       }
     }
     canvas.backgroundColor = draft.backgroundColor;
-    for (const cloned of clones) canvas.add(cloned);
+    for (const cloned of clones) {
+      canvas.add(cloned);
+      cloned.setCoords?.();
+    }
     canvas.renderOnAddRemove = prevRender;
     canvas.requestRenderAll();
   } finally {
