@@ -792,10 +792,10 @@ export function setFrameEditable(canvas, editable) {
   canvas.forEachObject((obj) => {
     if (obj.glintRole === 'framed-screenshot') {
       // Always evented so right-click import works; only selectable when frame is active.
-      obj.set({ selectable: editable, evented: true });
+      obj.set({ selectable: editable, evented: true, hasControls: true, hasBorders: true, lockMovementX: false, lockMovementY: false });
       applyDeviceTransformLocks(obj);
     } else {
-      const patch = { selectable: editable, evented: editable };
+      const patch = { selectable: editable, evented: editable, hasControls: true, hasBorders: true, lockMovementX: false, lockMovementY: false };
       if (obj.glintRole === 'text' || typeof obj.enterEditing === 'function') {
         patch.editable = editable;
       }
