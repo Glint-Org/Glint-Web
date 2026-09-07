@@ -43,4 +43,4 @@ Commit the updated preview images with your template changes.
 
 ## Future (do not implement unless asked)
 
-Marketplace / contribute `.glintpack` → community gallery: `docs/FUTURE-marketplace-glintpack.md`.
+Marketplace / contribute `.glint` → community gallery: `docs/FUTURE-marketplace-glint.md`.

@@ -1,8 +1,8 @@
-# Future plan: Community marketplace & glintpack contribution
+# Future plan: Community marketplace & glint contribution
 
 **Status:** Future work — do **not** implement or integrate in the current release track.  
 **Owner:** Glint Web  
-**Related today:** `.glintpack` (`src/utils/projectPack.js`), templates (`public/templates/`), Export / SessionImporter
+**Related today:** `.glint` (`src/utils/projectPack.js`), templates (`public/templates/`), Export / SessionImporter
 
 This document is the product + technical plan for a free community marketplace where designers contribute editable designs and others reuse them as templates or full projects.
 
@@ -27,9 +27,9 @@ That becomes a **free marketplace** of community designs — not a paid store in
 - Live “push to GitHub from the browser” without review  
 - Replacing first-party `public/templates/*.json` with packs only  
 - Building backend auth / accounts unless a later phase requires it  
-- Merging Capture `session.json` and `.glintpack` into one format  
+- Merging Capture `session.json` and `.glint` into one format  
 
-Implementing any of the above early will make the editor and repo messy. Keep shipping templates and glintpack round-trip as they are until this plan is scheduled.
+Implementing any of the above early will make the editor and repo messy. Keep shipping templates and glint round-trip as they are until this plan is scheduled.
 
 ---
 
@@ -38,7 +38,7 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 | Concept | What it is | User intent |
 |---------|------------|-------------|
 | **Template** | Layout recipe JSON (slots, placeholders, canvas). No user screenshots required. | “Start fresh with *my* shots.” |
-| **`.glintpack`** | ZIP project pack: `project.json` + shots + previews + Fabric bitmaps. Editable round-trip. | “Open this exact set / remix it.” |
+| **`.glint`** | ZIP project pack: `project.json` + shots + previews + Fabric bitmaps. Editable round-trip. | “Open this exact set / remix it.” |
 | **Marketplace listing** | Catalog entry pointing at a template and/or a pack, plus preview + metadata. | “Browse and pick.” |
 | **Capture session** | `session.json` + PNGs from Capture/Bridge. Shots only. | Import raw captures — **not** marketplace inventory. |
 
@@ -51,7 +51,7 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 ### 4.1 Surfaces
 
 1. **Home / Marketplace tab** — gallery of community + official listings (filters: store, device, type, author).  
-2. **Editor → Export (or Contribute)** — “Contribute your design” entry point (secondary CTA; primary remains Download `.glintpack` / store ZIP).  
+2. **Editor → Export (or Contribute)** — “Contribute your design” entry point (secondary CTA; primary remains Download `.glint` / store ZIP).  
 3. **Listing detail** — larger preview strip, description, license, Use template / Open pack.
 
 ### 4.2 User journeys
@@ -61,7 +61,7 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 1. Finish a set in the editor.  
 2. Click **Contribute your design**.  
 3. Fill metadata (title, description, author credit, store, license).  
-4. App builds `.glintpack` + preview images.  
+4. App builds `.glint` + preview images.  
 5. Submission goes to a **review pipeline** (not a silent push to `main`).  
 6. After approval, listing appears in the marketplace.
 
@@ -70,7 +70,7 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 1. Browse marketplace; see preview strips.  
 2. Choose:  
    - **Use as template** → loads layout; empty/placeholder slots for their screenshots.  
-   - **Open glintpack** → full editable restore (current pack import path).  
+   - **Open glint** → full editable restore (current pack import path).  
 3. Edit, re-export store ZIP / pack as usual.
 
 ### 4.3 Contribute CTA copy (intent)
@@ -79,12 +79,12 @@ Something like: *Contribute your design* → explains that the design may be rev
 
 ---
 
-## 5. What `.glintpack` already contains (reuse)
+## 5. What `.glint` already contains (reuse)
 
-Do not invent a second pack format. Marketplace packs should remain schema-compatible with today’s format (`GLINTPACK_FORMAT`, `schemaVersion: 1`):
+Do not invent a second pack format. Marketplace packs should remain schema-compatible with today’s format (`GLINT_FORMAT`, `schemaVersion: 1`):
 
 ```
-*.glintpack  (ZIP)
+*.glint  (ZIP)
 ├── project.json
 └── assets/
     ├── shots/frame-N.png       # raw device screenshots
@@ -111,7 +111,7 @@ public/
       {listing-id}/
         meta.json            # listing metadata
         preview.jpg          # or strip WebP
-        design.glintpack     # optional full pack
+        design.glint         # optional full pack
         template.json        # optional promoted recipe
 ```
 
@@ -144,7 +144,7 @@ Alternatives acceptable at implementation time:
       "type": "pack",
       "license": "CC-BY-4.0",
       "preview": "/marketplace/listings/community-blink-remix-01/preview.jpg",
-      "packUrl": "/marketplace/listings/…/design.glintpack",
+      "packUrl": "/marketplace/listings/…/design.glint",
       "templateId": null,
       "official": false,
       "tags": ["play", "gradient", "minimal"],
@@ -158,7 +158,7 @@ Alternatives acceptable at implementation time:
 
 | `type` | Meaning | Primary CTA |
 |--------|---------|-------------|
-| `pack` | Full `.glintpack` | Open pack |
+| `pack` | Full `.glint` | Open pack |
 | `template` | Recipe only (`templateId` or inline `template.json`) | Use template |
 | `both` | Promoted recipe + pack available | Prefer template; pack as “Open example” |
 
@@ -214,8 +214,8 @@ Until promotion exists, marketplace can ship **pack-only** listings safely.
 |------|------|
 | Home | Marketplace section or route; cards with preview, author, store badge, type |
 | Export | Secondary **Contribute your design** → metadata wizard → submit/download bundle |
-| SessionImporter / Assets | Keep **Open .glintpack**; optionally “Browse marketplace” deep-link |
-| Editor leave warn | Already mentions downloading `.glintpack`; contribute can reuse same pack build |
+| SessionImporter / Assets | Keep **Open .glint**; optionally “Browse marketplace” deep-link |
+| Editor leave warn | Already mentions downloading `.glint`; contribute can reuse same pack build |
 
 Do **not** clutter first viewport of Home with marketplace until the catalog has enough quality listings.
 
@@ -229,7 +229,7 @@ Do **not** clutter first viewport of Home with marketplace until the catalog has
 | Pack import in SessionImporter | Contribute wizard UI |
 | Template loader + engine | Promote-pack tooling (script OK at first) |
 | Template preview strips | Marketplace gallery + filters |
-| Export Download `.glintpack` | Review/PR pipeline + size/license checks |
+| Export Download `.glint` | Review/PR pipeline + size/license checks |
 
 Prefer scripts and static hosting over a new backend until traffic forces it.
 

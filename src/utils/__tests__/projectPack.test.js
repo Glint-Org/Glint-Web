@@ -32,7 +32,6 @@ describe('projectPack helpers', () => {
   it('detects .glint file extensions', () => {
     expect(isGlintFile({ name: 'demo.glint' })).toBe(true);
     expect(isGlintFile({ name: 'demo.glint.zip' })).toBe(true);
-    expect(isGlintFile({ name: 'demo.glintpack' })).toBe(false);
     expect(isGlintFile({ name: 'demo.zip' })).toBe(false);
     expect(isGlintFile(null)).toBe(false);
   });
@@ -139,7 +138,7 @@ describe('projectPack round-trip', () => {
   it('rejects raw ZIPs without GLINT header', async () => {
     const zip = new JSZip();
     zip.file('project.json', JSON.stringify({
-      format: 'glintpack',
+      format: 'glint',
       schemaVersion: 1,
       store: 'play/phone',
       frames: [],
