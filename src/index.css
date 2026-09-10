@@ -241,6 +241,27 @@ select:disabled {
   display: none;
 }
 
+/* Frames sidebar — news-ticker scroll for long layer labels */
+@keyframes glint-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.glint-marquee-track {
+  animation: glint-marquee var(--glint-marquee-duration, 12s) linear infinite;
+}
+.glint-marquee-track:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glint-marquee-track {
+    animation: none;
+  }
+}
+
 /* Home template showcase motion */
 @keyframes glint-reveal {
   from {

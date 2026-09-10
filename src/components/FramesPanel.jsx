@@ -7,7 +7,10 @@ function layerName(obj, index) {
   if (obj?.glintRole === 'store-frame') return obj.glintFrameName || `Frame ${index + 1}`;
   if (obj?.glintRole === 'framed-screenshot') return 'Device + screenshot';
   if (obj?.glintRole === 'screenshot') return 'Screenshot';
-  if (obj?.glintRole === 'text') return `Text: ${(obj?.text || 'Layer').slice(0, 20)}`;
+  if (obj?.glintRole === 'text') {
+    const t = String(obj?.text || 'Layer').replace(/\s+/g, ' ').trim();
+    return `Text: ${t}`;
+  }
   if (obj?.glintRole === 'graphic') {
     const graphic = getGraphicBySrc(obj.glintGraphic);
     return graphic ? graphic.label : 'Graphic';
@@ -15,9 +18,57 @@ function layerName(obj, index) {
   if (obj?.glintRole === 'frame-label') return obj.text || 'Label';
   if (obj?.glintRole === 'slide-bg') return 'Background';
   if (obj?.type === 'i-text' || obj?.type === 'textbox' || obj?.type === 'text') {
-    return `Text: ${(obj?.text || 'Layer').slice(0, 20)}`;
+    const t = String(obj?.text || 'Layer').replace(/\s+/g, ' ').trim();
+    return `Text: ${t}`;
   }
   return `${obj?.type || 'Layer'} ${index + 1}`;
+}
+
+/** Slow ticker when label overflows — pause on hover. */
+function MarqueeLabel({ text }) {
+  const wrapRef = useRef(null);
+  const measureRef = useRef(null);
+  const [overflow, setOverflow] = useState(false);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const measure = measureRef.current;
+    if (!wrap || !measure) return undefined;
+    const check = () => setOverflow(measure.scrollWidth > wrap.clientWidth + 1);
+    check();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(check) : null;
+    ro?.observe(wrap);
+    return () => ro?.disconnect();
+  }, [text]);
+
+  // ~40px/s readable ticker; longer copy gets a longer cycle.
+  const durationSec = Math.min(48, Math.max(6, Math.round(String(text).length * 0.28)));
+
+  return (
+    <span ref={wrapRef} className="block overflow-hidden min-w-0 flex-1 relative">
+      {/* Hidden measure line — full width of label without wrap. */}
+      <span
+        ref={measureRef}
+        className="absolute left-0 top-0 whitespace-nowrap opacity-0 pointer-events-none"
+        aria-hidden
+      >
+        {text}
+      </span>
+      {overflow ? (
+        <span
+          className="glint-marquee-track inline-flex whitespace-nowrap will-change-transform"
+          style={{ '--glint-marquee-duration': `${durationSec}s` }}
+        >
+          <span className="pr-10">{text}</span>
+          <span className="pr-10" aria-hidden>
+            {text}
+          </span>
+        </span>
+      ) : (
+        <span className="block truncate">{text}</span>
+      )}
+    </span>
+  );
 }
 
 /** Reorder so display[0] is front-most (Figma-style). */
@@ -243,6 +294,7 @@ export default function FramesPanel({
             const isSource = dragging && dragFrom.current === i;
             const protectedLayer = isProtectedLayer(obj);
             const hidden = obj.visible === false;
+            const name = layerName(obj, i);
             return (
               <div
                 key={obj.__uid ?? `${obj.type}-${i}`}
@@ -271,9 +323,10 @@ export default function FramesPanel({
                 <button
                   type="button"
                   onClick={() => selectLayer(obj)}
-                  className="flex-1 text-left text-glint-text-secondary truncate min-w-0"
+                  className="flex-1 text-left text-glint-text-secondary min-w-0 flex overflow-hidden"
+                  title={name}
                 >
-                  {layerName(obj, i)}
+                  <MarqueeLabel text={name} />
                 </button>
                 {protectedLayer ? (
                   <button
