@@ -491,7 +491,8 @@ export default function PropertiesPanel({
             {templatePalette?.length > 0 ? (
               <Section title="From screenshots">
                 <p className="text-[10px] text-glint-text-tertiary">
-                  Sample colors from imported screenshots and remap the template palette.
+                  Finds the brand accent in your screenshots (not the biggest grey/white area),
+                  then builds a matching palette for this template.
                 </p>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] text-glint-text-secondary">Auto extract theme</span>
