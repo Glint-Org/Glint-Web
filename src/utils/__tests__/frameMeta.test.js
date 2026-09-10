@@ -5,6 +5,8 @@ import {
   isFrameAllowedForStore,
   resolveDeviceScale,
   resolveFrameForStore,
+  scaleToMatchDisplayBox,
+  getFrameMeta,
   MIN_DEVICE_COVERAGE,
 } from '../frameMeta.js';
 
@@ -49,5 +51,20 @@ describe('frameMeta', () => {
     expect(scale).toBeGreaterThan(0);
     const tighter = resolveDeviceScale('pixel9', 1080, 1920, 0.9);
     expect(tighter).toBeGreaterThan(scale);
+  });
+
+  it('matches display box when swapping bezels so size stays stable', () => {
+    const pixel = getFrameMeta('pixel9');
+    const displayW = pixel.width * 0.5;
+    const displayH = pixel.height * 0.5;
+    const nextScale = scaleToMatchDisplayBox('iphone16-pro', displayW, displayH);
+    expect(nextScale).toBeGreaterThan(0);
+    const iphone = getFrameMeta('iphone16-pro');
+    const nextW = iphone.width * nextScale;
+    const nextH = iphone.height * nextScale;
+    // Contained in previous box; at least one axis touches.
+    expect(nextW).toBeLessThanOrEqual(displayW + 0.5);
+    expect(nextH).toBeLessThanOrEqual(displayH + 0.5);
+    expect(Math.min(displayW - nextW, displayH - nextH)).toBeLessThan(1);
   });
 });

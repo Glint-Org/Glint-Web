@@ -315,3 +315,15 @@ export function computeFrameLayout(frameId, targetScale) {
   const rx = meta.rx * targetScale;
   return { meta, frameW, frameH, insetL, insetT, screenW, screenH, rx };
 }
+
+/**
+ * Base scale so a new bezel fills the previous display box (contain, uniform).
+ * Swap Pixel → iPhone (etc.) without jumping size or position.
+ */
+export function scaleToMatchDisplayBox(frameId, displayW, displayH) {
+  const meta = getFrameMeta(frameId);
+  const mw = meta?.width || 0;
+  const mh = meta?.height || 0;
+  if (mw <= 0 || mh <= 0 || !(displayW > 0) || !(displayH > 0)) return null;
+  return Math.min(displayW / mw, displayH / mh);
+}

@@ -3,6 +3,7 @@ import {
   getFrameMeta,
   computeFrameLayout,
   resolveDeviceScale,
+  scaleToMatchDisplayBox,
   MIN_DEVICE_COVERAGE,
   DEFAULT_SCREENSHOT_STYLE,
 } from './frameMeta';
@@ -935,12 +936,31 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
   const slot = group.glintSlot;
   const slide = group.glintSlide;
   const angle = group.angle || 0;
-  const { x: cx, y: cy, sx, sy } = getGroupGeoCenter(group);
+  const { x: cx, y: cy, sx, sy, w: prevW, h: prevH } = getGroupGeoCenter(group);
+  const objects = canvas.getObjects();
+  const oldIndex = objects.indexOf(group);
 
   const coverage = Math.max(
     MIN_DEVICE_COVERAGE,
     group.glintCoverage || MIN_DEVICE_COVERAGE,
   );
+
+  const swapIn = (next) => {
+    if (!next) return false;
+    placeGroupAtCenter(next, cx, cy);
+    applyDeviceTransformLocks(next);
+    canvas.remove(group);
+    group.dispose?.();
+    // next was canvas.add()'d inside addFramedScreenshot — restore z-order.
+    canvas.remove(next);
+    if (oldIndex >= 0) {
+      canvas.insertAt(Math.min(oldIndex, canvas.getObjects().length), next);
+    } else {
+      canvas.add(next);
+    }
+    canvas.requestRenderAll();
+    return true;
+  };
 
   // Same bezel, new shot — keep exact transform, only rebake pixels.
   if (role === 'framed-screenshot' && group.glintFrameId === nextFrameId) {
@@ -964,15 +984,14 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
       glintCoverage: coverage,
       glintScreenshotUrl: screenshotUrl,
     });
-    placeGroupAtCenter(next, cx, cy);
-    applyDeviceTransformLocks(next);
-canvas.remove(group);
-  group.dispose?.();
-  canvas.requestRenderAll();
-  return true;
-}
+    return swapIn(next);
+  }
 
-  const baseScale = resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
+  // Different bezel (or bare → framed): keep center + display box size.
+  const matchedScale = scaleToMatchDisplayBox(nextFrameId, prevW, prevH);
+  const baseScale = matchedScale
+    ?? group.glintBaseScale
+    ?? resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
   const next = await addFramedScreenshot(canvas, screenshotUrl, nextFrameId, {
     scale: baseScale,
     left: 0,
@@ -983,21 +1002,21 @@ canvas.remove(group);
   });
   if (!next) return false;
 
+  // Exact box match (handles border pad baked into glintLayout*).
+  const layoutW = next.glintLayoutW || next.width || 1;
+  const layoutH = next.glintLayoutH || next.height || 1;
+  const fit = Math.min(prevW / layoutW, prevH / layoutH);
+
   next.set({
     angle,
+    scaleX: fit,
+    scaleY: fit,
     glintSlot: slot,
     glintSlide: slide,
     glintCoverage: coverage,
     glintScreenshotUrl: screenshotUrl,
   });
-  placeGroupAtCenter(next, cx, cy);
-  applyDeviceTransformLocks(next);
-
-  canvas.remove(group);
-  group.dispose?.();
-  canvas.sendObjectToBack(next);
-  canvas.requestRenderAll();
-  return true;
+  return swapIn(next);
 }
 
 /**
