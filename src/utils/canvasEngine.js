@@ -797,6 +797,7 @@ function getGroupGeoCenter(group) {
 
 /**
  * Place group so its geometric center sits on (cx, cy).
+ * Always forces left/top origin so scale doesn't drift the visual into the corner.
  */
 function placeGroupAtCenter(group, cx, cy) {
   if (!group) return;
@@ -807,6 +808,14 @@ function placeGroupAtCenter(group, cx, cy) {
     originX: 'left',
     originY: 'top',
   });
+  group.setCoords?.();
+}
+
+/** Pure helper — left/top so layout box center sits on (cx, cy). */
+export function pinnedTopLeft(cx, cy, layoutW, layoutH, scaleX = 1, scaleY = 1) {
+  const w = (layoutW || 0) * Math.abs(scaleX || 1);
+  const h = (layoutH || 0) * Math.abs(scaleY || 1);
+  return { left: cx - w / 2, top: cy - h / 2 };
 }
 
 /** Display size + uniform scale for a framed device group. */
@@ -865,9 +874,11 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
   const canvas = group.canvas;
   if (!canvas) return false;
 
-  const { x: cx, y: cy, sx, sy } = getGroupGeoCenter(group);
+  const { sx, sy } = getGroupGeoCenter(group);
   const uniform = Math.max(sx, sy);
   const angle = group.angle || 0;
+  const pinLeft = group.left || 0;
+  const pinTop = group.top || 0;
   const selectable = group.selectable !== false;
   const slot = group.glintSlot;
   const slide = group.glintSlide;
@@ -884,10 +895,16 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
     selectable,
     coverage,
     chrome,
+    deferShadow: true,
   });
   if (!next) return false;
 
   next.set({
+    shadow: null,
+    left: pinLeft,
+    top: pinTop,
+    originX: 'left',
+    originY: 'top',
     angle,
     scaleX: uniform,
     scaleY: uniform,
@@ -896,7 +913,8 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
     glintCoverage: coverage,
     glintScreenshotUrl: screenshotUrl,
   });
-  placeGroupAtCenter(next, cx, cy);
+  next.setCoords?.();
+  applyChromeShadow(next, chrome);
   applyDeviceTransformLocks(next);
 
   canvas.remove(group);
@@ -953,6 +971,8 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
   const slot = group.glintSlot;
   const slide = group.glintSlide;
   const angle = group.angle || 0;
+  const pinLeft = group.left || 0;
+  const pinTop = group.top || 0;
   const { x: cx, y: cy, sx, sy, w: prevW, h: prevH } = getGroupGeoCenter(group);
   const objects = canvas.getObjects();
   const oldIndex = objects.indexOf(group);
@@ -962,25 +982,50 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     group.glintCoverage || MIN_DEVICE_COVERAGE,
   );
 
-  const swapIn = (next, scaleX, scaleY) => {
+  const swapIn = (next, scaleX, scaleY, { pin = false } = {}) => {
     if (!next) return false;
     const sxOut = Number.isFinite(scaleX) && scaleX > 0 ? scaleX : 1;
     const syOut = Number.isFinite(scaleY) && scaleY > 0 ? scaleY : sxOut;
-    next.set({
-      angle,
-      scaleX: sxOut,
-      scaleY: syOut,
-      glintSlot: slot,
-      glintSlide: slide,
-      glintCoverage: coverage,
-      glintScreenshotUrl: screenshotUrl,
-      glintFrameId: nextFrameId,
-    });
-    placeGroupAtCenter(next, cx, cy);
+    // Drop shadow while posing — blur/offset inflate Fabric bounds and used to
+    // shove the bezel toward the bottom-right on fit-mode rebuilds.
+    next.set({ shadow: null });
+    if (pin) {
+      // Same bezel (fit / status bar): keep exact canvas pose — no re-center math.
+      next.set({
+        left: pinLeft,
+        top: pinTop,
+        originX: 'left',
+        originY: 'top',
+        angle,
+        scaleX: sxOut,
+        scaleY: syOut,
+        glintSlot: slot,
+        glintSlide: slide,
+        glintCoverage: coverage,
+        glintScreenshotUrl: screenshotUrl,
+        glintFrameId: nextFrameId,
+        glintChrome: chrome,
+      });
+    } else {
+      next.set({
+        originX: 'left',
+        originY: 'top',
+        angle,
+        scaleX: sxOut,
+        scaleY: syOut,
+        glintSlot: slot,
+        glintSlide: slide,
+        glintCoverage: coverage,
+        glintScreenshotUrl: screenshotUrl,
+        glintFrameId: nextFrameId,
+        glintChrome: chrome,
+      });
+      placeGroupAtCenter(next, cx, cy);
+    }
+    next.setCoords?.();
+    applyChromeShadow(next, chrome);
     applyDeviceTransformLocks(next);
 
-    // addFramedScreenshot already canvas.add()'d `next` at the top. Drop the old
-    // device, then move `next` back to the previous stack index.
     canvas.remove(group);
     group.dispose?.();
     moveObjectToIndex(canvas, next, oldIndex);
@@ -988,7 +1033,7 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     return true;
   };
 
-  // Same bezel, new shot — keep exact transform, only rebake pixels.
+  // Same bezel, new shot / chrome — keep exact transform, only rebake pixels.
   if (role === 'framed-screenshot' && group.glintFrameId === nextFrameId) {
     const baseScale = group.glintBaseScale
       ?? resolveDeviceScale(nextFrameId, canvasW, canvasH, coverage);
@@ -999,12 +1044,12 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
       selectable,
       coverage,
       chrome,
+      deferShadow: true,
     });
-    return swapIn(next, sx, sy);
+    return swapIn(next, sx, sy, { pin: true });
   }
 
   // Different bezel (or bare → framed): keep center + display box size.
-  // Prefer baking the target display size into baseScale; fall back to fit on group scale.
   const matchedScale = scaleToMatchDisplayBox(nextFrameId, prevW, prevH);
   const baseScale = matchedScale
     ?? group.glintBaseScale
@@ -1016,13 +1061,14 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     selectable,
     coverage,
     chrome,
+    deferShadow: true,
   });
   if (!next) return false;
 
   const layoutW = next.glintLayoutW || next.width || 1;
   const layoutH = next.glintLayoutH || next.height || 1;
   const fit = Math.min(prevW / layoutW, prevH / layoutH);
-  return swapIn(next, fit, fit);
+  return swapIn(next, fit, fit, { pin: false });
 }
 
 /**
@@ -1083,9 +1129,11 @@ export async function addFramedScreenshot(canvas, screenshotUrl, frameId, opts =
   applyDeviceTransformLocks(group);
 
   canvas.add(group);
-  // Apply shadow AFTER canvas.add — Fabric calls setCoords() on add, and setting
-  // shadow before that makes the bounding rect grow, shifting the group position.
-  applyChromeShadow(group, chrome);
+  // Shadow after add — and callers that immediately re-pose (fit / bezel swap)
+  // should pass deferShadow so blur doesn't skew intermediate setCoords.
+  if (!opts.deferShadow) {
+    applyChromeShadow(group, chrome);
+  }
   canvas.requestRenderAll();
   return group;
 }

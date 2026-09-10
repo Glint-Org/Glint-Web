@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { DEVICE_SCALE_MAX, DEVICE_SCALE_MIN, getDeviceDisplaySize } from '../canvasEngine.js';
+import {
+  DEVICE_SCALE_MAX,
+  DEVICE_SCALE_MIN,
+  getDeviceDisplaySize,
+  pinnedTopLeft,
+} from '../canvasEngine.js';
 
 describe('device scale helpers', () => {
   it('reads layout size from framed device props', () => {
@@ -20,5 +25,14 @@ describe('device scale helpers', () => {
 
   it('exports sane scale bounds', () => {
     expect(DEVICE_SCALE_MIN).toBeLessThan(DEVICE_SCALE_MAX);
+  });
+
+  it('pins top-left from geometric center without drifting to the corner', () => {
+    const pose = pinnedTopLeft(540, 960, 400, 800, 1, 1);
+    expect(pose.left).toBe(340);
+    expect(pose.top).toBe(560);
+    const scaled = pinnedTopLeft(540, 960, 400, 800, 0.5, 0.5);
+    expect(scaled.left).toBe(440);
+    expect(scaled.top).toBe(760);
   });
 });

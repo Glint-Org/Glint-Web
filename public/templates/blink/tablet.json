@@ -4,7 +4,7 @@
   "description": "Blink — App Store (iPad).",
   "store": "ios/ipad",
   "canvas": { "width": 2048, "height": 2732 },
-  "device": { "frame": "ipad-pro-13", "widthFraction": 0.82 },
+  "device": { "frame": "ipad-pro-13", "widthFraction": 0.80 },
   "preview": { "frame": "ipad-pro-13", "tablet": true },
   "style": {
     "shadow": { "blur": 8, "offsetX": 14, "offsetY": 12 },
@@ -13,27 +13,27 @@
   },
   "layout": {
     "Hero": {
-      "title": { "fontSize": 280, "marginTop": 220, "charSpacing": 36 },
-      "tagline": { "fontSize": 120, "marginTop": 520 },
-      "device": { "marginTop": 780 }
+      "title": { "fontSize": 280, "marginTop": 260, "charSpacing": 36 },
+      "tagline": { "fontSize": 120, "marginTop": 580 },
+      "device": { "marginTop": 860 }
     },
     "Free": {
-      "device": { "marginTop": 80 },
+      "device": { "marginTop": 100 },
       "banner": { "left": -360, "top": 2140, "width": 2760, "height": 980, "angle": -14.5 },
       "title": { "fontSize": 188, "marginTop": 2100 },
       "tagline": { "fontSize": 108, "marginTop": 2300 }
     },
     "Share": {
-      "title": { "fontSize": 148, "marginTop": 140 },
-      "device": { "marginTop": 460 }
+      "title": { "fontSize": 148, "marginTop": 172 },
+      "device": { "marginTop": 520 }
     },
     "Scan": {
-      "title": { "fontSize": 148, "marginTop": 148 },
-      "device": { "marginTop": 460 }
+      "title": { "fontSize": 148, "marginTop": 180 },
+      "device": { "marginTop": 520 }
     },
     "Secure": {
-      "title": { "fontSize": 196, "marginTop": 180 },
-      "device": { "marginTop": 520 }
+      "title": { "fontSize": 196, "marginTop": 212 },
+      "device": { "marginTop": 580 }
     }
   }
 }
