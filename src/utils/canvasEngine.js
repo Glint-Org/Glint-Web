@@ -841,6 +841,21 @@ function chromeBitmapChanged(prev = {}, next = {}, prevFrameId = null, nextFrame
 }
 
 /**
+ * Move `obj` to `index` in the canvas stack.
+ * Must mutate `_objects` — Fabric's getObjects() returns a copy.
+ */
+function moveObjectToIndex(canvas, obj, index) {
+  if (!canvas || !obj || index < 0) return;
+  const stack = canvas._objects;
+  if (!Array.isArray(stack)) return;
+  const cur = stack.indexOf(obj);
+  if (cur < 0 || cur === index) return;
+  stack.splice(cur, 1);
+  stack.splice(Math.min(index, stack.length), 0, obj);
+  canvas._onStackOrderChanged?.(obj);
+}
+
+/**
  * Swap the screenshot inside a framed device without resetting position/rotation/size.
  * Rebuilds the whole device group — Fabric 7 layout breaks if we surgically swap children.
  */
@@ -857,6 +872,7 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
   const slot = group.glintSlot;
   const slide = group.glintSlide;
   const coverage = group.glintCoverage || MIN_DEVICE_COVERAGE;
+  const oldIndex = canvas.getObjects().indexOf(group);
   const baseScale = group.glintBaseScale
     ?? resolveDeviceScale(frameId, canvas.getWidth?.() || 1080, canvas.getHeight?.() || 1920, coverage);
   const chrome = group.glintChrome || DEFAULT_SCREENSHOT_STYLE;
@@ -885,6 +901,7 @@ export async function replaceDeviceScreenshot(group, screenshotUrl) {
 
   canvas.remove(group);
   group.dispose?.();
+  moveObjectToIndex(canvas, next, oldIndex);
   canvas.requestRenderAll();
   return true;
 }
@@ -945,19 +962,28 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
     group.glintCoverage || MIN_DEVICE_COVERAGE,
   );
 
-  const swapIn = (next) => {
+  const swapIn = (next, scaleX, scaleY) => {
     if (!next) return false;
+    const sxOut = Number.isFinite(scaleX) && scaleX > 0 ? scaleX : 1;
+    const syOut = Number.isFinite(scaleY) && scaleY > 0 ? scaleY : sxOut;
+    next.set({
+      angle,
+      scaleX: sxOut,
+      scaleY: syOut,
+      glintSlot: slot,
+      glintSlide: slide,
+      glintCoverage: coverage,
+      glintScreenshotUrl: screenshotUrl,
+      glintFrameId: nextFrameId,
+    });
     placeGroupAtCenter(next, cx, cy);
     applyDeviceTransformLocks(next);
+
+    // addFramedScreenshot already canvas.add()'d `next` at the top. Drop the old
+    // device, then move `next` back to the previous stack index.
     canvas.remove(group);
     group.dispose?.();
-    // next was canvas.add()'d inside addFramedScreenshot — restore z-order.
-    canvas.remove(next);
-    if (oldIndex >= 0) {
-      canvas.insertAt(Math.min(oldIndex, canvas.getObjects().length), next);
-    } else {
-      canvas.add(next);
-    }
+    moveObjectToIndex(canvas, next, oldIndex);
     canvas.requestRenderAll();
     return true;
   };
@@ -974,20 +1000,11 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
       coverage,
       chrome,
     });
-    if (!next) return false;
-    next.set({
-      angle,
-      scaleX: sx,
-      scaleY: sy,
-      glintSlot: slot,
-      glintSlide: slide,
-      glintCoverage: coverage,
-      glintScreenshotUrl: screenshotUrl,
-    });
-    return swapIn(next);
+    return swapIn(next, sx, sy);
   }
 
   // Different bezel (or bare → framed): keep center + display box size.
+  // Prefer baking the target display size into baseScale; fall back to fit on group scale.
   const matchedScale = scaleToMatchDisplayBox(nextFrameId, prevW, prevH);
   const baseScale = matchedScale
     ?? group.glintBaseScale
@@ -1002,21 +1019,10 @@ export async function replaceDeviceFrame(group, nextFrameId, screenshotUrlOverri
   });
   if (!next) return false;
 
-  // Exact box match (handles border pad baked into glintLayout*).
   const layoutW = next.glintLayoutW || next.width || 1;
   const layoutH = next.glintLayoutH || next.height || 1;
   const fit = Math.min(prevW / layoutW, prevH / layoutH);
-
-  next.set({
-    angle,
-    scaleX: fit,
-    scaleY: fit,
-    glintSlot: slot,
-    glintSlide: slide,
-    glintCoverage: coverage,
-    glintScreenshotUrl: screenshotUrl,
-  });
-  return swapIn(next);
+  return swapIn(next, fit, fit);
 }
 
 /**

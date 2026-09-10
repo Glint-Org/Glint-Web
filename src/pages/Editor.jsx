@@ -578,9 +578,14 @@ export default function Editor() {
     if (nextId != null && frameId !== nextId) return;
     setDeviceFrame(frameId);
     markDirty();
+    // Cancel in-flight status-bar / chrome restyles so they can't rebake the old bezel after us.
+    styleApplyGenRef.current += 1;
+    if (styleApplyTimerRef.current) clearTimeout(styleApplyTimerRef.current);
+    if (styleApplyRafRef.current) cancelAnimationFrame(styleApplyRafRef.current);
 
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
+    const board = framesRef.current;
+    for (let i = 0; i < board.length; i++) {
+      const frame = board[i];
       const canvas = canvasMapRef.current[frame.id];
       if (!canvas) continue;
 
@@ -588,58 +593,80 @@ export default function Editor() {
       const devices = canvas.getObjects().filter((o) => o.glintRole === 'framed-screenshot');
       const bare = canvas.getObjects().filter((o) => o.glintRole === 'screenshot');
 
-      if (!frameId) {
-        // None — strip every bezel into a styled screenshot.
+      try {
+        if (!frameId) {
+          // None — strip every bezel into a styled screenshot.
+          for (const device of [...devices]) {
+            if (!device.glintScreenshotUrl && shotUrl) {
+              device.set({ glintScreenshotUrl: shotUrl });
+            }
+            await stripDeviceFrame(device, screenshotStyleRef.current);
+          }
+          continue;
+        }
+
+        // Apply / swap bezel on framed devices.
         for (const device of [...devices]) {
           if (!device.glintScreenshotUrl && shotUrl) {
             device.set({ glintScreenshotUrl: shotUrl });
           }
-          await stripDeviceFrame(device, screenshotStyle);
+          const url = shotUrl || device.glintScreenshotUrl;
+          const ok = await replaceDeviceFrame(
+            device,
+            frameId,
+            url,
+            screenshotStyleRef.current,
+          );
+          if (!ok && url) {
+            device.set({ glintScreenshotUrl: url });
+            await replaceDeviceFrame(device, frameId, url, screenshotStyleRef.current);
+          }
         }
-        continue;
-      }
 
-      // Apply / swap bezel on framed devices.
-      for (const device of [...devices]) {
-        if (!device.glintScreenshotUrl && shotUrl) {
-          device.set({ glintScreenshotUrl: shotUrl });
+        // Wrap bare screenshots (after stripping None) back into a bezel.
+        for (const shot of [...bare]) {
+          if (!shot.glintScreenshotUrl && shotUrl) {
+            shot.set({ glintScreenshotUrl: shotUrl });
+          }
+          await replaceDeviceFrame(
+            shot,
+            frameId,
+            shotUrl || shot.glintScreenshotUrl,
+            screenshotStyleRef.current,
+          );
         }
-        const ok = await replaceDeviceFrame(
-          device,
-          frameId,
-          shotUrl || device.glintScreenshotUrl,
-          screenshotStyle,
-        );
-        if (!ok && shotUrl) {
-          device.set({ glintScreenshotUrl: shotUrl });
-          await replaceDeviceFrame(device, frameId, shotUrl, screenshotStyle);
-        }
-      }
-
-      // Wrap bare screenshots (after stripping None) back into a bezel.
-      for (const shot of [...bare]) {
-        if (!shot.glintScreenshotUrl && shotUrl) {
-          shot.set({ glintScreenshotUrl: shotUrl });
-        }
-        await replaceDeviceFrame(
-          shot,
-          frameId,
-          shotUrl || shot.glintScreenshotUrl,
-          screenshotStyle,
-        );
+      } catch (err) {
+        console.error('Glint: device frame swap failed', frame.id, err);
       }
     }
 
-    if (activeCanvas && frameId) {
-      const refreshed = activeCanvas
+    // Persist bezel id into slide designs so a later paint keeps the swap.
+    if (frameId) {
+      setFrames((prev) =>
+        prev.map((f) => {
+          if (!f.design?.layers?.some((l) => l.type === 'device')) return f;
+          const design = {
+            ...f.design,
+            layers: f.design.layers.map((l) =>
+              l.type === 'device' ? { ...l, frame: frameId } : l,
+            ),
+          };
+          return { ...f, design };
+        }),
+      );
+    }
+
+    const live = canvasMapRef.current[framesRef.current[activeIndex]?.id];
+    if (live && frameId) {
+      const refreshed = live
         .getObjects()
         .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === frameId);
       if (refreshed) {
-        activeCanvas.setActiveObject(refreshed);
-        activeCanvas.requestRenderAll();
+        live.setActiveObject(refreshed);
+        live.requestRenderAll();
       }
     }
-  }, [activeCanvas, exportPreset, frames, screenshotStyle, markDirty]);
+  }, [activeIndex, exportPreset, markDirty, setFrames]);
 
   /** Drop illegal bezels when store size changes (e.g. iPhone → Play TV). */
   useEffect(() => {
