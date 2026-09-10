@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createCanvas, selectDeviceLayer, bindCanvasCursors } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
+import { unlockCanvasPointerEvents, setCanvasPaintVisibility } from '../utils/canvasPointerUnlock';
 
 function applyCssDisplaySize(canvas, cssW, cssH) {
   if (typeof canvas.setDimensions === 'function') {
@@ -82,10 +83,13 @@ export default function FrameCanvas({
     if (!elRef.current) return;
     // Synchronously hide — loaded may still be true from previous paint cycle,
     // and setLoaded(false) is batched by React so the new blank canvas would flash.
+    // Opacity only — never pointer-events on the canvas node (Fabric copies that
+    // onto the upper hit layer and selection stays dead forever).
     elRef.current.style.opacity = '0';
-    elRef.current.style.pointerEvents = 'none';
     setLoaded(false);
     const c = createCanvas(elRef.current, canvasWidth, canvasHeight);
+    unlockCanvasPointerEvents(c);
+    setCanvasPaintVisibility(c, false);
     applyDisplayScale(c, canvasWidth, canvasHeight, scaleRef.current);
     setFrameEditable(c, editableRef.current);
     canvasRef.current = c;
@@ -205,12 +209,8 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
-    // Hide canvas synchronously via DOM — setLoaded(false) is batched by React
-    // and won't paint the shimmer overlay before the blank canvas flashes.
-    if (elRef.current) {
-      elRef.current.style.opacity = '0';
-      elRef.current.style.pointerEvents = 'none';
-    }
+    // Hide via opacity only — shimmer overlay covers interaction while loading.
+    setCanvasPaintVisibility(canvas, false);
     setLoaded(false);
     (async () => {
       const paintOpts = {
@@ -252,11 +252,7 @@ export default function FrameCanvas({
         canvas.requestRenderAll?.();
         requestAnimationFrame(() => {
           if (ac.signal.aborted) return;
-          // Clear the inline hide styles, then let React class take over.
-          if (elRef.current) {
-            elRef.current.style.opacity = '';
-            elRef.current.style.pointerEvents = '';
-          }
+          setCanvasPaintVisibility(canvas, true);
           setLoaded(true);
         });
       });
@@ -270,9 +266,10 @@ export default function FrameCanvas({
       className="relative overflow-hidden rounded-sm bg-glint-surface-2"
       style={{ width: cssW, height: cssH }}
     >
-      <canvas ref={elRef} className={`block ${loaded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
+      {/* No pointer-events-none here — Fabric clones this class onto the upper canvas. */}
+      <canvas ref={elRef} className={`block ${loaded ? 'opacity-100' : 'opacity-0'}`} />
       {!loaded && (
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-white/[0.04] to-transparent" />
           <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-black/[0.06] to-transparent dark:via-white/[0.08]" />
           <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_ease-in-out_0.4s_infinite] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent dark:via-white/[0.05]" />
