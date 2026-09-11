@@ -353,6 +353,20 @@ select:disabled {
   100% { transform: translateX(100%); }
 }
 
+/* Copilot telepresence — soft pulse on the frame the agent is editing. */
+@keyframes glint-copilot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 208, 111, 0.35); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 208, 111, 0.08); }
+}
+.glint-copilot-pulse {
+  animation: glint-copilot-pulse 1.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glint-copilot-pulse {
+    animation: none;
+  }
+}
+
 /* Graphic tiles — grayscale preserves contrast between fills/strokes. */
 .graphic-tile img {
   filter: grayscale(1) brightness(0.3);

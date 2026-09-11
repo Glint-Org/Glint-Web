@@ -59,12 +59,14 @@ import {
 import { captureEditorSnapshot, createEditorHistory } from '../hooks/editorHistory';
 import { parseGlint, isGlintFile } from '../utils/projectPack';
 import CopyToFrameModal from '../components/CopyToFrameModal';
+import CopilotBar from '../components/CopilotBar';
 import { copySelectionToFrame } from '../utils/copyObjectToFrame';
+import { useCopilotSession } from '../hooks/useCopilotSession';
 
 const LEFT_W = 280;
 const RIGHT_W = 300;
-/** Room for the floating bottom toolbar so frame labels stay visible. */
-const BOARD_TOOLBAR_RESERVE = 52;
+/** Room for zoom toolbar + Copilot bar so frame labels stay visible. */
+const BOARD_TOOLBAR_RESERVE = 100;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
 /** ~8% per +/- click — discrete steps avoid trackpad-style rebuild jitter. */
 const ZOOM_STEP = 1.08;
@@ -118,10 +120,14 @@ export default function Editor() {
   const dirtyRef = useRef(false);
   const bootstrappingRef = useRef(true);
 
+  const copilotBumpRef = useRef(null);
+  const copilotApplyingRef = useRef(false);
   const markDirty = useCallback(() => {
     if (bootstrappingRef.current) return;
     dirtyRef.current = true;
     setDirty(true);
+    // Human edits bump Copilot generation so agents must re-read state.
+    if (!copilotApplyingRef.current) copilotBumpRef.current?.('human');
   }, []);
   const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
@@ -138,6 +144,8 @@ export default function Editor() {
   const canvasMapRef = useRef({});
   const framesRef = useRef(frames);
   framesRef.current = frames;
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
   const templateRef = useRef(template);
   templateRef.current = template;
   const backgroundRef = useRef(background);
@@ -210,6 +218,26 @@ export default function Editor() {
     const id = frames[activeIndex]?.id;
     setActiveCanvas(id ? canvasMapRef.current[id] || null : null);
   }, [activeIndex, frames]);
+
+  const copilot = useCopilotSession({
+    getFrames: () => framesRef.current,
+    getCanvas: (frameId) => canvasMapRef.current[frameId] || null,
+    getActiveIndex: () => activeIndexRef.current,
+    setActiveIndex,
+    getDeviceFrame: () => deviceFrameRef.current,
+    getWhiteScreenshot,
+    updateFrame,
+    onDirty: markDirty,
+  });
+
+  useEffect(() => {
+    copilotBumpRef.current = (reason) => {
+      if (!copilot.session.applying) copilot.bump(reason);
+    };
+    return copilot.session.subscribe(() => {
+      copilotApplyingRef.current = copilot.session.applying;
+    });
+  }, [copilot]);
 
   const loadTemplate = (t) => {
     setTemplate(t);
@@ -1184,15 +1212,35 @@ export default function Editor() {
             onDropScreenshot={assignScreenshotToFrame}
             onClearSelection={clearCanvasSelection}
             showFrameChrome={!canZoomIn}
+            agentFrameIndex={
+              copilot.enabled && !copilot.paused && typeof copilot.status?.frameIndex === 'number'
+                ? copilot.status.frameIndex
+                : null
+            }
           />
 
           <div
-            className="absolute bottom-4 z-20 flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl pointer-events-auto transition-[left,transform] duration-200 ease-out"
+            className="absolute bottom-4 z-20 flex flex-col items-center gap-2 pointer-events-none transition-[left,transform] duration-200 ease-out"
             style={{
               left: `calc(50% + ${(leftOpen ? LEFT_W : 0) / 2}px - ${(rightOpen ? RIGHT_W : 0) / 2}px)`,
               transform: 'translateX(-50%)',
             }}
           >
+            <CopilotBar
+              enabled={copilot.enabled}
+              paused={copilot.paused}
+              token={copilot.token}
+              generation={copilot.generation}
+              status={copilot.status}
+              onEnable={copilot.enable}
+              onDisable={copilot.disable}
+              onPause={copilot.pause}
+              onResume={copilot.resume}
+              onDemo={() => {
+                void copilot.runDemo();
+              }}
+            />
+            <div className="pointer-events-auto flex items-center gap-0.5 bg-glint-surface/95 backdrop-blur-md border border-glint-border rounded-xl px-1.5 py-1 shadow-2xl">
             <ToolBtn onClick={handleAddText} title="Add text (T)">
               <Type size={15} />
             </ToolBtn>
@@ -1216,6 +1264,7 @@ export default function Editor() {
               <RotateCcw size={14} />
               <span>Reset</span>
             </button>
+            </div>
           </div>
         </main>
 

@@ -30,6 +30,8 @@ export default function FrameBoard({
   onDropScreenshot,
   onClearSelection,
   showFrameChrome = false,
+  /** Frame index the Copilot agent is currently acting on (telepresence). */
+  agentFrameIndex = null,
 }) {
   const sizeLabel = `${canvasWidth}×${canvasHeight}`;
   const scale = fitScale / 100;
@@ -100,7 +102,8 @@ export default function FrameBoard({
       >
         {frames.map((frame, i) => {
           const selected = i === activeIndex;
-          const chromeVisible = showFrameChrome || selected;
+          const agentFocus = agentFrameIndex === i;
+          const chromeVisible = showFrameChrome || selected || agentFocus;
           return (
             <div
               key={frame.id}
@@ -159,6 +162,8 @@ export default function FrameBoard({
                 className={`relative overflow-hidden rounded-md bg-glint-surface shrink-0 transition-[box-shadow,opacity,ring] duration-150 ${
                   dropTarget === i
                     ? 'ring-2 ring-glint-accent ring-offset-2 ring-offset-glint-bg shadow-lg shadow-glint-accent/30'
+                    : agentFocus
+                      ? 'ring-2 ring-glint-accent glint-copilot-pulse shadow-lg shadow-glint-accent/40'
                     : selected
                       ? 'ring-2 ring-glint-accent shadow-lg shadow-glint-accent/25'
                       : 'ring-1 ring-glint-border shadow-xl opacity-90 hover:opacity-100'
@@ -182,8 +187,15 @@ export default function FrameBoard({
               </div>
 
               <div className="mt-2 text-center shrink-0">
-                <div className={`text-xs font-semibold ${selected ? 'text-glint-accent' : 'text-glint-text-secondary'}`}>
+                <div className={`text-xs font-semibold ${
+                  agentFocus || selected ? 'text-glint-accent' : 'text-glint-text-secondary'
+                }`}>
                   #{i + 1}
+                  {agentFocus ? (
+                    <span className="ml-1 text-[9px] font-medium uppercase tracking-wide text-glint-accent/80">
+                      agent
+                    </span>
+                  ) : null}
                 </div>
                 <div className="text-[10px] text-glint-text-tertiary tabular-nums">{sizeLabel}</div>
               </div>
