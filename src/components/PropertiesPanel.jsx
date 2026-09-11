@@ -61,7 +61,7 @@ function RangeRow({ label, value, min, max, suffix = '', onChange, onAdjustStart
           onChange={(e) => onChange(Number(e.target.value))}
           className="flex-1 accent-glint-accent"
         />
-        <span className="text-[11px] tabular-nums w-10 text-right text-glint-text-secondary">
+        <span className="text-[11px] tabular-nums min-w-[2.75rem] text-right text-glint-text-secondary">
           {value}{suffix}
         </span>
       </div>
@@ -118,6 +118,7 @@ export default function PropertiesPanel({
   });
   const [shapeFill, setShapeFill] = useState('#FFFFFF');
   const [deviceScalePct, setDeviceScalePct] = useState(100);
+  const [deviceAngle, setDeviceAngle] = useState(0);
   const [deviceSize, setDeviceSize] = useState({ width: 0, height: 0 });
 
   const syncDeviceSize = (obj) => {
@@ -125,6 +126,7 @@ export default function PropertiesPanel({
     const d = getDeviceDisplaySize(obj);
     setDeviceScalePct(d.scalePct);
     setDeviceSize({ width: d.width, height: d.height });
+    setDeviceAngle(Math.round(obj.angle || 0));
   };
 
   const handleDeviceScale = (pct) => {
@@ -133,6 +135,17 @@ export default function PropertiesPanel({
     setDeviceScalePct(pct);
     setDeviceUniformScale(obj, pct / 100);
     syncDeviceSize(obj);
+    onDeviceTransform?.();
+  };
+
+  const handleDeviceRotation = (deg) => {
+    const obj = selection?.obj;
+    if (!obj || obj.glintRole !== 'framed-screenshot' || !canvas) return;
+    const clamped = Math.max(-180, Math.min(180, Math.round(deg)));
+    setDeviceAngle(clamped);
+    obj.set({ angle: clamped });
+    obj.setCoords?.();
+    canvas.requestRenderAll?.();
     onDeviceTransform?.();
   };
 
@@ -363,6 +376,15 @@ export default function PropertiesPanel({
                 <p className="text-[10px] text-glint-text-secondary tabular-nums">
                   {deviceSize.width} × {deviceSize.height} px
                 </p>
+                <RangeRow
+                  label="Rotation"
+                  value={deviceAngle}
+                  min={-180}
+                  max={180}
+                  suffix="°"
+                  onChange={handleDeviceRotation}
+                  onAdjustStart={onDeviceScaleAdjustStart}
+                />
               </Section>
             ) : null}
 

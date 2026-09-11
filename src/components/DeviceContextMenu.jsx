@@ -1,11 +1,13 @@
 import { ImagePlus, Trash2 } from 'lucide-react';
 
 /**
- * Device frame actions menu (import / clear screenshot).
+ * Device frame actions menu (import / replace / clear screenshot).
+ * Empty bezel → Import only. User screenshot → Replace + Clear.
  */
 export default function DeviceContextMenu({
   x,
   y,
+  hasScreenshot = false,
   onImport,
   onClear,
   onClose,
@@ -13,7 +15,7 @@ export default function DeviceContextMenu({
   if (x == null || y == null) return null;
 
   const menuW = 180;
-  const menuH = 80;
+  const menuH = hasScreenshot ? 80 : 44;
   const left = Math.min(x, window.innerWidth - menuW - 8);
   const top = Math.min(y, window.innerHeight - menuH - 8);
 
@@ -30,11 +32,13 @@ export default function DeviceContextMenu({
         role="menu"
       >
         <MenuItem icon={<ImagePlus size={14} />} onClick={onImport}>
-          Import screenshot
+          {hasScreenshot ? 'Replace screenshot' : 'Import screenshot'}
         </MenuItem>
-        <MenuItem icon={<Trash2 size={14} />} onClick={onClear} danger>
-          Clear
-        </MenuItem>
+        {hasScreenshot ? (
+          <MenuItem icon={<Trash2 size={14} />} onClick={onClear} danger>
+            Clear
+          </MenuItem>
+        ) : null}
       </div>
     </>
   );

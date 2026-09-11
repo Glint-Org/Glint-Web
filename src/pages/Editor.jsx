@@ -1426,6 +1426,10 @@ export default function Editor() {
         <DeviceContextMenu
           x={deviceMenu.clientX}
           y={deviceMenu.clientY}
+          hasScreenshot={isUserScreenshot(
+            deviceMenu.device?.glintScreenshotUrl
+              || frames.find((f) => f.id === deviceMenu.frameId)?.screenshotUrl,
+          )}
           onImport={handleDeviceImportClick}
           onClear={handleDeviceClear}
           onClose={closeDeviceMenu}
