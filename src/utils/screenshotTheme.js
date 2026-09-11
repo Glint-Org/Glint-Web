@@ -2,7 +2,7 @@
  * Theme from app screenshots → template palette slots.
  *
  * App UIs are mostly neutrals (chrome, cards, photos). “Most pixels” is the wrong
- * signal — we want the brand accent (CTA / logo / header tint), then build a
+ * signal - we want the brand accent (CTA / logo / header tint), then build a
  * coherent harmony for secondary / accent / soft so remaps don’t turn templates
  * into a random multi-hue mess.
  */
@@ -38,7 +38,7 @@ export function luminance(r, g, b) {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
-/** RGB 0–255 → hue degrees 0–360 (−1 for near-neutrals). */
+/** RGB 0-255 → hue degrees 0-360 (−1 for near-neutrals). */
 export function rgbToHue(r, g, b) {
   const rn = r / 255;
   const gn = g / 255;
@@ -72,7 +72,7 @@ export function isNeutralRgb(r, g, b) {
 
 /**
  * How “brand-like” a color is for store graphics.
- * Area still matters, but sublinearly — a purple CTA beats a huge washed tile.
+ * Area still matters, but sublinearly - a purple CTA beats a huge washed tile.
  */
 export function brandScore({ sat, lum, weight }) {
   const satScore = Math.pow(Math.max(0, sat), 1.35);
@@ -195,7 +195,7 @@ export function clusterAccentsByHue(entries, binDeg = HUE_BIN) {
   return [...bins.values()].sort((a, b) => b.score - a.score);
 }
 
-/** Best hex inside a hue cluster — vivid representative, not the muddiest average. */
+/** Best hex inside a hue cluster - vivid representative, not the muddiest average. */
 export function pickClusterRepresentative(cluster) {
   if (!cluster?.entries?.length) return null;
   const ranked = [...cluster.entries].sort((a, b) => {
@@ -228,7 +228,7 @@ function pickBackground(neutralEntries) {
 
 /**
  * Build a cohesive slot palette around one brand primary.
- * Secondary / accent / soft are harmony tints — not random 2nd/3rd histogram peaks
+ * Secondary / accent / soft are harmony tints - not random 2nd/3rd histogram peaks
  * (those are often chart greens / error reds and wreck template remaps).
  */
 export function buildHarmonyFromPrimary(primaryHex, backgroundHex) {
@@ -284,7 +284,7 @@ export function buildThemeFromCounts(accentCounts, neutralCounts, slotIds = DEFA
   return out;
 }
 
-/** @deprecated Use buildThemeFromCounts — kept for tests. */
+/** @deprecated Use buildThemeFromCounts - kept for tests. */
 export function pickThemeColors(counts, maxColors = 5) {
   const theme = buildThemeFromCounts(counts, counts, DEFAULT_SLOTS.slice(0, maxColors));
   return DEFAULT_SLOTS.slice(0, maxColors).map((id) => theme[id]);

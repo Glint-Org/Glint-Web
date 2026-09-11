@@ -21,7 +21,7 @@ function toHex(value) {
 
 /**
  * Figma-style color control: presets, hex, native picker, canvas eyedropper.
- * @param {() => any[]} [getCanvases] — live Fabric canvases to sample from
+ * @param {() => any[]} [getCanvases] - live Fabric canvases to sample from
  */
 export default function ColorPicker({ label, value, onChange, getCanvases }) {
   const hex = toHex(value);
@@ -78,7 +78,7 @@ export default function ColorPicker({ label, value, onChange, getCanvases }) {
           type="button"
           onClick={pickColor}
           disabled={picking}
-          title="Eyedropper — move over the canvas and click a color"
+          title="Eyedropper - move over the canvas and click a color"
           className={`p-1.5 rounded-lg border border-glint-border text-glint-text-secondary hover:text-glint-accent hover:border-glint-accent disabled:opacity-50 ${picking ? 'border-glint-accent text-glint-accent' : ''}`}
         >
           <Pipette size={14} />

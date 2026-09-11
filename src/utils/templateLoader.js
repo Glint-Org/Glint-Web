@@ -43,7 +43,7 @@ export {
   devicesForPlatform,
 } from './storeCatalog';
 
-/** Curated store templates — phone / tablet packs + form-factor sets. */
+/** Curated store templates - phone / tablet packs + form-factor sets. */
 export const TEMPLATE_IDS = [
   // Flagship Glint brand
   'glint-gold-play',
@@ -60,7 +60,7 @@ export const TEMPLATE_IDS = [
   'mint-tags-play',
   'mint-tags-ios',
   'mint-tags-tablet',
-  // Legacy curated packs — Play phone
+  // Legacy curated packs - Play phone
   'play-hero',
   'play-pop',
   'play-dual',

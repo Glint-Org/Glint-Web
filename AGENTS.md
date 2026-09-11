@@ -9,10 +9,10 @@ Gint-Web is the frames editor (AppLaunchpad-style board). Import raw screenshots
 **Left** (workflow tabs): Templates · Assets · Frames · Export
 
 **Right** (Design tabs):
-- `Device` — visual device bezel tiles (replace selected / active artboard device)
-- `Graphics` — visual graphic preview tiles
-- `Colors` — background swatches
-- `Design` — text insert, fonts, typography
+- `Device` - visual device bezel tiles (replace selected / active artboard device)
+- `Graphics` - visual graphic preview tiles
+- `Colors` - background swatches
+- `Design` - text insert, fonts, typography
 
 **Center:** frames board. Active artboard has accent ring; Fabric objects use gold selection handles.
 

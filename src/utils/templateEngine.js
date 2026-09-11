@@ -349,7 +349,7 @@ export function getTemplateSlides(template) {
 }
 
 /**
- * Simple overflow slide — used for frame 6+ and “device frames only” reset.
+ * Simple overflow slide - used for frame 6+ and “device frames only” reset.
  * Authored as template.extraSlide; otherwise generated from palette + device defaults.
  */
 export function resolveExtraFrameDesign(template) {
@@ -678,7 +678,7 @@ async function paintDesignContents(
   }
 
   if (!design?.layers?.length) {
-    // Scratch board only — not a gallery template. Neutral white + no invented bezel theme.
+    // Scratch board only - not a gallery template. Neutral white + no invented bezel theme.
     setBackground(canvas, 'solid', '#FFFFFF');
     if (screenshotUrl) {
       await addDeviceLayer(
@@ -749,7 +749,7 @@ export async function applyDesignToFrame(
     const prevRender = canvas.renderOnAddRemove;
     canvas.renderOnAddRemove = false;
     canvas.clear();
-    // Preserve CSS display size — setDimensions alone resets to full pixel size
+    // Preserve CSS display size - setDimensions alone resets to full pixel size
     // and makes frames unequal until the next board re-fit.
     {
       const cssW =

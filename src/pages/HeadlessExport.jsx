@@ -111,7 +111,7 @@ export default function HeadlessExport() {
       if (Array.isArray(injected) && injected.length) {
         run(injected);
       } else {
-        setStatus('Ready — post { type: "glint-export", screenshots: [...] } or set __GLINT_HEADLESS__');
+        setStatus('Ready - post { type: "glint-export", screenshots: [...] } or set __GLINT_HEADLESS__');
         done({ ok: false, error: 'awaiting_screenshots', pending: true });
       }
     };

@@ -225,7 +225,7 @@ function splitFamily({ family, variants }) {
 
   for (const pack of packs) {
     const device = inferDevice(pack.tpl);
-    // Device defaults applied at merge — strip frame/scale from per-layer layout if uniform
+    // Device defaults applied at merge - strip frame/scale from per-layer layout if uniform
     const layout = buildLayout(pack.tpl);
     if (device.frame || device.scale != null || device.widthFraction != null) {
       for (const slideName of Object.keys(layout)) {
@@ -248,7 +248,7 @@ function splitFamily({ family, variants }) {
     const platform = {
       id: pack.id,
       extends: 'common',
-      description: pack.tpl.description || `${common.name} — ${pack.file}`,
+      description: pack.tpl.description || `${common.name} - ${pack.file}`,
       store: pack.tpl.store,
       canvas: pack.tpl.canvas,
       device,

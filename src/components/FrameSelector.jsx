@@ -2,7 +2,7 @@ import { Minus } from 'lucide-react';
 import { getFrameSrc, framesForStore } from '../utils/frameMeta';
 
 /**
- * Visual device frame picker — only bezels allowed for the active store target.
+ * Visual device frame picker - only bezels allowed for the active store target.
  */
 export default function FrameSelector({ selected, onChange, store }) {
   const options = framesForStore(store);

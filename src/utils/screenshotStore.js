@@ -50,7 +50,7 @@ function forgetId(id) {
   }
 }
 
-/** Read a File with progress 0–100 (local read, not network). */
+/** Read a File with progress 0-100 (local read, not network). */
 export function readFileWithProgress(file, onProgress) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -103,7 +103,7 @@ export async function deleteScreenshotBlob(id) {
       db.close();
     }
   } catch {
-    /* meta already cleared — orphaned blob is inert until manual cache clear */
+    /* meta already cleared - orphaned blob is inert until manual cache clear */
   }
 }
 

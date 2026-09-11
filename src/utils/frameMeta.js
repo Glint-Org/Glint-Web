@@ -150,7 +150,7 @@ export function getStatusBarMeta(frameId) {
   return STATUS_BAR_SPECS[frameId] ?? null;
 }
 
-/** Status bar height in screen-hole pixels — tracks frame inset height when available. */
+/** Status bar height in screen-hole pixels - tracks frame inset height when available. */
 export function statusBarHeightForFrame(screenW, frameId, screenH = 0) {
   const sb = getStatusBarMeta(frameId);
   if (!sb || !(screenW > 0)) return 0;
@@ -284,7 +284,7 @@ export const DEFAULT_SCREENSHOT_STYLE = {
   strokeWidth: 0,
   strokeColor: '#FFFFFF',
   scale: 0.58,
-  /** Drop shadow — works on framed devices and bare screenshots. */
+  /** Drop shadow - works on framed devices and bare screenshots. */
   shadowEnabled: true,
   shadowBlur: 36,
   shadowOffsetX: 0,

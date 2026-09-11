@@ -1,5 +1,5 @@
 /**
- * Canvas Agent API — shared board verbs for Manual UI and Copilot (Mode 3).
+ * Canvas Agent API - shared board verbs for Manual UI and Copilot (Mode 3).
  * Device transforms always go through canvasEngine helpers (center-aware scale/angle).
  */
 import {

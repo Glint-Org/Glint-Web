@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * render.mjs — Headless PNG renderer for Glint.
+ * render.mjs - Headless PNG renderer for Glint.
  *
  * Reads design.json + screenshots → composites via @napi-rs/canvas → ZIP.
  * No browser, no Playwright, no Fabric. Pure Node.js.
@@ -25,7 +25,7 @@ import { join, resolve, basename } from 'node:path';
 import { createCanvas, loadImage } from '@napi-rs/canvas';
 import { compose, framePngPath, STORES, FRAMES } from '../lib/compose.js';
 
-// ─── ZIP (inline minimal impl — avoids JSZip dependency for CLI) ────────────
+// ─── ZIP (inline minimal impl - avoids JSZip dependency for CLI) ────────────
 // We'll use JSZip since it's already a dependency of Glint-Web.
 async function buildZip(entries) {
   const JSZip = (await import('jszip')).default;
@@ -181,13 +181,13 @@ async function drawDevice(ctx, c, screenshots, publicDir) {
         ctx.drawImage(shotImg, sx, sy, sw, sh);
         ctx.restore();
       } catch {
-        // Screenshot not found — draw gray placeholder
+        // Screenshot not found - draw gray placeholder
         ctx.fillStyle = '#E5E7EB';
         ctx.fillRect(screenX, screenY, screenW, screenH);
       }
     }
   } catch {
-    // Frame not found — draw a simple rounded rect
+    // Frame not found - draw a simple rounded rect
     ctx.fillStyle = '#1a1a1a';
     roundRect(ctx, x, y, w, h, 40);
     ctx.fill();
@@ -209,7 +209,7 @@ async function drawGraphic(ctx, c, publicDir) {
     }
     ctx.restore();
   } catch {
-    // Graphic not found — skip silently
+    // Graphic not found - skip silently
   }
 }
 

@@ -241,7 +241,7 @@ select:disabled {
   display: none;
 }
 
-/* Frames sidebar — news-ticker scroll for long layer labels */
+/* Frames sidebar - news-ticker scroll for long layer labels */
 @keyframes glint-marquee {
   from {
     transform: translateX(0);
@@ -353,7 +353,7 @@ select:disabled {
   100% { transform: translateX(100%); }
 }
 
-/* Copilot telepresence — soft pulse on the frame the agent is editing. */
+/* Copilot telepresence - soft pulse on the frame the agent is editing. */
 @keyframes glint-copilot-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(245, 208, 111, 0.35); }
   50% { box-shadow: 0 0 0 6px rgba(245, 208, 111, 0.08); }
@@ -367,7 +367,7 @@ select:disabled {
   }
 }
 
-/* Graphic tiles — grayscale preserves contrast between fills/strokes. */
+/* Graphic tiles - grayscale preserves contrast between fills/strokes. */
 .graphic-tile img {
   filter: grayscale(1) brightness(0.3);
 }

@@ -83,7 +83,7 @@ export function generateSessionJson(screens, store = 'play/phone', extra = {}) {
   }, null, 2);
 }
 
-/** @deprecated Prefer getStoreTarget — kept for callers using EXPORT_PRESETS[key] */
+/** @deprecated Prefer getStoreTarget - kept for callers using EXPORT_PRESETS[key] */
 export const EXPORT_PRESETS = Object.fromEntries(
   Object.entries(STORE_TARGETS).map(([id, t]) => [
     id,
@@ -117,10 +117,10 @@ export function verifyExport(dataUrls, store = 'play/phone') {
   }
 
   if (dataUrls.length < 2) {
-    warnings.push(`Only ${dataUrls.length} screenshot(s) — most stores recommend 3-5`);
+    warnings.push(`Only ${dataUrls.length} screenshot(s) - most stores recommend 3-5`);
   }
   if (dataUrls.length > 8) {
-    warnings.push(`${dataUrls.length} screenshots — Play Store allows max 8 per listing`);
+    warnings.push(`${dataUrls.length} screenshots - Play Store allows max 8 per listing`);
   }
 
   // We can't check pixel dimensions of data URLs in-browser without loading them,

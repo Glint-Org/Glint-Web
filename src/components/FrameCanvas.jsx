@@ -81,9 +81,9 @@ export default function FrameCanvas({
 
   useEffect(() => {
     if (!elRef.current) return;
-    // Synchronously hide — loaded may still be true from previous paint cycle,
+    // Synchronously hide - loaded may still be true from previous paint cycle,
     // and setLoaded(false) is batched by React so the new blank canvas would flash.
-    // Opacity only — never pointer-events on the canvas node (Fabric copies that
+    // Opacity only - never pointer-events on the canvas node (Fabric copies that
     // onto the upper hit layer and selection stays dead forever).
     elRef.current.style.opacity = '0';
     setLoaded(false);
@@ -119,7 +119,7 @@ export default function FrameCanvas({
       // Only force device selection when clicking the device group itself or
       // one of its internal children (bezel bitmap, border rect).
       // User-added objects (text, graphics, shapes) are top-level canvas objects
-      // that may overlap the device — let Fabric select them normally.
+      // that may overlap the device - let Fabric select them normally.
       const isDeviceChild = device && target !== device
         && (target.group === device || target.parent === device);
       if (device && (target === device || isDeviceChild)) {
@@ -182,7 +182,7 @@ export default function FrameCanvas({
     };
   }, [canvasWidth, canvasHeight, frameId]);
 
-  // Zoom: CSS size only — never reset the Fabric backstore.
+  // Zoom: CSS size only - never reset the Fabric backstore.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -193,7 +193,7 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     setFrameEditable(canvas, editable);
-    // Frame focus only — do not auto-select the device; user clicks the layer they want.
+    // Frame focus only - do not auto-select the device; user clicks the layer they want.
     if (!editable) return;
     canvas.discardActiveObject?.();
     canvas.requestRenderAll?.();
@@ -212,7 +212,7 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ac = new AbortController();
-    // Hide via opacity only — shimmer overlay covers interaction while loading.
+    // Hide via opacity only - shimmer overlay covers interaction while loading.
     setCanvasPaintVisibility(canvas, false);
     setLoaded(false);
     (async () => {
@@ -246,7 +246,7 @@ export default function FrameCanvas({
       if (ac.signal.aborted) return;
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
-      // Keep artboard clear after paint — selecting a frame ≠ selecting the device.
+      // Keep artboard clear after paint - selecting a frame ≠ selecting the device.
       canvas.discardActiveObject?.();
       // Wait for the actual pixel paint to land before revealing the canvas.
       // requestRenderAll() queues a render for the next animation frame;
@@ -270,7 +270,7 @@ export default function FrameCanvas({
       className="relative overflow-hidden rounded-sm bg-glint-surface-2"
       style={{ width: cssW, height: cssH }}
     >
-      {/* No pointer-events-none here — Fabric clones this class onto the upper canvas. */}
+      {/* No pointer-events-none here - Fabric clones this class onto the upper canvas. */}
       <canvas ref={elRef} className={`block ${loaded ? 'opacity-100' : 'opacity-0'}`} />
       {!loaded && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

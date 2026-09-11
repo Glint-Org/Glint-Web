@@ -1,5 +1,5 @@
 /**
- * DEPRECATED — Blink lives in public/templates/blink/{common,play,ios,tablet}.json.
+ * DEPRECATED - Blink lives in public/templates/blink/{common,play,ios,tablet}.json.
  * Do not regenerate flat blink-*.json from this script.
  */
 import { writeFileSync, mkdirSync } from 'node:fs';

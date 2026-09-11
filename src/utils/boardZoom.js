@@ -1,5 +1,5 @@
 /**
- * Board scale (%) — zoom out fits all frames; zoom in caps at ~2.5 frames visible.
+ * Board scale (%) - zoom out fits all frames; zoom in caps at ~2.5 frames visible.
  */
 export const BOARD_FIT_MIN = 8;
 export const BOARD_FIT_MAX = 100;

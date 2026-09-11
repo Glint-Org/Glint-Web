@@ -109,7 +109,7 @@ function RangeRow({ label, value, min, max, suffix = '', onChange, onAdjustStart
 }
 
 /**
- * Right sidebar — tabbed Design tools (Device / Graphics / Colors / Design).
+ * Right sidebar - tabbed Design tools (Device / Graphics / Colors / Design).
  */
 export default function PropertiesPanel({
   canvas,
@@ -508,8 +508,8 @@ export default function PropertiesPanel({
                 </>
               )}
               <p className="text-[9px] text-glint-text-tertiary">
-                {style.fitMode === 'cover' && 'Crops to fill screen — no white bars'}
-                {style.fitMode === 'contain' && 'Shows full screenshot — may have white bars'}
+                {style.fitMode === 'cover' && 'Crops to fill screen - no white bars'}
+                {style.fitMode === 'contain' && 'Shows full screenshot - may have white bars'}
                 {style.fitMode === 'custom' && 'Drag to choose which part is visible'}
               </p>
             </Section>

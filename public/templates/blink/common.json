@@ -1,7 +1,7 @@
 {
   "familyId": "blink",
   "name": "Blink",
-  "description": "Share files in a flash — purple store set.",
+  "description": "Share files in a flash - purple store set.",
   "palette": [
     { "id": "primary", "label": "Primary", "color": "#611AB4" },
     { "id": "secondary", "label": "Secondary", "color": "#8030DD" },

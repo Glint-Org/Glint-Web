@@ -1,4 +1,4 @@
-/** Graphics catalog — icons, brands, shapes from /public/graphics/. */
+/** Graphics catalog - icons, brands, shapes from /public/graphics/. */
 
 function labelFromFilename(file) {
   return file

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * AdSense slot — only renders when VITE_ADSENSE_CLIENT is set (soft launch: leave unset).
+ * AdSense slot - only renders when VITE_ADSENSE_CLIENT is set (soft launch: leave unset).
  */
 export default function AdSlot({ slot, format = 'banner' }) {
   const adRef = useRef(null);

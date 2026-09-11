@@ -1,5 +1,5 @@
 /**
- * Glint project pack — time-capsule round-trip for the editor.
+ * Glint project pack - time-capsule round-trip for the editor.
  *
  * .glint format:
  *   [GLINT magic 5B][version 1B][ZIP payload]

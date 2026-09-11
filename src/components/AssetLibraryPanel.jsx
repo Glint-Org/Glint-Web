@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { GLINT_SHOT_MIME } from '../utils/assetLibrary';
 
 /**
- * All imported screenshots — drag onto a frame or pick "Add to frame N".
+ * All imported screenshots - drag onto a frame or pick "Add to frame N".
  */
 export default function AssetLibraryPanel({
   assets = [],

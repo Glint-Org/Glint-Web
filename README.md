@@ -4,7 +4,7 @@ Browser editor that turns real app screenshots into store-ready frames. No login
 
 ## Features
 
-- **Frames board** - 1–10 store-size artboards (AppLaunchpad-style), not an infinite canvas
+- **Frames board** - 1-10 store-size artboards (AppLaunchpad-style), not an infinite canvas
 - **Graphic templates** - Play Store & App Store packs by device (phone, tablet, TV, Wear, Chromebook, iPhone, iPad) with premium frames where they apply
 - **Assets** - import screenshots, sessions, or Bridge captures; map 1:1 onto frames
 - **Layers** - drag to restack, device right-click → import screenshot
@@ -50,7 +50,7 @@ JSON packs in `public/templates/`. Device layers composite screenshots inside SV
 
 ## Future work
 
-Community marketplace / contribute-via-`.glint` is planned but **not** in scope yet — see [docs/FUTURE-marketplace-glint.md](docs/FUTURE-marketplace-glint.md).
+Community marketplace / contribute-via-`.glint` is planned but **not** in scope yet - see [docs/FUTURE-marketplace-glint.md](docs/FUTURE-marketplace-glint.md).
 
 ## License
 

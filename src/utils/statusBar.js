@@ -1,5 +1,5 @@
 /**
- * Device-matched status bars — official SVG strips per frame (`public/frames/status-bars/`).
+ * Device-matched status bars - official SVG strips per frame (`public/frames/status-bars/`).
  * Screenshot content cover-fits into `screenContentRect` below the bar.
  */
 
@@ -38,7 +38,7 @@ export function statusBarHasIsland(frameId) {
   return getStatusBarMeta(frameId)?.profile === 'ios-island';
 }
 
-/** @deprecated use statusBarHeightForFrame — kept for tests */
+/** @deprecated use statusBarHeightForFrame - kept for tests */
 export function statusBarHeight(screenW, kindOrFrameId = 'android') {
   if (typeof kindOrFrameId === 'string' && getStatusBarMeta(kindOrFrameId)) {
     return statusBarHeightForFrame(screenW, kindOrFrameId);
@@ -87,7 +87,7 @@ export function coverFitRect(srcW, srcH, destW, destH, destX = 0, destY = 0) {
   };
 }
 
-/** object-fit: contain — fit inside dest without cropping, centered. */
+/** object-fit: contain - fit inside dest without cropping, centered. */
 export function containFitRect(srcW, srcH, destW, destH, destX = 0, destY = 0) {
   const iw = Math.max(1, srcW);
   const ih = Math.max(1, srcH);
@@ -117,11 +117,11 @@ export async function paintStatusBar(ctx, screenW, theme = 'dark', frameId = nul
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, screenW, barH);
   } catch {
-    /* ponytail: missing asset — skip overlay rather than break export */
+    /* ponytail: missing asset - skip overlay rather than break export */
   }
 }
 
-/** Legacy no-op — use paintStatusBar. */
+/** Legacy no-op - use paintStatusBar. */
 export function drawStatusBar() {}
 
 /** True when status-bar chrome fields changed enough to rebake the screen bitmap. */

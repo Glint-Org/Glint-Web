@@ -79,7 +79,7 @@ function iosRightCluster(fg, rightMargin, iconY, iconH) {
 }
 
 
-/** Pixel — thin vertical signal bars (AOSP SignalDrawable-style). */
+/** Pixel - thin vertical signal bars (AOSP SignalDrawable-style). */
 function pixelSignalBars(fg, x, y, w, h) {
   const bars = [
     { h: 0.38 },
@@ -125,7 +125,7 @@ function pixelRightCluster(fg, rightMargin, iconY, iconH) {
   ${aospBatteryIcon(fg, batX, iconY, batW, iconH)}`;
 }
 
-/** Samsung One UI — wedge cellular + filled wifi fan + AOSP battery. */
+/** Samsung One UI - wedge cellular + filled wifi fan + AOSP battery. */
 function samsungRightCluster(fg, rightMargin, iconY, iconH) {
   const batW = 22;
   const wifiW = 17;

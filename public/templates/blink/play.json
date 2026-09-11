@@ -1,7 +1,7 @@
 {
   "id": "blink-play",
   "extends": "common",
-  "description": "Blink — Play Store (phone).",
+  "description": "Blink - Play Store (phone).",
   "store": "play/phone",
   "canvas": { "width": 1080, "height": 1920 },
   "device": { "frame": "pixel9", "widthFraction": 0.84 },

@@ -1,5 +1,5 @@
 /**
- * Template brand palette — remap major colors across designs + live canvases.
+ * Template brand palette - remap major colors across designs + live canvases.
  */
 
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;

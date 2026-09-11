@@ -4,7 +4,7 @@ import TemplateSetPreview from './TemplateSetPreview';
 import DeviceBrowseFilters, { filterByDevice, storeToDeviceFilter } from './StoreBrowseFilters';
 
 /**
- * Left sidebar — pick a store template pack (preview only).
+ * Left sidebar - pick a store template pack (preview only).
  * Device chips filter the list; selection persists after applying a template.
  */
 export default function TemplateGallery({ onChange, activeStore }) {

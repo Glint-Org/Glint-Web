@@ -1,11 +1,11 @@
 ---
 name: glint-screenshot-workflow
-description: End-to-end Glint screenshot workflow for AI agents — real Capture/Bridge, Web polish, headless ZIP.
+description: End-to-end Glint screenshot workflow for AI agents - real Capture/Bridge, Web polish, headless ZIP.
 ---
 
 # Glint Screenshot Workflow
 
-Use when a user needs Play / App Store screenshots. **Real UI only** — never invent screens (App Store 2.3.10).
+Use when a user needs Play / App Store screenshots. **Real UI only** - never invent screens (App Store 2.3.10).
 
 **You are the AI.** Do not ask the user for Capture API keys.
 
@@ -25,10 +25,10 @@ Prefer **Mode 2** unless the user asks to watch/edit live together.
    - Discover real screens (`glint discover --write` / `glint capture --auto` / write `GLINTRule`s yourself)  
    - Soft launch: **pixel9** only  
    **Or Bridge:** manual capture / crawl / MCP Bridge tools
-2. **Validate** — MCP `glint_validate_session` or check `session.json` + PNGs.
-3. **Polish** — Mode 2: `glint_render` / export tools; Mode 1: Glint Web import → template → captions / colors / scale / rotation.
-4. **Export** — ZIP from Web, or MCP `glint_export`.
-5. **QA** — Copy for Glint View → paste on device.
+2. **Validate** - MCP `glint_validate_session` or check `session.json` + PNGs.
+3. **Polish** - Mode 2: `glint_render` / export tools; Mode 1: Glint Web import → template → captions / colors / scale / rotation.
+4. **Export** - ZIP from Web, or MCP `glint_export`.
+5. **QA** - Copy for Glint View → paste on device.
 
 ## Agent / MCP tools
 

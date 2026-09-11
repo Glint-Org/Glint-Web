@@ -68,7 +68,7 @@ const RIGHT_W = 300;
 /** Room for zoom toolbar + Copilot bar so frame labels stay visible. */
 const BOARD_TOOLBAR_RESERVE = 100;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
-/** ~8% per +/- click — discrete steps avoid trackpad-style rebuild jitter. */
+/** ~8% per +/- click - discrete steps avoid trackpad-style rebuild jitter. */
 const ZOOM_STEP = 1.08;
 
 export default function Editor() {
@@ -288,7 +288,7 @@ export default function Editor() {
   };
 
   // Reload / bare /editor: restore last pack or first enabled gallery template.
-  // (location.state is lost on refresh — that charcoal+Pixel board was the empty fallback.)
+  // (location.state is lost on refresh - that charcoal+Pixel board was the empty fallback.)
   useEffect(() => {
     if (initialTemplate) {
       try {
@@ -350,7 +350,7 @@ export default function Editor() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, []);
 
-  // Trap browser back while dirty — confirm before leaving editor.
+  // Trap browser back while dirty - confirm before leaving editor.
   useEffect(() => {
     if (!dirty) return undefined;
     const push = () => window.history.pushState({ glintEditorGuard: 1 }, '');
@@ -525,7 +525,7 @@ export default function Editor() {
     markDirty();
     setScreenshotStyle((prev) => {
       const next = { ...prev, ...patch };
-      // Debounce canvas work — slider ticks must not stack full-board restyles.
+      // Debounce canvas work - slider ticks must not stack full-board restyles.
       const radiusOnlyRebuild = Object.prototype.hasOwnProperty.call(patch, 'cornerRadius');
       const delay = radiusOnlyRebuild ? 120 : 0;
 
@@ -552,7 +552,7 @@ export default function Editor() {
       if (delay > 0) {
         styleApplyTimerRef.current = setTimeout(apply, delay);
       } else {
-        // Stroke / shadow: sync, cheap in-place updates — still coalesce via rAF.
+        // Stroke / shadow: sync, cheap in-place updates - still coalesce via rAF.
         if (styleApplyRafRef.current) cancelAnimationFrame(styleApplyRafRef.current);
         styleApplyRafRef.current = requestAnimationFrame(() => {
           styleApplyRafRef.current = 0;
@@ -586,7 +586,7 @@ export default function Editor() {
 
       try {
         if (!frameId) {
-          // None — strip every bezel into a styled screenshot.
+          // None - strip every bezel into a styled screenshot.
           for (const device of [...devices]) {
             if (!device.glintScreenshotUrl && shotUrl) {
               device.set({ glintScreenshotUrl: shotUrl });
@@ -1258,7 +1258,7 @@ export default function Editor() {
             <button
               type="button"
               onClick={() => setStripConfirmOpen(true)}
-              title="Clear styling and screenshots — device frames only"
+              title="Clear styling and screenshots - device frames only"
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-glint-text-secondary hover:text-glint-danger hover:bg-glint-danger/10 transition-colors"
             >
               <RotateCcw size={14} />

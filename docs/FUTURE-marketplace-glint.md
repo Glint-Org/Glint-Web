@@ -1,6 +1,6 @@
 # Future plan: Community marketplace & glint contribution
 
-**Status:** Future work — do **not** implement or integrate in the current release track.  
+**Status:** Future work - do **not** implement or integrate in the current release track.  
 **Owner:** Glint Web  
 **Related today:** `.glint` (`src/utils/projectPack.js`), templates (`public/templates/`), Export / SessionImporter
 
@@ -17,7 +17,7 @@ Glint already ships a small set of first-party templates. Scaling that only with
 3. Appear in a browseable gallery with previews  
 4. Let others open it as an editable project **or** start from a clean template recipe  
 
-That becomes a **free marketplace** of community designs — not a paid store in v1.
+That becomes a **free marketplace** of community designs - not a paid store in v1.
 
 ---
 
@@ -40,7 +40,7 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 | **Template** | Layout recipe JSON (slots, placeholders, canvas). No user screenshots required. | “Start fresh with *my* shots.” |
 | **`.glint`** | ZIP project pack: `project.json` + shots + previews + Fabric bitmaps. Editable round-trip. | “Open this exact set / remix it.” |
 | **Marketplace listing** | Catalog entry pointing at a template and/or a pack, plus preview + metadata. | “Browse and pick.” |
-| **Capture session** | `session.json` + PNGs from Capture/Bridge. Shots only. | Import raw captures — **not** marketplace inventory. |
+| **Capture session** | `session.json` + PNGs from Capture/Bridge. Shots only. | Import raw captures - **not** marketplace inventory. |
 
 **Rule:** Marketplace can list both templates and packs. Never treat a pack as a catalog template until it has been **promoted** (shots stripped / placeholders normalized).
 
@@ -50,9 +50,9 @@ Implementing any of the above early will make the editor and repo messy. Keep sh
 
 ### 4.1 Surfaces
 
-1. **Home / Marketplace tab** — gallery of community + official listings (filters: store, device, type, author).  
-2. **Editor → Export (or Contribute)** — “Contribute your design” entry point (secondary CTA; primary remains Download `.glint` / store ZIP).  
-3. **Listing detail** — larger preview strip, description, license, Use template / Open pack.
+1. **Home / Marketplace tab** - gallery of community + official listings (filters: store, device, type, author).  
+2. **Editor → Export (or Contribute)** - “Contribute your design” entry point (secondary CTA; primary remains Download `.glint` / store ZIP).  
+3. **Listing detail** - larger preview strip, description, license, Use template / Open pack.
 
 ### 4.2 User journeys
 
@@ -94,7 +94,7 @@ Do not invent a second pack format. Marketplace packs should remain schema-compa
 
 `project.json` (today) already carries: app, tagline, store, exportedAt, editor settings, light template meta, per-frame design + fabric.
 
-**Marketplace may extend metadata** (see §7) without breaking parse — additive fields only, bump `schemaVersion` when required.
+**Marketplace may extend metadata** (see §7) without breaking parse - additive fields only, bump `schemaVersion` when required.
 
 ---
 
@@ -105,7 +105,7 @@ When work starts, prefer a dedicated tree so first-party templates stay clean:
 ```
 public/
   templates/                 # first-party recipes (unchanged)
-  marketplace/               # FUTURE — community catalog
+  marketplace/               # FUTURE - community catalog
     catalog.json             # index of listings
     listings/
       {listing-id}/
@@ -173,21 +173,21 @@ v1: free reuse only (e.g. MIT / CC-BY-4.0). Reject submissions that claim “all
 **Wrong:** browser → commit to `main` with a GitHub token.  
 **Right:** staged submission + human (or automated) review.
 
-### Phase A — Minimal viable contribute
+### Phase A - Minimal viable contribute
 
 1. Client builds pack + preview (reuse `buildGlintPackBlob`).  
 2. User downloads a **contribution bundle** (pack + `meta.json` draft) **or** uploads via a form to an issue/PR bot.  
 3. Maintainer reviews and merges into `marketplace/`.  
 4. Catalog regenerates (script or CI).
 
-### Phase B — One-click contribute
+### Phase B - One-click contribute
 
 1. GitHub App or Cloudflare Worker receives upload.  
 2. Opens PR against marketplace tree / release.  
 3. CI validates pack schema, preview presence, file size limits, malware scan (zip bomb checks).  
 4. Maintainer merges; CDN/catalog updates.
 
-### Phase C — Soft accounts (optional)
+### Phase C - Soft accounts (optional)
 
 - Optional GitHub OAuth for author identity.  
 - Still no requirement to log in to *use* free listings.
@@ -237,7 +237,7 @@ Prefer scripts and static hosting over a new backend until traffic forces it.
 
 ## 12. Quality, legal, safety
 
-- Max pack size (e.g. 50–100 MB); reject oversized ZIPs.  
+- Max pack size (e.g. 50-100 MB); reject oversized ZIPs.  
 - Require contributor attestation: they own or may share screenshots/branding.  
 - Strip EXIF / unexpected executables inside ZIP.  
 - Preview must be generated from Glint render, not an arbitrary unrelated image (or clearly labeled).  
@@ -257,7 +257,7 @@ Prefer scripts and static hosting over a new backend until traffic forces it.
 | **4** | Promote pack → template tooling + `type: both` | When packs should become starters |
 | **5** | Optional OAuth / author profiles / search | Later polish |
 
-Do not jump to Phase 3–5 before Phase 1 has real listings and UX.
+Do not jump to Phase 3-5 before Phase 1 has real listings and UX.
 
 ---
 

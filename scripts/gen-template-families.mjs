@@ -68,7 +68,7 @@ function buildVariant(base, storeKey) {
   };
 }
 
-/** Ref: template-refs/phone/04-phone-warm-icons.png — solid warm, soft blob, centered device */
+/** Ref: template-refs/phone/04-phone-warm-icons.png - solid warm, soft blob, centered device */
 const WARM_GLOW = {
   familyId: 'warm-glow',
   name: 'Warm Glow',
@@ -303,7 +303,7 @@ const WARM_GLOW = {
   ],
 };
 
-/** Ref: template-refs/phone/07-phone-mint-pills.png — headline + pill tags + centered device */
+/** Ref: template-refs/phone/07-phone-mint-pills.png - headline + pill tags + centered device */
 const MINT_TAGS = {
   familyId: 'mint-tags',
   name: 'Mint Tags',

@@ -1,5 +1,5 @@
 /**
- * Copilot session — generation lock, pause/takeover, telepresence events.
+ * Copilot session - generation lock, pause/takeover, telepresence events.
  * Agents dispatch ops through here; Manual edits bump generation via bump().
  */
 import { CANVAS_AGENT_OPS, runCanvasOp } from './canvasAgent.js';
@@ -75,7 +75,7 @@ export function createCopilotSession({ getCtx, onDirty } = {}) {
       return () => listeners.delete(fn);
     },
 
-    /** Human (or successful agent) mutate — agents must re-getEditorState. */
+    /** Human (or successful agent) mutate - agents must re-getEditorState. */
     bump(reason = 'edit') {
       generation += 1;
       emit({ phase: 'generation', generation, reason, at: Date.now() });

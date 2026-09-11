@@ -1,7 +1,7 @@
 import { Bot, Pause, Play, Sparkles, X } from 'lucide-react';
 
 /**
- * Mode 3 Copilot chrome — allow agent, pause/takeover, live status.
+ * Mode 3 Copilot chrome - allow agent, pause/takeover, live status.
  */
 export default function CopilotBar({
   enabled,
@@ -15,7 +15,7 @@ export default function CopilotBar({
   onResume,
   onDemo,
 }) {
-  const label = status?.label || (enabled ? (paused ? 'Paused — you have control' : 'Listening for agent…') : null);
+  const label = status?.label || (enabled ? (paused ? 'Paused - you have control' : 'Listening for agent…') : null);
   const busy = status?.phase === 'select' || status?.phase === 'apply';
 
   return (
@@ -44,7 +44,7 @@ export default function CopilotBar({
         </div>
         <p className="text-[11px] text-glint-text truncate">
           {!enabled
-            ? 'Manual mode — allow an agent to share this board'
+            ? 'Manual mode - allow an agent to share this board'
             : busy
               ? label
               : label}
@@ -78,7 +78,7 @@ export default function CopilotBar({
                 type="button"
                 onClick={onPause}
                 className="inline-flex items-center gap-1 rounded-lg border border-glint-border px-2 py-1 text-[11px] text-glint-text-secondary hover:bg-glint-surface-2 hover:text-glint-text"
-                title="Pause — take over"
+                title="Pause - take over"
               >
                 <Pause size={12} />
                 Pause

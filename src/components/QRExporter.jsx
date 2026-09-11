@@ -52,7 +52,7 @@ export default function QRExporter({ session, exportedUrls }) {
         Session JSON
       </h3>
       <p className="text-[10px] text-glint-text-tertiary leading-relaxed">
-        Ordered screenshots for Glint View — which shot comes after which.
+        Ordered screenshots for Glint View - which shot comes after which.
       </p>
       {qrDataUrl && (
         <div className="flex justify-center">

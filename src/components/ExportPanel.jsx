@@ -6,7 +6,7 @@ import { storeExportLabel } from '../utils/exportHelper';
 import { buildGlintBlob, downloadGlint } from '../utils/projectPack';
 
 /**
- * Export panel — store size is locked to the selected template.
+ * Export panel - store size is locked to the selected template.
  */
 export default function ExportPanel({
   frames,

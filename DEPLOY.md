@@ -1,4 +1,4 @@
-# Glint Web — Cloudflare Pages
+# Glint Web - Cloudflare Pages
 
 1. Connect this repo (or the `Glint-Web` subdirectory) to Cloudflare Pages.
 2. Build settings:

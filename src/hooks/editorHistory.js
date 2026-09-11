@@ -1,5 +1,5 @@
 /**
- * Editor undo/redo — snapshot frames, template, and editor chrome.
+ * Editor undo/redo - snapshot frames, template, and editor chrome.
  */
 
 import { GLINT_CLONE_PROPS } from '../utils/glintCloneProps';

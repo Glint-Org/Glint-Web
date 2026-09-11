@@ -35,7 +35,7 @@ describe('screenshotTheme', () => {
   it('picks brand primary hue and derives harmony (not 2nd histogram peak)', () => {
     // Large washed teal area + smaller vivid purple brand
     const accent = new Map([
-      ['48,160,160', 400], // teal — many pixels, low brand quality
+      ['48,160,160', 400], // teal - many pixels, low brand quality
       ['96,32,160', 55], // purple brand
       ['112,40,184', 28],
     ]);

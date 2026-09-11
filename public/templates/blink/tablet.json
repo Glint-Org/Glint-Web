@@ -1,7 +1,7 @@
 {
   "id": "blink-tablet",
   "extends": "common",
-  "description": "Blink — App Store (iPad).",
+  "description": "Blink - App Store (iPad).",
   "store": "ios/ipad",
   "canvas": { "width": 2048, "height": 2732 },
   "device": { "frame": "ipad-pro-13", "widthFraction": 0.80 },

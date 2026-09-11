@@ -24,7 +24,7 @@ function layerName(obj, index) {
   return `${obj?.type || 'Layer'} ${index + 1}`;
 }
 
-/** Slow ticker when label overflows — pause on hover. */
+/** Slow ticker when label overflows - pause on hover. */
 function MarqueeLabel({ text }) {
   const wrapRef = useRef(null);
   const measureRef = useRef(null);
@@ -46,7 +46,7 @@ function MarqueeLabel({ text }) {
 
   return (
     <span ref={wrapRef} className="block overflow-hidden min-w-0 flex-1 relative">
-      {/* Hidden measure line — full width of label without wrap. */}
+      {/* Hidden measure line - full width of label without wrap. */}
       <span
         ref={measureRef}
         className="absolute left-0 top-0 whitespace-nowrap opacity-0 pointer-events-none"

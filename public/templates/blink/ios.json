@@ -1,7 +1,7 @@
 {
   "id": "blink-ios",
   "extends": "common",
-  "description": "Blink — App Store (iPhone).",
+  "description": "Blink - App Store (iPhone).",
   "store": "ios/iphone",
   "canvas": { "width": 1290, "height": 2796 },
   "device": { "frame": "iphone16-pro-max", "widthFraction": 0.84 },

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Simple modal confirm — Replace/Cancel, Leave/Stay, etc.
+ * Simple modal confirm - Replace/Cancel, Leave/Stay, etc.
  * Pass enterConfirms to bind Enter → confirm (Escape always cancels).
  */
 export default function ConfirmDialog({

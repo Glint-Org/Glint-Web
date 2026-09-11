@@ -10,7 +10,7 @@ import {
 } from '../utils/exportHelper';
 
 /**
- * Preview frames, then export as PNG or SVG — each export downloads a ZIP of every frame
+ * Preview frames, then export as PNG or SVG - each export downloads a ZIP of every frame
  * as Frame_1.png / Frame_2.svg / …
  */
 export default function FrameExport({
