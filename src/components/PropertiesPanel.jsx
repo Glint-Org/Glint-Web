@@ -13,7 +13,7 @@ import {
   DEVICE_SCALE_MAX,
   DEVICE_SCALE_MIN,
   getDeviceDisplaySize,
-  setDeviceAngle,
+  setDeviceAngle as applyDeviceAngle,
   setDeviceUniformScale,
 } from '../utils/canvasEngine';
 
@@ -48,7 +48,17 @@ function ColorField({ label, value, onChange, getCanvases }) {
   return <ColorPicker label={label} value={value} onChange={onChange} getCanvases={getCanvases} />;
 }
 
+/** Slider + numeric input that stay in sync (suffix e.g. `%` or `°`). */
 function RangeRow({ label, value, min, max, suffix = '', onChange, onAdjustStart }) {
+  const [draft, setDraft] = useState(null);
+  const shown = draft ?? String(value);
+
+  const commit = (raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return;
+    onChange(Math.max(min, Math.min(max, Math.round(n))));
+  };
+
   return (
     <label className="space-y-1 block">
       <span className="text-[10px] text-glint-text-tertiary">{label}</span>
@@ -57,13 +67,41 @@ function RangeRow({ label, value, min, max, suffix = '', onChange, onAdjustStart
           type="range"
           min={min}
           max={max}
-          value={value}
+          value={Number.isFinite(value) ? value : min}
           onPointerDown={() => onAdjustStart?.()}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="flex-1 accent-glint-accent"
+          onChange={(e) => {
+            setDraft(null);
+            onChange(Number(e.target.value));
+          }}
+          className="flex-1 min-w-0 accent-glint-accent"
         />
-        <span className="text-[11px] tabular-nums min-w-[2.75rem] text-right text-glint-text-secondary">
-          {value}{suffix}
+        <span className="flex items-center gap-0.5 shrink-0">
+          <input
+            type="number"
+            min={min}
+            max={max}
+            step={1}
+            value={shown}
+            onFocus={() => {
+              onAdjustStart?.();
+              setDraft(String(value));
+            }}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setDraft(raw);
+              if (raw === '' || raw === '-' || raw === '+') return;
+              commit(raw);
+            }}
+            onBlur={() => {
+              if (draft != null && draft !== '' && draft !== '-' && draft !== '+') commit(draft);
+              setDraft(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+            }}
+            className="w-14 rounded-md border border-glint-border bg-glint-surface-2 px-1.5 py-1 text-[11px] tabular-nums text-right text-glint-text outline-none focus:border-glint-accent"
+          />
+          <span className="text-[11px] text-glint-text-secondary min-w-[0.75rem]">{suffix}</span>
         </span>
       </div>
     </label>
@@ -117,7 +155,7 @@ export default function PropertiesPanel({
   });
   const [shapeFill, setShapeFill] = useState('#FFFFFF');
   const [deviceScalePct, setDeviceScalePct] = useState(100);
-  const [deviceAngle, setDeviceAngle] = useState(0);
+  const [deviceAngleDeg, setDeviceAngleDeg] = useState(0);
   const [deviceSize, setDeviceSize] = useState({ width: 0, height: 0 });
 
   const syncDeviceSize = (obj) => {
@@ -125,7 +163,7 @@ export default function PropertiesPanel({
     const d = getDeviceDisplaySize(obj);
     setDeviceScalePct(d.scalePct);
     setDeviceSize({ width: d.width, height: d.height });
-    setDeviceAngle(Math.round(obj.angle || 0));
+    setDeviceAngleDeg(Math.round(obj.angle || 0));
   };
 
   const handleDeviceScale = (pct) => {
@@ -140,7 +178,7 @@ export default function PropertiesPanel({
   const handleDeviceRotation = (deg) => {
     const obj = selection?.obj;
     if (!obj || !canvas) return;
-    setDeviceAngle(obj, deg);
+    applyDeviceAngle(obj, deg);
     syncDeviceSize(obj);
     onDeviceTransform?.();
   };
@@ -158,8 +196,9 @@ export default function PropertiesPanel({
       const isText = role === 'text' || obj.type === 'textbox' || obj.type === 'i-text' || obj.type === 'text';
       setSelection({ type: isText ? 'text' : role || obj.type, obj });
 
-      if (role === 'framed-screenshot' && obj.glintFrameId) {
-        onFrameHighlight?.(obj.glintFrameId);
+      if (role === 'framed-screenshot') {
+        // Keep sidebar bezel picker in lockstep with the selected canvas device.
+        onFrameHighlight?.(obj.glintFrameId ?? null);
         setRightTab('device');
         syncDeviceSize(obj);
       } else if (role === 'screenshot') {
@@ -374,7 +413,7 @@ export default function PropertiesPanel({
                 </p>
                 <RangeRow
                   label="Rotation"
-                  value={deviceAngle}
+                  value={deviceAngleDeg}
                   min={-180}
                   max={180}
                   suffix="°"

@@ -620,10 +620,13 @@ export default function Editor() {
     }
 
     const live = canvasMapRef.current[framesRef.current[activeIndex]?.id];
-    if (live && frameId) {
-      const refreshed = live
-        .getObjects()
-        .find((o) => o.glintRole === 'framed-screenshot' && o.glintFrameId === frameId);
+    if (live) {
+      const refreshed = live.getObjects().find((o) => {
+        if (frameId) {
+          return o.glintRole === 'framed-screenshot' && o.glintFrameId === frameId;
+        }
+        return o.glintRole === 'screenshot' || o.glintRole === 'framed-screenshot';
+      });
       if (refreshed) {
         live.setActiveObject(refreshed);
         live.requestRenderAll();
