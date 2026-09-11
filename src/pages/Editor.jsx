@@ -66,7 +66,6 @@ const RIGHT_W = 300;
 /** Room for the floating bottom toolbar so frame labels stay visible. */
 const BOARD_TOOLBAR_RESERVE = 52;
 const LAST_TEMPLATE_KEY = 'glint.lastTemplateId';
-const AUTO_EXTRACT_THEME_KEY = 'glint.autoExtractTheme';
 /** ~8% per +/- click — discrete steps avoid trackpad-style rebuild jitter. */
 const ZOOM_STEP = 1.08;
 
@@ -126,13 +125,6 @@ export default function Editor() {
   }, []);
   const [fontFamily, setFontFamily] = useState('Space Grotesk');
   const [themes, setThemes] = useState({});
-  const [autoExtractTheme, setAutoExtractTheme] = useState(() => {
-    try {
-      return localStorage.getItem(AUTO_EXTRACT_THEME_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
   const [bridgeToken, setBridgeToken] = useState('');
   const [leftTab, setLeftTab] = useState(initialAssetItems.length ? 'assets' : 'templates');
   const [assetLibrary, setAssetLibrary] = useState(initialAssetItems);
@@ -469,34 +461,6 @@ export default function Editor() {
     [markDirty, setFrames, template],
   );
 
-  const applyThemeFromScreenshots = useCallback(
-    async (urls) => {
-      const palette = getTemplatePalette(template);
-      const userUrls = (urls || []).filter(isUserScreenshot);
-      if (!autoExtractTheme || !template || !palette.length || !userUrls.length) return;
-      try {
-        const theme = await extractThemeFromUrls(userUrls, palette);
-        const pairs = buildPaletteRemap(palette, theme);
-        if (pairs.length) {
-          pushHistory();
-          applyPaletteRemaps(pairs);
-        }
-      } catch {
-        /* ignore failed sampling (CORS, empty image) */
-      }
-    },
-    [autoExtractTheme, template, applyPaletteRemaps, pushHistory],
-  );
-
-  const handleAutoExtractThemeChange = useCallback((enabled) => {
-    setAutoExtractTheme(enabled);
-    try {
-      localStorage.setItem(AUTO_EXTRACT_THEME_KEY, enabled ? '1' : '0');
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
   const handleExtractThemeNow = useCallback(async () => {
     const urls = [
       ...assetLibrary.map((a) => a.url),
@@ -525,10 +489,9 @@ export default function Editor() {
       }));
       addAssets(items);
       mapScreenshots(bridge.screenshots, template);
-      void applyThemeFromScreenshots(bridge.screenshots);
       setLeftTab('assets');
     }
-  }, [bridge.screenshots, mapScreenshots, addAssets, template, applyThemeFromScreenshots]);
+  }, [bridge.screenshots, mapScreenshots, addAssets, template]);
 
   const handleScreenshotStyleChange = useCallback((patch) => {
     markDirty();
@@ -709,7 +672,6 @@ export default function Editor() {
     }));
     addAssets(items);
     mapScreenshots(imported, template);
-    void applyThemeFromScreenshots(imported);
     setLeftTab('assets');
     markDirty();
   };
@@ -763,7 +725,6 @@ export default function Editor() {
     addAssets(ingested);
     const urls = ingested.map((x) => x.url);
     mapScreenshots(urls, template);
-    void applyThemeFromScreenshots(urls);
     setLeftTab('assets');
     markDirty();
   };
@@ -1403,8 +1364,6 @@ export default function Editor() {
               store={exportPreset}
               templatePalette={templatePalette}
               onPaletteColorChange={handlePaletteColorChange}
-              autoExtractTheme={autoExtractTheme}
-              onAutoExtractThemeChange={handleAutoExtractThemeChange}
               onExtractThemeNow={handleExtractThemeNow}
               canExtractTheme={
                 !!template

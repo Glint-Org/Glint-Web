@@ -830,13 +830,21 @@ function groupLayoutSize(group) {
 }
 
 /**
- * Geometric center from left/top/size — ignores shadow blur that can skew getCenterPoint.
+ * Geometric center from left/top/size + angle — ignores shadow blur that can skew getCenterPoint.
+ * Devices use origin left/top, so the visual center rotates around that corner with `angle`.
  */
 function getGroupGeoCenter(group) {
   const { w, h, sx, sy } = groupLayoutSize(group);
+  const left = group.left || 0;
+  const top = group.top || 0;
+  const rad = ((group.angle || 0) * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const lx = w / 2;
+  const ly = h / 2;
   return {
-    x: (group.left || 0) + w / 2,
-    y: (group.top || 0) + h / 2,
+    x: left + lx * cos - ly * sin,
+    y: top + lx * sin + ly * cos,
     sx,
     sy,
     w,
@@ -846,14 +854,19 @@ function getGroupGeoCenter(group) {
 
 /**
  * Place group so its geometric center sits on (cx, cy).
- * Always forces left/top origin so scale doesn't drift the visual into the corner.
+ * Always forces left/top origin so scale/rotation don't drift the visual into the corner.
  */
 function placeGroupAtCenter(group, cx, cy) {
   if (!group) return;
   const { w, h } = groupLayoutSize(group);
+  const rad = ((group.angle || 0) * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const lx = w / 2;
+  const ly = h / 2;
   group.set({
-    left: cx - w / 2,
-    top: cy - h / 2,
+    left: cx - (lx * cos - ly * sin),
+    top: cy - (lx * sin + ly * cos),
     originX: 'left',
     originY: 'top',
   });
@@ -888,6 +901,18 @@ export function setDeviceUniformScale(group, scale) {
   const clamped = Math.min(DEVICE_SCALE_MAX, Math.max(DEVICE_SCALE_MIN, scale));
   const center = getGroupGeoCenter(group);
   group.set({ scaleX: clamped, scaleY: clamped });
+  placeGroupAtCenter(group, center.x, center.y);
+  group.setCoords?.();
+  group.canvas?.requestRenderAll?.();
+  return true;
+}
+
+/** Set device rotation in degrees; pivots around geometric center (not left/top). */
+export function setDeviceAngle(group, angle) {
+  if (!group || group.glintRole !== 'framed-screenshot') return false;
+  const clamped = Math.max(-180, Math.min(180, Math.round(angle)));
+  const center = getGroupGeoCenter(group);
+  group.set({ angle: clamped });
   placeGroupAtCenter(group, center.x, center.y);
   group.setCoords?.();
   group.canvas?.requestRenderAll?.();
