@@ -105,7 +105,9 @@ export default function FrameBoard({
             <div
               key={frame.id}
               data-frame-column
-              className="relative flex flex-col items-center shrink-0 group"
+              className={`relative flex flex-col items-center shrink-0 group ${
+                selected ? 'cursor-default' : 'cursor-pointer'
+              }`}
               onClick={() => onSelect(i)}
               onDragLeave={() => setDropTarget((t) => (t === i ? null : t))}
               onDragOver={(e) => handleFrameDragOver(e, i)}

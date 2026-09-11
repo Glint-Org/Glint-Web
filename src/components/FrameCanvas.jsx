@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createCanvas, selectDeviceLayer, bindCanvasCursors } from '../utils/canvasEngine';
+import { createCanvas, bindCanvasCursors } from '../utils/canvasEngine';
 import { applyDesignToFrame, setFrameEditable } from '../utils/templateEngine';
 import { unlockCanvasPointerEvents, setCanvasPaintVisibility } from '../utils/canvasPointerUnlock';
 
@@ -193,7 +193,10 @@ export default function FrameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     setFrameEditable(canvas, editable);
-    if (editable) selectDeviceLayer(canvas);
+    // Frame focus only — do not auto-select the device; user clicks the layer they want.
+    if (!editable) return;
+    canvas.discardActiveObject?.();
+    canvas.requestRenderAll?.();
   }, [editable]);
 
   const syncDisplaySize = (canvas) => {
@@ -243,7 +246,8 @@ export default function FrameCanvas({
       if (ac.signal.aborted) return;
       syncDisplaySize(canvas);
       setFrameEditable(canvas, editableRef.current);
-      if (editableRef.current) selectDeviceLayer(canvas);
+      // Keep artboard clear after paint — selecting a frame ≠ selecting the device.
+      canvas.discardActiveObject?.();
       // Wait for the actual pixel paint to land before revealing the canvas.
       // requestRenderAll() queues a render for the next animation frame;
       // without this wait the canvas shows one blank frame before the template.

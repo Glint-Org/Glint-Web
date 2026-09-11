@@ -44,7 +44,7 @@ export function createCanvas(container, width = 1080, height = 1920) {
     selectionBorderColor: GLINT_SELECTION.border,
     selectionLineWidth: GLINT_SELECTION.lineWidth,
     defaultCursor: 'default',
-    hoverCursor: 'move',
+    hoverCursor: 'default',
     moveCursor: 'grabbing',
   });
 }
@@ -52,6 +52,13 @@ export function createCanvas(container, width = 1080, height = 1920) {
 /** Accent selection chrome so selected canvas layers are obvious. */
 export function applySelectionStyle(obj) {
   if (!obj) return obj;
+  const role = obj.glintRole;
+  let hoverCursor = 'grab';
+  if (role === 'text' || obj.type === 'i-text' || obj.type === 'textbox' || obj.type === 'text') {
+    hoverCursor = 'text';
+  } else if (role === 'framed-screenshot' || role === 'screenshot') {
+    hoverCursor = 'pointer';
+  }
   obj.set({
     borderColor: GLINT_SELECTION.border,
     cornerColor: GLINT_SELECTION.corner,
@@ -63,8 +70,26 @@ export function applySelectionStyle(obj) {
     padding: GLINT_SELECTION.padding,
     borderOpacityWhenMoving: 1,
     cornerOpacityWhenMoving: 1,
+    hoverCursor,
+    moveCursor: 'grabbing',
   });
   return obj;
+}
+
+/** Cursor for a Fabric target — Figma-like affordances. */
+export function cursorForTarget(target, { editable = true, selected = false } = {}) {
+  if (!editable) return 'pointer'; // click artboard to focus frame
+  if (!target) return 'default';
+  const role = target.glintRole;
+  if (role === 'framed-screenshot' || role === 'screenshot') {
+    return selected ? 'grab' : 'pointer';
+  }
+  if (role === 'text' || target.type === 'i-text' || target.type === 'textbox' || target.type === 'text') {
+    return 'text';
+  }
+  if (target.hoverCursor) return target.hoverCursor;
+  if (target.selectable && target.evented !== false) return selected ? 'grab' : 'grab';
+  return 'default';
 }
 
 /** Per-target hover cursor on the frame canvas. */
@@ -78,32 +103,51 @@ export function bindCanvasCursors(canvas, { getEditable = () => true, wrapEl = n
     if (wrapEl) wrapEl.style.cursor = cur;
   };
 
-  const roleCursor = (target) => {
-    if (!getEditable()) return 'default';
-    let t = target;
-    while (t) {
-      if (t.glintRole === 'framed-screenshot' || t.glintRole === 'screenshot') return 'pointer';
-      if (t.glintRole === 'text' || t.type === 'i-text' || t.type === 'textbox') return 'text';
-      if (t.glintRole === 'graphic' || (t.selectable && t.evented !== false)) return 'move';
-      t = t.group || t.parent;
-    }
-    return 'default';
+  const resolve = (opt) => {
+    if (!getEditable()) return setCursor('pointer');
+    // Let Fabric keep resize/rotate corner cursors.
+    if (opt?.target?.__corner || canvas._currentTransform?.corner) return;
+    if (canvas._currentTransform) return setCursor('grabbing');
+    const target = opt?.target || null;
+    const active = canvas.getActiveObject?.();
+    const selected = !!(target && active && (target === active || active === target.group));
+    setCursor(cursorForTarget(target, { editable: true, selected }));
   };
 
-  const onMove = (opt) => setCursor(roleCursor(opt.target));
-  const onOver = (opt) => setCursor(roleCursor(opt.target));
-  const onOut = () => setCursor('default');
+  const onMove = (opt) => resolve(opt);
+  const onOver = (opt) => resolve(opt);
+  const onOut = () => setCursor(getEditable() ? 'default' : 'pointer');
   const onDown = (opt) => {
-    if (getEditable() && opt.target) setCursor('grabbing');
+    if (!getEditable()) return setCursor('pointer');
+    if (opt?.target?.__corner) return;
+    if (opt?.target) setCursor('grabbing');
   };
-  const onUp = (opt) => setCursor(roleCursor(opt.target));
+  const onUp = (opt) => resolve(opt);
+  const onSel = () => {
+    const active = canvas.getActiveObject?.();
+    if (active) {
+      // Selected device uses grab; keep role hover cursors on the object itself.
+      if (active.glintRole === 'framed-screenshot' || active.glintRole === 'screenshot') {
+        active.set({ hoverCursor: 'grab' });
+      }
+    }
+    canvas.getObjects?.().forEach((obj) => {
+      if (obj === active) return;
+      if (obj.glintRole === 'framed-screenshot' || obj.glintRole === 'screenshot') {
+        obj.set({ hoverCursor: 'pointer' });
+      }
+    });
+  };
 
   canvas.on('mouse:move', onMove);
   canvas.on('mouse:over', onOver);
   canvas.on('mouse:out', onOut);
   canvas.on('mouse:down', onDown);
   canvas.on('mouse:up', onUp);
-  setCursor('default');
+  canvas.on('selection:created', onSel);
+  canvas.on('selection:updated', onSel);
+  canvas.on('selection:cleared', onSel);
+  setCursor(getEditable() ? 'default' : 'pointer');
 
   return () => {
     canvas.off('mouse:move', onMove);
@@ -111,6 +155,9 @@ export function bindCanvasCursors(canvas, { getEditable = () => true, wrapEl = n
     canvas.off('mouse:out', onOut);
     canvas.off('mouse:down', onDown);
     canvas.off('mouse:up', onUp);
+    canvas.off('selection:created', onSel);
+    canvas.off('selection:updated', onSel);
+    canvas.off('selection:cleared', onSel);
     setCursor('default');
   };
 }
@@ -737,6 +784,8 @@ export function applyDeviceTransformLocks(group) {
     hasControls: true,
     hasBorders: true,
     cornerSize: 10,
+    hoverCursor: 'pointer',
+    moveCursor: 'grabbing',
   });
   group.setControlsVisibility?.({
     tl: true,
@@ -1180,7 +1229,7 @@ export function findDeviceLayer(canvas) {
   );
 }
 
-/** Select the device/screenshot group on a frame (template default selection). */
+/** Select the device/screenshot group on a frame (explicit — never auto on frame focus). */
 export function selectDeviceLayer(canvas) {
   if (!canvas) return null;
   const device = findDeviceLayer(canvas);
